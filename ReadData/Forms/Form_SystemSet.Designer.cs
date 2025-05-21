@@ -35,26 +35,30 @@
             this.cmb_StopBits = new System.Windows.Forms.ComboBox();
             this.cmb_DataBits = new System.Windows.Forms.ComboBox();
             this.cmb_BaudRate = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.txt_DataFile = new System.Windows.Forms.TextBox();
+            this.lab_DataFile = new System.Windows.Forms.Label();
             this.btn_Save = new System.Windows.Forms.Button();
             this.lab_Parity = new System.Windows.Forms.Label();
             this.lab_StopBits = new System.Windows.Forms.Label();
             this.lab_DataBits = new System.Windows.Forms.Label();
             this.lab_BaudRate = new System.Windows.Forms.Label();
+            this.lab_LogFile = new System.Windows.Forms.Label();
+            this.txt_LogFile = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.txt_LogFile);
+            this.panel1.Controls.Add(this.lab_LogFile);
             this.panel1.Controls.Add(this.cmb_PortName);
             this.panel1.Controls.Add(this.lab_COM);
             this.panel1.Controls.Add(this.cmb_Parity);
             this.panel1.Controls.Add(this.cmb_StopBits);
             this.panel1.Controls.Add(this.cmb_DataBits);
             this.panel1.Controls.Add(this.cmb_BaudRate);
-            this.panel1.Controls.Add(this.textBox1);
-            this.panel1.Controls.Add(this.label5);
+            this.panel1.Controls.Add(this.txt_DataFile);
+            this.panel1.Controls.Add(this.lab_DataFile);
             this.panel1.Controls.Add(this.btn_Save);
             this.panel1.Controls.Add(this.lab_Parity);
             this.panel1.Controls.Add(this.lab_StopBits);
@@ -120,21 +124,21 @@
             this.cmb_BaudRate.Size = new System.Drawing.Size(121, 20);
             this.cmb_BaudRate.TabIndex = 7;
             // 
-            // textBox1
+            // txt_DataFile
             // 
-            this.textBox1.Location = new System.Drawing.Point(100, 197);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(314, 21);
-            this.textBox1.TabIndex = 6;
+            this.txt_DataFile.Location = new System.Drawing.Point(129, 200);
+            this.txt_DataFile.Name = "txt_DataFile";
+            this.txt_DataFile.Size = new System.Drawing.Size(314, 21);
+            this.txt_DataFile.TabIndex = 6;
             // 
-            // label5
+            // lab_DataFile
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(41, 200);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(41, 12);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "label5";
+            this.lab_DataFile.AutoSize = true;
+            this.lab_DataFile.Location = new System.Drawing.Point(41, 200);
+            this.lab_DataFile.Name = "lab_DataFile";
+            this.lab_DataFile.Size = new System.Drawing.Size(77, 12);
+            this.lab_DataFile.TabIndex = 5;
+            this.lab_DataFile.Text = "数据存储路径";
             // 
             // btn_Save
             // 
@@ -182,6 +186,22 @@
             this.lab_BaudRate.TabIndex = 0;
             this.lab_BaudRate.Text = "波特率";
             // 
+            // lab_LogFile
+            // 
+            this.lab_LogFile.AutoSize = true;
+            this.lab_LogFile.Location = new System.Drawing.Point(45, 232);
+            this.lab_LogFile.Name = "lab_LogFile";
+            this.lab_LogFile.Size = new System.Drawing.Size(53, 12);
+            this.lab_LogFile.TabIndex = 13;
+            this.lab_LogFile.Text = "日志路径";
+            // 
+            // txt_LogFile
+            // 
+            this.txt_LogFile.Location = new System.Drawing.Point(129, 232);
+            this.txt_LogFile.Name = "txt_LogFile";
+            this.txt_LogFile.Size = new System.Drawing.Size(314, 21);
+            this.txt_LogFile.TabIndex = 14;
+            // 
             // Form_SystemSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -212,9 +232,11 @@
         private System.Windows.Forms.ComboBox cmb_StopBits;
         private System.Windows.Forms.ComboBox cmb_DataBits;
         private System.Windows.Forms.ComboBox cmb_BaudRate;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox txt_DataFile;
+        private System.Windows.Forms.Label lab_DataFile;
         private System.Windows.Forms.ComboBox cmb_PortName;
         private System.Windows.Forms.Label lab_COM;
+        private System.Windows.Forms.TextBox txt_LogFile;
+        private System.Windows.Forms.Label lab_LogFile;
     }
 }

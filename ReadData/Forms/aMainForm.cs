@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -45,9 +46,25 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void btn_End_Click(object sender, EventArgs e)
         {
-            Working = false;
-            btn_Start.Enabled = true;
-            btn_End.Enabled = false;
+            DialogResult result = MessageBox.Show("确定停止并保存数据？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    Working = false;
+                    btn_Start.Enabled = true;
+                    btn_End.Enabled = false;
+                    string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
+                    string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
+                    string savefileName = SystemParas.DataFile+ "\\"+ DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
+                    bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Datas, savefileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    
+                }
+            }
             //SystemParas.energyMeters.Close();
         }
         /// <summary>
@@ -63,13 +80,13 @@ namespace ReadDataSoftware
                     var Current = SystemParas.energyMeters.ReadCurrent();
                     var Power = SystemParas.energyMeters.ReadPower();
                     AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
+                    SystemParas.Datas.Add(new DataStructure() {Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
                     if (!Working) throw new Exception("手动取消");
                     Thread.Sleep(1000);
                 }
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show(ex.Message);
             }
             finally
@@ -99,7 +116,7 @@ namespace ReadDataSoftware
             this.Invoke(new Action(() =>
             {
                 DGV1.Rows.Add();
-                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value = DateTime.Now.ToString();
+                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Voltage.Name].Value = Voltage;
                 DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Current.Name].Value = Current;
                 DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power;
@@ -134,7 +151,7 @@ namespace ReadDataSoftware
                 try
                 {
                     FileHelp.ExportCsv(DGV1,saveFileDialog.FileName);
-                    DialogResult result = MessageBox.Show("是否要打开导出的文件？", "导出成功！", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    DialogResult result = MessageBox.Show("是否要打开导出的文件？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.Yes)
                     {
                         System.Diagnostics.Process.Start(saveFileDialog.FileName);
@@ -144,6 +161,7 @@ namespace ReadDataSoftware
                 catch (Exception ex)
                 {
                     MessageBox.Show($"导出失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError(ex.Message+ex.StackTrace);
                 }
             
             }
@@ -155,5 +173,40 @@ namespace ReadDataSoftware
             form_Chart.ShowDialog();
             form_Chart.Dispose();
         }
+        /// <summary>
+        /// 错误日志
+        /// </summary>
+        /// <param name="message"></param>
+        public static void LogError(string message)
+        {
+            // 检查日志文件夹是否存在
+            string logFolderPath = Path.GetDirectoryName(SystemParas.logFilePath);
+            if (!Directory.Exists(logFolderPath))
+            {
+                Directory.CreateDirectory(logFolderPath);
+            }
+            // 写入日志
+            using (StreamWriter writer = new StreamWriter(SystemParas.logFilePath, true))
+            {
+                writer.WriteLine($"{DateTime.Now}: {message}");
+            }
+        }
+
+        private void btn_ReadData_Click(object sender, EventArgs e)
+        {
+            DGV1 .Rows.Clear();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filePath = openFileDialog.FileName;
+                List<DataStructure> loadedData = JsonSerializerHelper.LoadFromJsonFile<List<DataStructure>>(filePath);
+                foreach (DataStructure dataStructure in loadedData)
+                {
+                   DGV1 .Rows.Add(dataStructure.Time .ToString (), dataStructure.Voltage.ToString (),dataStructure.Current.ToString (),dataStructure .Power.ToString ());
+                }
+            }
+        }
     }
 }
+
+

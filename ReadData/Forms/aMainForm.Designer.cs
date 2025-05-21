@@ -43,6 +43,7 @@
             this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btn_ExportCsv = new System.Windows.Forms.Button();
             this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btn_ReadData = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -126,6 +127,7 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.btn_ReadData);
             this.panel2.Controls.Add(this.btn_ExportCsv);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(847, 176);
@@ -139,7 +141,7 @@
             this.系统设置ToolStripMenuItem,
             this.曲线数据ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
             // 
             // 系统设置ToolStripMenuItem
             // 
@@ -189,10 +191,19 @@
             // 曲线数据ToolStripMenuItem
             // 
             this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
-            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.曲线数据ToolStripMenuItem.Text = "曲线数据";
-            this.曲线数据ToolStripMenuItem.Visible = false;
             this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
+            // 
+            // btn_ReadData
+            // 
+            this.btn_ReadData.Location = new System.Drawing.Point(34, 61);
+            this.btn_ReadData.Name = "btn_ReadData";
+            this.btn_ReadData.Size = new System.Drawing.Size(170, 23);
+            this.btn_ReadData.TabIndex = 1;
+            this.btn_ReadData.Text = "从文件读取数据";
+            this.btn_ReadData.UseVisualStyleBackColor = true;
+            this.btn_ReadData.Click += new System.EventHandler(this.btn_ReadData_Click);
             // 
             // aMainForm
             // 
@@ -233,6 +244,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
         private System.Windows.Forms.Button btn_ExportCsv;
         private System.Windows.Forms.ToolStripMenuItem 曲线数据ToolStripMenuItem;
+        private System.Windows.Forms.Button btn_ReadData;
     }
 }
 

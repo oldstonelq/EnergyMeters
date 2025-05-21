@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
+using ReadData;
 
 namespace ReadDataSoftware
 {
@@ -22,6 +23,14 @@ namespace ReadDataSoftware
         /// </summary>
         public static string SystemFile = SystemPath + @"\system.ini";
         /// <summary>
+        /// 数据文件路径
+        /// </summary>
+        public static string DataFile= Application.StartupPath + @"\Data";
+        /// <summary>
+        /// 日志文件
+        /// </summary>
+        public static string logFilePath = Application.StartupPath + @"\Logs\log.txt";
+        /// <summary>
         /// 串口配置
         /// </summary>
         public static SerialPortSettings SerialPortSettings = new SerialPortSettings();
@@ -29,6 +38,10 @@ namespace ReadDataSoftware
         /// 电表实例
         /// </summary>
         public static EnergyMeters energyMeters;
+        /// <summary>
+        /// 原始数据队列
+        /// </summary>
+        public static List <DataStructure> Datas = new List <DataStructure>();
 
         /// <summary>
         /// 初始化系统参数
@@ -39,6 +52,11 @@ namespace ReadDataSoftware
             if (!Directory.Exists(SystemPath))
             {
                 Directory.CreateDirectory(SystemPath);
+            }
+            //// 检查数据文件夹是否存在
+            if (!Directory.Exists(DataFile))
+            {
+                Directory.CreateDirectory(DataFile);
             }
             //// 检查系统文件是否存在
             if (!File.Exists(SystemFile))
