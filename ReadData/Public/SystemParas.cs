@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO.Ports;
 
 namespace ReadDataSoftware
 {
@@ -20,6 +21,14 @@ namespace ReadDataSoftware
         /// 系统配置文件
         /// </summary>
         public static string SystemFile = SystemPath + @"\system.ini";
+        /// <summary>
+        /// 串口配置
+        /// </summary>
+        public static SerialPortSettings SerialPortSettings = new SerialPortSettings();
+        /// <summary>
+        /// 电表实例
+        /// </summary>
+        public static EnergyMeters energyMeters;
 
         /// <summary>
         /// 初始化系统参数
@@ -36,12 +45,38 @@ namespace ReadDataSoftware
             {
                 File.Create(SystemFile);
             }
-            //// 读取系统参数
-            var str = FileHelp.ReadIniKeys("SystemSet", "API_KEY", "", SystemFile);
-            if (!string.IsNullOrEmpty(str))
+           //串口配置
+            string portName = FileHelp.ReadIniKeys("SystemSet", "PortName", "", SystemFile);
+            if (!string.IsNullOrEmpty(portName))
             {
-               
+                SerialPortSettings.PortName = portName;
             }
+            //波特率设置
+            string baudRate = FileHelp.ReadIniKeys("SystemSet", "BaudRate", "", SystemFile);
+            if (!string.IsNullOrEmpty(baudRate))
+            {
+                SerialPortSettings.BaudRate = int.Parse(baudRate);
+            }
+            //数据位设置
+            string dataBits = FileHelp.ReadIniKeys("SystemSet", "DataBits", "", SystemFile);
+            if (!string.IsNullOrEmpty(dataBits))
+            {
+                SerialPortSettings.DataBits = int.Parse(dataBits);
+            }
+            //停止位设置
+            string stopBits = FileHelp.ReadIniKeys("SystemSet", "StopBits", "", SystemFile);
+            if (!string.IsNullOrEmpty(stopBits))
+            {
+                SerialPortSettings.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
+            }
+            //校验位设置
+            string parity = FileHelp.ReadIniKeys("SystemSet", "Parity", "", SystemFile);
+            if (!string.IsNullOrEmpty(parity))
+            {
+                SerialPortSettings.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
+            }
+
+            energyMeters = new EnergyMeters(SerialPortSettings.PortName,SerialPortSettings.BaudRate,SerialPortSettings.DataBits,SerialPortSettings .StopBits,SerialPortSettings .Parity);
         }
 
     }

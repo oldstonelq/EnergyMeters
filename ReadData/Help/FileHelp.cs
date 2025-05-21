@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
 
@@ -101,6 +102,66 @@ namespace ReadDataSoftware
             workbook.Close(false);
             excelApp.Quit();
             return queryBuilder.ToString();
+        }
+        /// <summary>
+        /// 导出DGV表格
+        /// </summary>
+        /// <param name="dgv"></param>
+        /// <param name="fileName"></param>
+        /// <param name="appendTexts"></param>
+        /// <returns></returns>
+        public static bool ExportCsv(DataGridView dgv, string fileName, string[] appendTexts = null)
+        {
+            List<string> mList = new List<string>();
+            var sb = new StringBuilder();
+            for (int i = 0; i < dgv.Columns.Count; i++)
+            {
+                if (dgv.Columns[i].Visible) sb.Append(dgv.Columns[i].HeaderText + "\t,");
+            }
+            mList.Add(sb.ToString());
+            for (int i = 0; i < dgv.Rows.Count; i++)
+            {
+                sb.Clear();
+                for (int j = 0; j < dgv.Columns.Count; j++)
+                {
+                    if (!dgv.Columns[j].Visible) continue;
+                    if (dgv.Rows[i].Cells[j].Value != null) sb.Append(dgv.Rows[i].Cells[j].Value.ToString() + "\t");
+                    sb.Append(",");
+                }
+                mList.Add(sb.ToString());
+            }
+            if (appendTexts != null && appendTexts.Length > 0)
+            {
+                mList.AddRange(appendTexts);
+            }
+            return FileHelp.WriteCSV(fileName, mList.ToArray(), System.IO.FileMode.Create) == "ok";
+        }
+
+        /// <summary>
+        /// CSV文件写入多行
+        /// </summary>
+        /// <param name="FilePath">文件路径</param>
+        /// <param name="Mess">写入信息内容</param>
+        /// <param name="Filemode">文件打开模式</param>
+        /// <returns>成功时返回ok,失败时返回错误内容</returns>
+        public static string WriteCSV(string FilePath, string[] Mess, FileMode Filemode)
+        {
+            try
+            {
+                FileStream fs = new FileStream(FilePath, Filemode);
+                StreamWriter sw = new StreamWriter(fs, Encoding.GetEncoding("gb2312"));
+                for (int i = 0; i < Mess.Length; i++)
+                {
+                    sw.WriteLine(Mess[i]);
+                }
+                sw.Close();
+                fs.Close();
+                return "ok";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }

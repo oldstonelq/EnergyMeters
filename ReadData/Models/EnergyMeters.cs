@@ -59,15 +59,24 @@ namespace ReadDataSoftware
         /// </summary>
         /// <param name="portName">串口名称，如"COM1"</param>
         /// <param name="baudRate">波特率，如9600</param>
-        public EnergyMeters(string portName, int baudRate)
+        public EnergyMeters(string portName, int baudRate,int dataBits, StopBits stopBits, Parity parity)
         {
-            serialPort = new SerialPort(portName, baudRate);
-            serialPort.DataBits = 8;
-            serialPort.StopBits = StopBits.One;
-            serialPort.Parity = Parity.None;
+            serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
+        }
+        /// <summary>
+        /// 打开串口
+        /// </summary>
+        public void Open()
+        {
             serialPort.Open();
         }
-
+        /// <summary>
+        /// 关闭串口
+        /// </summary>
+        public void Close()
+        { 
+            serialPort.Close(); 
+        }
         /// <summary>
         /// 计算CRC校验码
         /// </summary>
@@ -118,8 +127,14 @@ namespace ReadDataSoftware
             request[7] = (byte)(crc >> 8);
             return request;
         }
-
-        public  byte[] ReadData(byte slaveAddress, ushort startAddress, ushort quantity)
+        /// <summary>
+        /// 读数据
+        /// </summary>
+        /// <param name="slaveAddress"></param>
+        /// <param name="startAddress"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
+        private  byte[] ReadData(byte slaveAddress, ushort startAddress, ushort quantity)
         {
             byte[] request = BuildRequest(slaveAddress, ModbusRtuFunctionCode.ReadHoldingRegisters, startAddress, quantity);
             serialPort.Write(request, 0, request.Length);
@@ -145,6 +160,101 @@ namespace ReadDataSoftware
 
             }
             return response;
+        }
+        /// <summary>
+        /// 读电压数据
+        /// </summary>
+        /// <returns></returns>
+        public double ReadVoltage()
+        {
+            var res = ReadData(1, 0, 2);
+            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            {
+                // 处理异常响应数据
+                return 0;
+            }
+            else if (res.Length < 2)
+            {
+                return 0;
+            }
+            else
+            {
+                // 处理正常响应数据
+                int byteCount = res[2];
+                int registerCount = byteCount / 2;
+                List<ushort> registerValues = new List<ushort>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
+            }
+        }
+        /// <summary>
+        /// 读电流数据
+        /// </summary>
+        /// <returns></returns>
+
+        public double  ReadCurrent()
+        {
+            var res=ReadData(1, 2, 2);
+
+            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            {
+                // 处理异常响应数据
+                return 0;
+            }
+            else if (res.Length < 2)
+            {
+                return 0;
+            }
+            else
+            {
+                // 处理正常响应数据
+                int byteCount = res[2];
+                int registerCount = byteCount / 2;
+                List<ushort> registerValues = new List<ushort>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
+            }
+            
+        }
+        /// <summary>
+        /// 读功率数据
+        /// </summary>
+        /// <returns></returns>
+
+        public double  ReadPower()
+        {
+            var res = ReadData(1, 8, 2);
+
+            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            {
+                // 处理异常响应数据
+                return 0;
+            }
+            else if (res.Length < 2)
+            {
+                return 0;
+            }
+            else
+            {
+                // 处理正常响应数据
+                int byteCount = res[2];
+                int registerCount = byteCount / 2;
+                List<ushort> registerValues = new List<ushort>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
+            }
         }
     }
 }
