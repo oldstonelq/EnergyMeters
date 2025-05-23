@@ -49,9 +49,16 @@ namespace ReadData
             cmb_Parity.Text = SystemParas.SerialPortSettings.Parity.ToString();
         }
 
+        private void InitTextBox()
+        {
+            txt_DataFile.Text = SystemParas.DataFile;
+            txt_LogFile.Text = SystemParas.logFilePath;
+        }
+
         private void SystemSet_Load(object sender, EventArgs e)
         {
             InitComBox();
+            InitTextBox();
         }
 
         private void btn_Save_Click(object sender, EventArgs e)

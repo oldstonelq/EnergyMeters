@@ -18,7 +18,8 @@ namespace ReadDataSoftware
         /// <summary>
         /// 是否正在读数
         /// </summary>
-        private bool Working;       
+        private bool Working;
+        private ManualResetEvent _stopEvent = new ManualResetEvent(false);
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -51,9 +52,11 @@ namespace ReadDataSoftware
             {
                 try
                 {
+                    _stopEvent.Set(); // 通知数据记录线程停止
                     Working = false;
                     btn_Start.Enabled = true;
                     btn_End.Enabled = false;
+                    _stopEvent.WaitOne(); // 等待数据记录线程完成
                     string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
                     string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
                     string savefileName = SystemParas.DataFile+ "\\"+ DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
@@ -74,13 +77,14 @@ namespace ReadDataSoftware
         {
             try
             {
-                while (true)
+                while (!_stopEvent.WaitOne(0))
                 {
                     var Voltage = SystemParas.energyMeters.ReadVoltage();
                     var Current = SystemParas.energyMeters.ReadCurrent();
                     var Power = SystemParas.energyMeters.ReadPower();
                     AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
                     SystemParas.Datas.Add(new DataStructure() {Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
+                    SystemParas.ChartDatas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
                     if (!Working) throw new Exception("手动取消");
                     Thread.Sleep(1000);
                 }
@@ -92,6 +96,7 @@ namespace ReadDataSoftware
             finally
             {
                 SystemParas.energyMeters.Close();
+                _stopEvent.Set(); // 通知主线程数据记录线程已经完成
             }
         }
         /// <summary>
@@ -205,6 +210,11 @@ namespace ReadDataSoftware
                    DGV1 .Rows.Add(dataStructure.Time .ToString (), dataStructure.Voltage.ToString (),dataStructure.Current.ToString (),dataStructure .Power.ToString ());
                 }
             }
+        }
+
+        private void btn_Clear_Click(object sender, EventArgs e)
+        {
+            DGV1.Rows.Clear();  
         }
     }
 }

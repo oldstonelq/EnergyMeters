@@ -27,7 +27,7 @@ namespace ReadDataSoftware
 
         public SerialPortSettings()
         {
-            PortName = "COM1";
+            PortName = "COM3";
             BaudRate = 9600;
             DataBits = 8;
             StopBits = StopBits.One;

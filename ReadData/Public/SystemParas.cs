@@ -37,11 +37,15 @@ namespace ReadDataSoftware
         /// <summary>
         /// 电表实例
         /// </summary>
-        public static EnergyMeters energyMeters;
+        public static DJSF1352EnergyMeters energyMeters;
         /// <summary>
         /// 原始数据队列
         /// </summary>
         public static List <DataStructure> Datas = new List <DataStructure>();
+        /// <summary>
+        /// 曲线数据队列
+        /// </summary>
+        public static List<DataStructure> ChartDatas = new List<DataStructure>();
 
         /// <summary>
         /// 初始化系统参数
@@ -94,7 +98,7 @@ namespace ReadDataSoftware
                 SerialPortSettings.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
             }
 
-            energyMeters = new EnergyMeters(SerialPortSettings.PortName,SerialPortSettings.BaudRate,SerialPortSettings.DataBits,SerialPortSettings .StopBits,SerialPortSettings .Parity);
+            energyMeters = new DJSF1352EnergyMeters(SerialPortSettings.PortName,SerialPortSettings.BaudRate,SerialPortSettings.DataBits,SerialPortSettings .StopBits,SerialPortSettings .Parity);
         }
 
     }

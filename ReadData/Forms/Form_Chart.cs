@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using ReadDataSoftware;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +21,7 @@ namespace ReadData
         private DateTime startTime;
         private const int MaxPoints = 1000;
         private bool isClosing = false; // 新增：标记窗体是否正在关闭
-        int i = 0;
+       
         public Form_Chart()
         {
             InitializeComponent();
@@ -83,17 +84,16 @@ namespace ReadData
         {
             if (isClosing || chart1.IsDisposed)
                 return;
-            DateTime now = DateTime.Now;
-            // 添加新数据点
-            //AddDataPoint("电压", now, GenerateVoltage(elapsed.TotalSeconds));
-            //AddDataPoint("电流", now, GenerateCurrent(elapsed.TotalSeconds));
-            //AddDataPoint("功率", now, GeneratePower(elapsed.TotalSeconds));
             
-            AddDataPoint("电压", now, i);
-            AddDataPoint("电流", now, i+1);
-            AddDataPoint("功率", now, i+2);
-
-            i++;
+            // 添加新数据点
+            if (SystemParas.ChartDatas.Count > 0)
+            {
+                var data=SystemParas.ChartDatas[0];
+                AddDataPoint("电压", data.Time, data.Voltage);
+                AddDataPoint("电流", data.Time,data .Current);
+                AddDataPoint("功率", data.Time, data .Power);
+                SystemParas.ChartDatas.RemoveAt(0);
+            }
 
             // 限制数据点数量
             LimitDataPoints();
@@ -108,21 +108,6 @@ namespace ReadData
         private void AddDataPoint(string seriesName, DateTime time, double value)
         {
             chart1.Series[seriesName].Points.AddXY(time, value);
-        }
-
-        private double GenerateVoltage(double time)
-        {
-            return 220 + 10 * Math.Sin(time * 0.2) ;
-        }
-
-        private double GenerateCurrent(double time)
-        {
-            return 5 + 2 * Math.Sin(time * 0.15 + 1);
-        }
-
-        private double GeneratePower(double time)
-        {
-            return 5 + 2 * Math.Sin(time * 0.15 + 1);
         }
 
         private void LimitDataPoints()

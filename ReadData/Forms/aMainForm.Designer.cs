@@ -35,15 +35,16 @@
             this.btn_End = new System.Windows.Forms.Button();
             this.btn_Start = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btn_Clear = new System.Windows.Forms.Button();
+            this.btn_ReadData = new System.Windows.Forms.Button();
+            this.btn_ExportCsv = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.系统设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.btn_ExportCsv = new System.Windows.Forms.Button();
-            this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btn_ReadData = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -127,6 +128,7 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.btn_Clear);
             this.panel2.Controls.Add(this.btn_ReadData);
             this.panel2.Controls.Add(this.btn_ExportCsv);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -134,6 +136,36 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(231, 371);
             this.panel2.TabIndex = 2;
+            // 
+            // btn_Clear
+            // 
+            this.btn_Clear.Location = new System.Drawing.Point(34, 105);
+            this.btn_Clear.Name = "btn_Clear";
+            this.btn_Clear.Size = new System.Drawing.Size(170, 23);
+            this.btn_Clear.TabIndex = 2;
+            this.btn_Clear.Text = "清楚当前表格数据";
+            this.btn_Clear.UseVisualStyleBackColor = true;
+            this.btn_Clear.Click += new System.EventHandler(this.btn_Clear_Click);
+            // 
+            // btn_ReadData
+            // 
+            this.btn_ReadData.Location = new System.Drawing.Point(34, 61);
+            this.btn_ReadData.Name = "btn_ReadData";
+            this.btn_ReadData.Size = new System.Drawing.Size(170, 23);
+            this.btn_ReadData.TabIndex = 1;
+            this.btn_ReadData.Text = "从文件读取数据显示到表格";
+            this.btn_ReadData.UseVisualStyleBackColor = true;
+            this.btn_ReadData.Click += new System.EventHandler(this.btn_ReadData_Click);
+            // 
+            // btn_ExportCsv
+            // 
+            this.btn_ExportCsv.Location = new System.Drawing.Point(34, 17);
+            this.btn_ExportCsv.Name = "btn_ExportCsv";
+            this.btn_ExportCsv.Size = new System.Drawing.Size(170, 25);
+            this.btn_ExportCsv.TabIndex = 0;
+            this.btn_ExportCsv.Text = "导出表格数据到csv";
+            this.btn_ExportCsv.UseVisualStyleBackColor = true;
+            this.btn_ExportCsv.Click += new System.EventHandler(this.btn_ExportCsv_Click);
             // 
             // contextMenuStrip1
             // 
@@ -150,6 +182,13 @@
             this.系统设置ToolStripMenuItem.Text = "系统设置";
             this.系统设置ToolStripMenuItem.Click += new System.EventHandler(this.系统设置ToolStripMenuItem_Click);
             // 
+            // 曲线数据ToolStripMenuItem
+            // 
+            this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
+            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.曲线数据ToolStripMenuItem.Text = "曲线数据";
+            this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
+            // 
             // Column_Time
             // 
             this.Column_Time.HeaderText = "时间";
@@ -159,51 +198,24 @@
             // 
             // Column_Voltage
             // 
-            this.Column_Voltage.HeaderText = "电压";
+            this.Column_Voltage.HeaderText = "电压(v)";
             this.Column_Voltage.Name = "Column_Voltage";
             this.Column_Voltage.ReadOnly = true;
             this.Column_Voltage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // Column_Current
             // 
-            this.Column_Current.HeaderText = "电流";
+            this.Column_Current.HeaderText = "电流(A)";
             this.Column_Current.Name = "Column_Current";
             this.Column_Current.ReadOnly = true;
             this.Column_Current.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // Column_Power
             // 
-            this.Column_Power.HeaderText = "功率";
+            this.Column_Power.HeaderText = "功率(w)";
             this.Column_Power.Name = "Column_Power";
             this.Column_Power.ReadOnly = true;
             this.Column_Power.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // btn_ExportCsv
-            // 
-            this.btn_ExportCsv.Location = new System.Drawing.Point(34, 17);
-            this.btn_ExportCsv.Name = "btn_ExportCsv";
-            this.btn_ExportCsv.Size = new System.Drawing.Size(170, 25);
-            this.btn_ExportCsv.TabIndex = 0;
-            this.btn_ExportCsv.Text = "导出表格数据";
-            this.btn_ExportCsv.UseVisualStyleBackColor = true;
-            this.btn_ExportCsv.Click += new System.EventHandler(this.btn_ExportCsv_Click);
-            // 
-            // 曲线数据ToolStripMenuItem
-            // 
-            this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
-            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.曲线数据ToolStripMenuItem.Text = "曲线数据";
-            this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
-            // 
-            // btn_ReadData
-            // 
-            this.btn_ReadData.Location = new System.Drawing.Point(34, 61);
-            this.btn_ReadData.Name = "btn_ReadData";
-            this.btn_ReadData.Size = new System.Drawing.Size(170, 23);
-            this.btn_ReadData.TabIndex = 1;
-            this.btn_ReadData.Text = "从文件读取数据";
-            this.btn_ReadData.UseVisualStyleBackColor = true;
-            this.btn_ReadData.Click += new System.EventHandler(this.btn_ReadData_Click);
             // 
             // aMainForm
             // 
@@ -238,13 +250,14 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 系统设置ToolStripMenuItem;
+        private System.Windows.Forms.Button btn_ExportCsv;
+        private System.Windows.Forms.ToolStripMenuItem 曲线数据ToolStripMenuItem;
+        private System.Windows.Forms.Button btn_ReadData;
+        private System.Windows.Forms.Button btn_Clear;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Time;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Voltage;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Current;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
-        private System.Windows.Forms.Button btn_ExportCsv;
-        private System.Windows.Forms.ToolStripMenuItem 曲线数据ToolStripMenuItem;
-        private System.Windows.Forms.Button btn_ReadData;
     }
 }
 

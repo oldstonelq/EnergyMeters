@@ -47,7 +47,7 @@ namespace ReadDataSoftware
     /// <summary>
     /// 电能表实例
     /// </summary>
-    public class EnergyMeters
+    public class DJSF1352EnergyMeters
     {
         /// <summary>
         /// 串口实例
@@ -59,7 +59,7 @@ namespace ReadDataSoftware
         /// </summary>
         /// <param name="portName">串口名称，如"COM1"</param>
         /// <param name="baudRate">波特率，如9600</param>
-        public EnergyMeters(string portName, int baudRate,int dataBits, StopBits stopBits, Parity parity)
+        public DJSF1352EnergyMeters(string portName, int baudRate,int dataBits, StopBits stopBits, Parity parity)
         {
             serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
         }
@@ -179,6 +179,11 @@ namespace ReadDataSoftware
             }
             else
             {
+                //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
+                if (res[3] == 0xff)
+                {
+                    return -1;
+                }
                 // 处理正常响应数据
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
@@ -212,6 +217,11 @@ namespace ReadDataSoftware
             else
             {
                 // 处理正常响应数据
+                //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
+                if (res[3]==0xff)
+                { 
+                    return -1;
+                }
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
                 List<ushort> registerValues = new List<ushort>();
@@ -245,6 +255,11 @@ namespace ReadDataSoftware
             else
             {
                 // 处理正常响应数据
+                //电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为-1
+                if (res[3] == 0xff)
+                {
+                    return -1;
+                }
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
                 List<ushort> registerValues = new List<ushort>();

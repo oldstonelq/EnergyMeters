@@ -53,16 +53,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\DataStructure.cs" />
-    <Compile Include="Form_Chart.cs">
+    <Compile Include="Forms\Form_Chart.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form_Chart.Designer.cs">
+    <Compile Include="Forms\Form_Chart.Designer.cs">
       <DependentUpon>Form_Chart.cs</DependentUpon>
     </Compile>
     <Compile Include="Help\JsonSerializerHelper.cs" />
     <Compile Include="Models\SerialPortSettings.cs" />
     <Compile Include="Help\FileHelp.cs" />
-    <Compile Include="Models\EnergyMeters.cs" />
+    <Compile Include="Models\DJSF1352EnergyMeters.cs" />
     <Compile Include="Forms\aMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,7 +81,7 @@
     <EmbeddedResource Include="Forms\aMainForm.resx">
       <DependentUpon>aMainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form_Chart.resx">
+    <EmbeddedResource Include="Forms\Form_Chart.resx">
       <DependentUpon>Form_Chart.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.txt_LogFile = new System.Windows.Forms.TextBox();
+            this.lab_LogFile = new System.Windows.Forms.Label();
             this.cmb_PortName = new System.Windows.Forms.ComboBox();
             this.lab_COM = new System.Windows.Forms.Label();
             this.cmb_Parity = new System.Windows.Forms.ComboBox();
@@ -42,8 +44,6 @@
             this.lab_StopBits = new System.Windows.Forms.Label();
             this.lab_DataBits = new System.Windows.Forms.Label();
             this.lab_BaudRate = new System.Windows.Forms.Label();
-            this.lab_LogFile = new System.Windows.Forms.Label();
-            this.txt_LogFile = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,6 +69,22 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(523, 356);
             this.panel1.TabIndex = 0;
+            // 
+            // txt_LogFile
+            // 
+            this.txt_LogFile.Location = new System.Drawing.Point(129, 232);
+            this.txt_LogFile.Name = "txt_LogFile";
+            this.txt_LogFile.Size = new System.Drawing.Size(373, 21);
+            this.txt_LogFile.TabIndex = 14;
+            // 
+            // lab_LogFile
+            // 
+            this.lab_LogFile.AutoSize = true;
+            this.lab_LogFile.Location = new System.Drawing.Point(45, 232);
+            this.lab_LogFile.Name = "lab_LogFile";
+            this.lab_LogFile.Size = new System.Drawing.Size(53, 12);
+            this.lab_LogFile.TabIndex = 13;
+            this.lab_LogFile.Text = "日志路径";
             // 
             // cmb_PortName
             // 
@@ -128,7 +144,7 @@
             // 
             this.txt_DataFile.Location = new System.Drawing.Point(129, 200);
             this.txt_DataFile.Name = "txt_DataFile";
-            this.txt_DataFile.Size = new System.Drawing.Size(314, 21);
+            this.txt_DataFile.Size = new System.Drawing.Size(373, 21);
             this.txt_DataFile.TabIndex = 6;
             // 
             // lab_DataFile
@@ -185,22 +201,6 @@
             this.lab_BaudRate.Size = new System.Drawing.Size(41, 12);
             this.lab_BaudRate.TabIndex = 0;
             this.lab_BaudRate.Text = "波特率";
-            // 
-            // lab_LogFile
-            // 
-            this.lab_LogFile.AutoSize = true;
-            this.lab_LogFile.Location = new System.Drawing.Point(45, 232);
-            this.lab_LogFile.Name = "lab_LogFile";
-            this.lab_LogFile.Size = new System.Drawing.Size(53, 12);
-            this.lab_LogFile.TabIndex = 13;
-            this.lab_LogFile.Text = "日志路径";
-            // 
-            // txt_LogFile
-            // 
-            this.txt_LogFile.Location = new System.Drawing.Point(129, 232);
-            this.txt_LogFile.Name = "txt_LogFile";
-            this.txt_LogFile.Size = new System.Drawing.Size(314, 21);
-            this.txt_LogFile.TabIndex = 14;
             // 
             // Form_SystemSet
             // 
