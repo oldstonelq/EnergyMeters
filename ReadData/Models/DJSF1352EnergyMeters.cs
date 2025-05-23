@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
@@ -69,6 +70,7 @@ namespace ReadDataSoftware
         public void Open()
         {
             serialPort.Open();
+            
         }
         /// <summary>
         /// 关闭串口
@@ -187,10 +189,10 @@ namespace ReadDataSoftware
                 // 处理正常响应数据
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
-                List<ushort> registerValues = new List<ushort>();
+                List<short> registerValues = new List<short>();
                 for (int i = 0; i < registerCount; i++)
                 {
-                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
                 return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
@@ -224,10 +226,10 @@ namespace ReadDataSoftware
                 }
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
-                List<ushort> registerValues = new List<ushort>();
+                List<short> registerValues = new List<short>();
                 for (int i = 0; i < registerCount; i++)
                 {
-                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
                 return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
@@ -262,10 +264,10 @@ namespace ReadDataSoftware
                 }
                 int byteCount = res[2];
                 int registerCount = byteCount / 2;
-                List<ushort> registerValues = new List<ushort>();
+                List<short> registerValues = new List<short>();
                 for (int i = 0; i < registerCount; i++)
                 {
-                    ushort registerValue = (ushort)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
                 return registerValues[0] * Math.Pow(10, registerValues[1] - 3);

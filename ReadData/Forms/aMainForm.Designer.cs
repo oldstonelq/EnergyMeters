@@ -29,69 +29,55 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.DGV1 = new System.Windows.Forms.DataGridView();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_End = new System.Windows.Forms.Button();
             this.btn_Start = new System.Windows.Forms.Button();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.btn_Clear = new System.Windows.Forms.Button();
-            this.btn_ReadData = new System.Windows.Forms.Button();
-            this.btn_ExportCsv = new System.Windows.Forms.Button();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.系统设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DGV1 = new System.Windows.Forms.DataGridView();
             this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.btn_Clear = new System.Windows.Forms.Button();
+            this.btn_ReadData = new System.Windows.Forms.Button();
+            this.btn_ExportCsv = new System.Windows.Forms.Button();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.系统设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
             this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 78.16837F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 21.83164F));
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.2448F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.7552F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 230F));
+            this.tableLayoutPanel1.Controls.Add(this.panel1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.DGV1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel2, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel3, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.52364F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 68.47636F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1081, 571);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1337, 592);
             this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // DGV1
-            // 
-            this.DGV1.AllowUserToAddRows = false;
-            this.DGV1.AllowUserToDeleteRows = false;
-            this.DGV1.AllowUserToResizeColumns = false;
-            this.DGV1.AllowUserToResizeRows = false;
-            this.DGV1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.DGV1.BackgroundColor = System.Drawing.Color.Gainsboro;
-            this.DGV1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DGV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column_Time,
-            this.Column_Voltage,
-            this.Column_Current,
-            this.Column_Power});
-            this.DGV1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DGV1.Location = new System.Drawing.Point(3, 3);
-            this.DGV1.Name = "DGV1";
-            this.DGV1.RowHeadersVisible = false;
-            this.tableLayoutPanel1.SetRowSpan(this.DGV1, 2);
-            this.DGV1.RowTemplate.Height = 23;
-            this.DGV1.Size = new System.Drawing.Size(838, 544);
-            this.DGV1.TabIndex = 0;
             // 
             // panel1
             // 
@@ -99,10 +85,10 @@
             this.panel1.Controls.Add(this.btn_End);
             this.panel1.Controls.Add(this.btn_Start);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(847, 3);
+            this.panel1.Location = new System.Drawing.Point(1109, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(231, 167);
-            this.panel1.TabIndex = 1;
+            this.panel1.Size = new System.Drawing.Size(225, 180);
+            this.panel1.TabIndex = 4;
             // 
             // btn_End
             // 
@@ -125,69 +111,28 @@
             this.btn_Start.UseVisualStyleBackColor = true;
             this.btn_Start.Click += new System.EventHandler(this.btn_Start_Click);
             // 
-            // panel2
+            // DGV1
             // 
-            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.btn_Clear);
-            this.panel2.Controls.Add(this.btn_ReadData);
-            this.panel2.Controls.Add(this.btn_ExportCsv);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(847, 176);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(231, 371);
-            this.panel2.TabIndex = 2;
-            // 
-            // btn_Clear
-            // 
-            this.btn_Clear.Location = new System.Drawing.Point(34, 105);
-            this.btn_Clear.Name = "btn_Clear";
-            this.btn_Clear.Size = new System.Drawing.Size(170, 23);
-            this.btn_Clear.TabIndex = 2;
-            this.btn_Clear.Text = "清楚当前表格数据";
-            this.btn_Clear.UseVisualStyleBackColor = true;
-            this.btn_Clear.Click += new System.EventHandler(this.btn_Clear_Click);
-            // 
-            // btn_ReadData
-            // 
-            this.btn_ReadData.Location = new System.Drawing.Point(34, 61);
-            this.btn_ReadData.Name = "btn_ReadData";
-            this.btn_ReadData.Size = new System.Drawing.Size(170, 23);
-            this.btn_ReadData.TabIndex = 1;
-            this.btn_ReadData.Text = "从文件读取数据显示到表格";
-            this.btn_ReadData.UseVisualStyleBackColor = true;
-            this.btn_ReadData.Click += new System.EventHandler(this.btn_ReadData_Click);
-            // 
-            // btn_ExportCsv
-            // 
-            this.btn_ExportCsv.Location = new System.Drawing.Point(34, 17);
-            this.btn_ExportCsv.Name = "btn_ExportCsv";
-            this.btn_ExportCsv.Size = new System.Drawing.Size(170, 25);
-            this.btn_ExportCsv.TabIndex = 0;
-            this.btn_ExportCsv.Text = "导出表格数据到csv";
-            this.btn_ExportCsv.UseVisualStyleBackColor = true;
-            this.btn_ExportCsv.Click += new System.EventHandler(this.btn_ExportCsv_Click);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.系统设置ToolStripMenuItem,
-            this.曲线数据ToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
-            // 
-            // 系统设置ToolStripMenuItem
-            // 
-            this.系统设置ToolStripMenuItem.Name = "系统设置ToolStripMenuItem";
-            this.系统设置ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.系统设置ToolStripMenuItem.Text = "系统设置";
-            this.系统设置ToolStripMenuItem.Click += new System.EventHandler(this.系统设置ToolStripMenuItem_Click);
-            // 
-            // 曲线数据ToolStripMenuItem
-            // 
-            this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
-            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.曲线数据ToolStripMenuItem.Text = "曲线数据";
-            this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
+            this.DGV1.AllowUserToAddRows = false;
+            this.DGV1.AllowUserToDeleteRows = false;
+            this.DGV1.AllowUserToResizeColumns = false;
+            this.DGV1.AllowUserToResizeRows = false;
+            this.DGV1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.DGV1.BackgroundColor = System.Drawing.Color.Gainsboro;
+            this.DGV1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DGV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column_Time,
+            this.Column_Voltage,
+            this.Column_Current,
+            this.Column_Power});
+            this.DGV1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DGV1.Location = new System.Drawing.Point(3, 3);
+            this.DGV1.Name = "DGV1";
+            this.DGV1.RowHeadersVisible = false;
+            this.tableLayoutPanel1.SetRowSpan(this.DGV1, 2);
+            this.DGV1.RowTemplate.Height = 23;
+            this.DGV1.Size = new System.Drawing.Size(516, 586);
+            this.DGV1.TabIndex = 0;
             // 
             // Column_Time
             // 
@@ -217,11 +162,109 @@
             this.Column_Power.ReadOnly = true;
             this.Column_Power.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
+            // panel2
+            // 
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.btn_Clear);
+            this.panel2.Controls.Add(this.btn_ReadData);
+            this.panel2.Controls.Add(this.btn_ExportCsv);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(1109, 189);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(225, 400);
+            this.panel2.TabIndex = 2;
+            // 
+            // btn_Clear
+            // 
+            this.btn_Clear.Location = new System.Drawing.Point(34, 105);
+            this.btn_Clear.Name = "btn_Clear";
+            this.btn_Clear.Size = new System.Drawing.Size(170, 23);
+            this.btn_Clear.TabIndex = 2;
+            this.btn_Clear.Text = "清除当前表格数据";
+            this.btn_Clear.UseVisualStyleBackColor = true;
+            this.btn_Clear.Click += new System.EventHandler(this.btn_Clear_Click);
+            // 
+            // btn_ReadData
+            // 
+            this.btn_ReadData.Location = new System.Drawing.Point(34, 61);
+            this.btn_ReadData.Name = "btn_ReadData";
+            this.btn_ReadData.Size = new System.Drawing.Size(170, 23);
+            this.btn_ReadData.TabIndex = 1;
+            this.btn_ReadData.Text = "从文件读取数据显示到表格";
+            this.btn_ReadData.UseVisualStyleBackColor = true;
+            this.btn_ReadData.Click += new System.EventHandler(this.btn_ReadData_Click);
+            // 
+            // btn_ExportCsv
+            // 
+            this.btn_ExportCsv.Location = new System.Drawing.Point(34, 17);
+            this.btn_ExportCsv.Name = "btn_ExportCsv";
+            this.btn_ExportCsv.Size = new System.Drawing.Size(170, 25);
+            this.btn_ExportCsv.TabIndex = 0;
+            this.btn_ExportCsv.Text = "导出当前表格数据到csv";
+            this.btn_ExportCsv.UseVisualStyleBackColor = true;
+            this.btn_ExportCsv.Click += new System.EventHandler(this.btn_ExportCsv_Click);
+            // 
+            // panel3
+            // 
+            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel3.Controls.Add(this.chart1);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(525, 3);
+            this.panel3.Name = "panel3";
+            this.tableLayoutPanel1.SetRowSpan(this.panel3, 2);
+            this.panel3.Size = new System.Drawing.Size(578, 586);
+            this.panel3.TabIndex = 5;
+            // 
+            // chart1
+            // 
+            chartArea3.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea3);
+            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend3.Name = "Legend1";
+            this.chart1.Legends.Add(legend3);
+            this.chart1.Location = new System.Drawing.Point(0, 0);
+            this.chart1.Name = "chart1";
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Series1";
+            this.chart1.Series.Add(series3);
+            this.chart1.Size = new System.Drawing.Size(576, 584);
+            this.chart1.TabIndex = 0;
+            this.chart1.Text = "chart1";
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.系统设置ToolStripMenuItem,
+            this.曲线数据ToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
+            // 
+            // 系统设置ToolStripMenuItem
+            // 
+            this.系统设置ToolStripMenuItem.Name = "系统设置ToolStripMenuItem";
+            this.系统设置ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.系统设置ToolStripMenuItem.Text = "系统设置";
+            this.系统设置ToolStripMenuItem.Click += new System.EventHandler(this.系统设置ToolStripMenuItem_Click);
+            // 
+            // 曲线数据ToolStripMenuItem
+            // 
+            this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
+            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.曲线数据ToolStripMenuItem.Text = "曲线数据";
+            this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.Timer_Tick);
+            // 
             // aMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1081, 571);
+            this.ClientSize = new System.Drawing.Size(1337, 592);
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -232,9 +275,11 @@
             this.Text = "ReadDataSoftware";
             this.Load += new System.EventHandler(this.aMainForm_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.DGV1)).EndInit();
             this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DGV1)).EndInit();
             this.panel2.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -243,10 +288,6 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.DataGridView DGV1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button btn_End;
-        private System.Windows.Forms.Button btn_Start;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 系统设置ToolStripMenuItem;
@@ -254,10 +295,17 @@
         private System.Windows.Forms.ToolStripMenuItem 曲线数据ToolStripMenuItem;
         private System.Windows.Forms.Button btn_ReadData;
         private System.Windows.Forms.Button btn_Clear;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button btn_End;
+        private System.Windows.Forms.Button btn_Start;
+        private System.Windows.Forms.DataGridView DGV1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Time;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Voltage;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Current;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 
