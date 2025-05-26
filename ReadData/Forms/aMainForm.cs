@@ -29,7 +29,6 @@ namespace ReadDataSoftware
         public aMainForm()
         {
             InitializeComponent();
-
         }
 
         /// <summary>
@@ -111,6 +110,7 @@ namespace ReadDataSoftware
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
+                    LogError("手动停止工作时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
                 }
             }
         }
@@ -143,7 +143,7 @@ namespace ReadDataSoftware
                 catch (Exception ex)
                 {
                     MessageBox.Show($"导出失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LogError(ex.Message + ex.StackTrace);
+                    LogError("导出表格数据时出现异常，异常原因为："+ex.Message + ex.StackTrace);
                 }
 
             }
@@ -222,28 +222,22 @@ namespace ReadDataSoftware
             {
                 while (!_stopEvent.WaitOne(0))
                 {
-                    var Voltage = SystemParas.energyMeters.ReadVoltage();
-                    var Current = SystemParas.energyMeters.ReadCurrent();
+                    var Voltage = SystemParas.energyMeters.ReadDirectCurrentVoltage();
+                    var Current = SystemParas.energyMeters.ReadDirectCurrent();
                     var Power = SystemParas.energyMeters.ReadPower();
-                    var alarm = SystemParas.energyMeters.ReadAlarm();
-                    foreach (var v in alarm)
-                    {
-                        if (v)
-                        {
-                            MessageBox.Show("");
-                        }
-                    }
+                    var alarm = SystemParas.energyMeters.ReadAlarmStateToString();
                     AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
+                    lab_AlarmState.Text = alarm.ToString();
                     //AddRow(0.ToString(), 0.ToString (), Power.ToString());
                     SystemParas.Datas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
                     //SystemParas.ChartDatas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
-                    if (!Working) throw new Exception();
+                    if (!Working) throw new Exception("手动停止工作");
                     Thread.Sleep(1000);
                 }
             }
             catch (Exception ex)
             {
-                //MessageBox.Show(ex.Message);
+                LogError("Thread_AutoWork线程执行出现异常,异常原因为：" +ex.Message + ex.StackTrace);
             }
             finally
             {
@@ -360,7 +354,10 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void Timer_Tick(object sender, EventArgs e)
         {
-            ScrollToBottom(DGV1);
+            if (Working)
+            {
+                ScrollToBottom(DGV1);
+            }
             RefreshChart();
         }
         /// <summary>

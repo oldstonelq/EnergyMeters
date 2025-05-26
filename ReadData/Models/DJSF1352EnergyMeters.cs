@@ -171,10 +171,10 @@ namespace ReadDataSoftware
             return response;
         }
         /// <summary>
-        /// 读电压数据
+        /// 读直流电压值（地址00读两位）
         /// </summary>
         /// <returns></returns>
-        public double ReadVoltage()
+        public double ReadDirectCurrentVoltage()
         {
             var res = ReadData(1, 0, 2);
             if (res.Length >= 2 && (res[1] & 0x80) != 0)
@@ -206,11 +206,11 @@ namespace ReadDataSoftware
             }
         }
         /// <summary>
-        /// 读电流数据
+        /// 读直流电流值（地址02读两位）
         /// </summary>
         /// <returns></returns>
 
-        public double  ReadCurrent()
+        public double ReadDirectCurrent()
         {
             var res=ReadData(1, 2, 2);
 
@@ -244,7 +244,7 @@ namespace ReadDataSoftware
             
         }
         /// <summary>
-        /// 读功率数据
+        /// 读功率值（地址08读两位）
         /// </summary>
         /// <returns></returns>
 
@@ -280,14 +280,15 @@ namespace ReadDataSoftware
                 return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
             }
         }
+
         /// <summary>
-        /// 读取报警数据
+        /// 读取报警状态（地址19读1位）
         /// </summary>
         /// <returns></returns>
-        public bool[] ReadAlarm()
+        public bool[] ReadAlarmStateToBoolArray()
         {
-            var res = ReadData(1, 611, 6);
-            bool[] alarm = new bool[6];
+            var res = ReadData(1, 19, 1);
+            bool[] alarm = new bool[8];
             if (res.Length >= 2 && (res[1] & 0x80) != 0)
             {
                 // 处理异常响应数据
@@ -308,11 +309,44 @@ namespace ReadDataSoftware
                     short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 8; i++)
                 {
-                    alarm[i]= registerValues[i]==1? true : false;
+                    alarm[7 - i] = (registerValues[0] & (1 << i)) != 0; // 使用位运算提取每一位
                 }
                 return alarm;
+            }
+        }
+
+        /// <summary>
+        /// 读取报警状态（地址19读1位）
+        /// </summary>
+        /// <returns></returns>
+        public string  ReadAlarmStateToString()
+        {
+            var res = ReadData(1, 19, 1);
+            bool[] alarm = new bool[8];
+            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            {
+                // 处理异常响应数据
+                return "异常响应";
+            }
+            else if (res.Length < 2)
+            {
+                return "数据长度不足";
+            }
+            else
+            {
+                // 处理正常响应数据
+                int byteCount = res[2];
+                int registerCount = byteCount / 2;
+                List<short> registerValues = new List<short>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                string binaryString = Convert.ToString(registerValues[0], 2).PadLeft(8, '0'); // 将 byte 转为二进制字符串，左边填充 0
+                return binaryString;
             }
         }
     }

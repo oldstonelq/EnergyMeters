@@ -29,19 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(aMainForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_End = new System.Windows.Forms.Button();
             this.btn_Start = new System.Windows.Forms.Button();
             this.DGV1 = new System.Windows.Forms.DataGridView();
-            this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel2 = new System.Windows.Forms.Panel();
             this.btn_Clear = new System.Windows.Forms.Button();
             this.btn_ReadData = new System.Windows.Forms.Button();
@@ -50,6 +46,11 @@
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btn_Set = new System.Windows.Forms.Button();
+            this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lab_AlarmState = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
@@ -132,37 +133,10 @@
             this.DGV1.Size = new System.Drawing.Size(516, 586);
             this.DGV1.TabIndex = 0;
             // 
-            // Column_Time
-            // 
-            this.Column_Time.HeaderText = "时间";
-            this.Column_Time.Name = "Column_Time";
-            this.Column_Time.ReadOnly = true;
-            this.Column_Time.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_Voltage
-            // 
-            this.Column_Voltage.HeaderText = "电压(v)";
-            this.Column_Voltage.Name = "Column_Voltage";
-            this.Column_Voltage.ReadOnly = true;
-            this.Column_Voltage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_Current
-            // 
-            this.Column_Current.HeaderText = "电流(A)";
-            this.Column_Current.Name = "Column_Current";
-            this.Column_Current.ReadOnly = true;
-            this.Column_Current.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_Power
-            // 
-            this.Column_Power.HeaderText = "功率(w)";
-            this.Column_Power.Name = "Column_Power";
-            this.Column_Power.ReadOnly = true;
-            this.Column_Power.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.lab_AlarmState);
             this.panel2.Controls.Add(this.btn_Set);
             this.panel2.Controls.Add(this.btn_Clear);
             this.panel2.Controls.Add(this.btn_ReadData);
@@ -216,17 +190,17 @@
             // 
             // chart1
             // 
-            chartArea6.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea6);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend6.Name = "Legend1";
-            this.chart1.Legends.Add(legend6);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(0, 0);
             this.chart1.Name = "chart1";
-            series6.ChartArea = "ChartArea1";
-            series6.Legend = "Legend1";
-            series6.Name = "Series1";
-            this.chart1.Series.Add(series6);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(575, 584);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -247,6 +221,43 @@
             this.btn_Set.UseVisualStyleBackColor = true;
             this.btn_Set.Click += new System.EventHandler(this.btn_Set_Click);
             // 
+            // Column_Time
+            // 
+            this.Column_Time.HeaderText = "时间";
+            this.Column_Time.Name = "Column_Time";
+            this.Column_Time.ReadOnly = true;
+            this.Column_Time.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_Voltage
+            // 
+            this.Column_Voltage.HeaderText = "直流电压(v)";
+            this.Column_Voltage.Name = "Column_Voltage";
+            this.Column_Voltage.ReadOnly = true;
+            this.Column_Voltage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_Current
+            // 
+            this.Column_Current.HeaderText = "直流电流(A)";
+            this.Column_Current.Name = "Column_Current";
+            this.Column_Current.ReadOnly = true;
+            this.Column_Current.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_Power
+            // 
+            this.Column_Power.HeaderText = "功率(w)";
+            this.Column_Power.Name = "Column_Power";
+            this.Column_Power.ReadOnly = true;
+            this.Column_Power.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // lab_AlarmState
+            // 
+            this.lab_AlarmState.AutoSize = true;
+            this.lab_AlarmState.Location = new System.Drawing.Point(46, 207);
+            this.lab_AlarmState.Name = "lab_AlarmState";
+            this.lab_AlarmState.Size = new System.Drawing.Size(53, 12);
+            this.lab_AlarmState.TabIndex = 4;
+            this.lab_AlarmState.Text = "报警状态";
+            // 
             // aMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -265,6 +276,7 @@
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.DGV1)).EndInit();
             this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.panel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
@@ -282,14 +294,15 @@
         private System.Windows.Forms.Button btn_End;
         private System.Windows.Forms.Button btn_Start;
         private System.Windows.Forms.DataGridView DGV1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Time;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Voltage;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Current;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btn_Set;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Time;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Voltage;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Current;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
+        private System.Windows.Forms.Label lab_AlarmState;
     }
 }
 
