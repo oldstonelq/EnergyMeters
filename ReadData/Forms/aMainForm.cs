@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -22,6 +23,7 @@ namespace ReadDataSoftware
         /// </summary>
         private bool Working;
         private const int MaxPoints = 1000;
+        private string errorMsg = "";
         private ManualResetEvent _stopEvent = new ManualResetEvent(false);
         /// <summary>
         /// 构造函数
@@ -225,9 +227,9 @@ namespace ReadDataSoftware
                     var Voltage = SystemParas.energyMeters.ReadDirectCurrentVoltage();
                     var Current = SystemParas.energyMeters.ReadDirectCurrent();
                     var Power = SystemParas.energyMeters.ReadPower();
-                    var alarm = SystemParas.energyMeters.ReadAlarmStateToString();
+                    errorMsg = SystemParas.energyMeters.ReadAlarmStateToString();
                     AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
-                    lab_AlarmState.Text = alarm.ToString();
+                    //lab_AlarmState.Text = alarm.ToString();
                     //AddRow(0.ToString(), 0.ToString (), Power.ToString());
                     SystemParas.Datas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
                     //SystemParas.ChartDatas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
@@ -357,6 +359,10 @@ namespace ReadDataSoftware
             if (Working)
             {
                 ScrollToBottom(DGV1);
+                if (lab_AlarmState.Text != errorMsg)
+                {
+                    lab_AlarmState.Text = errorMsg;
+                }
             }
             RefreshChart();
         }

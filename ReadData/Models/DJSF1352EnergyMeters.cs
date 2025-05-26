@@ -189,7 +189,7 @@ namespace ReadDataSoftware
             else
             {
                 //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
-                if (res[3] == 0xff)
+                if (res[3] == 0xff && res[4] == 0xff)
                 {
                     return -1;
                 }
@@ -227,8 +227,8 @@ namespace ReadDataSoftware
             {
                 // 处理正常响应数据
                 //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
-                if (res[3]==0xff)
-                { 
+                if (res[3] == 0xff && res[4] == 0xff)
+                {
                     return -1;
                 }
                 int byteCount = res[2];
@@ -265,7 +265,7 @@ namespace ReadDataSoftware
             {
                 // 处理正常响应数据
                 //电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为-1
-                if (res[3] == 0xff)
+                if (res[3] == 0xff&& res[4] == 0xff)
                 {
                     return -1;
                 }
