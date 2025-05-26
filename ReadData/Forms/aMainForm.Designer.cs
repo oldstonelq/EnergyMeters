@@ -29,9 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(aMainForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_End = new System.Windows.Forms.Button();
@@ -47,17 +48,14 @@
             this.btn_ExportCsv = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.系统设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.曲线数据ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btn_Set = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGV1)).BeginInit();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
-            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -65,7 +63,7 @@
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.2448F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.7552F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 230F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 231F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.DGV1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel2, 2, 1);
@@ -85,9 +83,9 @@
             this.panel1.Controls.Add(this.btn_End);
             this.panel1.Controls.Add(this.btn_Start);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(1109, 3);
+            this.panel1.Location = new System.Drawing.Point(1108, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(225, 180);
+            this.panel1.Size = new System.Drawing.Size(226, 180);
             this.panel1.TabIndex = 4;
             // 
             // btn_End
@@ -165,13 +163,14 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.btn_Set);
             this.panel2.Controls.Add(this.btn_Clear);
             this.panel2.Controls.Add(this.btn_ReadData);
             this.panel2.Controls.Add(this.btn_ExportCsv);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(1109, 189);
+            this.panel2.Location = new System.Drawing.Point(1108, 189);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(225, 400);
+            this.panel2.Size = new System.Drawing.Size(226, 400);
             this.panel2.TabIndex = 2;
             // 
             // btn_Clear
@@ -212,47 +211,25 @@
             this.panel3.Location = new System.Drawing.Point(525, 3);
             this.panel3.Name = "panel3";
             this.tableLayoutPanel1.SetRowSpan(this.panel3, 2);
-            this.panel3.Size = new System.Drawing.Size(578, 586);
+            this.panel3.Size = new System.Drawing.Size(577, 586);
             this.panel3.TabIndex = 5;
             // 
             // chart1
             // 
-            chartArea3.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea3);
+            chartArea6.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea6);
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend3.Name = "Legend1";
-            this.chart1.Legends.Add(legend3);
+            legend6.Name = "Legend1";
+            this.chart1.Legends.Add(legend6);
             this.chart1.Location = new System.Drawing.Point(0, 0);
             this.chart1.Name = "chart1";
-            series3.ChartArea = "ChartArea1";
-            series3.Legend = "Legend1";
-            series3.Name = "Series1";
-            this.chart1.Series.Add(series3);
-            this.chart1.Size = new System.Drawing.Size(576, 584);
+            series6.ChartArea = "ChartArea1";
+            series6.Legend = "Legend1";
+            series6.Name = "Series1";
+            this.chart1.Series.Add(series6);
+            this.chart1.Size = new System.Drawing.Size(575, 584);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.系统设置ToolStripMenuItem,
-            this.曲线数据ToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
-            // 
-            // 系统设置ToolStripMenuItem
-            // 
-            this.系统设置ToolStripMenuItem.Name = "系统设置ToolStripMenuItem";
-            this.系统设置ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.系统设置ToolStripMenuItem.Text = "系统设置";
-            this.系统设置ToolStripMenuItem.Click += new System.EventHandler(this.系统设置ToolStripMenuItem_Click);
-            // 
-            // 曲线数据ToolStripMenuItem
-            // 
-            this.曲线数据ToolStripMenuItem.Name = "曲线数据ToolStripMenuItem";
-            this.曲线数据ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.曲线数据ToolStripMenuItem.Text = "曲线数据";
-            this.曲线数据ToolStripMenuItem.Click += new System.EventHandler(this.曲线数据ToolStripMenuItem_Click);
             // 
             // timer1
             // 
@@ -260,14 +237,24 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.Timer_Tick);
             // 
+            // btn_Set
+            // 
+            this.btn_Set.Location = new System.Drawing.Point(34, 146);
+            this.btn_Set.Name = "btn_Set";
+            this.btn_Set.Size = new System.Drawing.Size(170, 23);
+            this.btn_Set.TabIndex = 3;
+            this.btn_Set.Text = "系统设置";
+            this.btn_Set.UseVisualStyleBackColor = true;
+            this.btn_Set.Click += new System.EventHandler(this.btn_Set_Click);
+            // 
             // aMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1337, 592);
-            this.ContextMenuStrip = this.contextMenuStrip1;
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "aMainForm";
@@ -280,7 +267,6 @@
             this.panel2.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -289,10 +275,7 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem 系统设置ToolStripMenuItem;
         private System.Windows.Forms.Button btn_ExportCsv;
-        private System.Windows.Forms.ToolStripMenuItem 曲线数据ToolStripMenuItem;
         private System.Windows.Forms.Button btn_ReadData;
         private System.Windows.Forms.Button btn_Clear;
         private System.Windows.Forms.Panel panel1;
@@ -306,6 +289,7 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btn_Set;
     }
 }
 

@@ -54,6 +54,13 @@ namespace ReadDataSoftware
         /// 串口实例
         /// </summary>
         private SerialPort serialPort;
+        /// <summary>
+        /// 串口是否打开
+        /// </summary>
+        public bool isopen
+        {
+            get { return serialPort.IsOpen; }
+        }
 
         /// <summary>
         /// 构造函数
@@ -271,6 +278,41 @@ namespace ReadDataSoftware
                     registerValues.Add(registerValue);
                 }
                 return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
+            }
+        }
+        /// <summary>
+        /// 读取报警数据
+        /// </summary>
+        /// <returns></returns>
+        public bool[] ReadAlarm()
+        {
+            var res = ReadData(1, 611, 6);
+            bool[] alarm = new bool[6];
+            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            {
+                // 处理异常响应数据
+                return alarm;
+            }
+            else if (res.Length < 2)
+            {
+                return alarm;
+            }
+            else
+            {
+                // 处理正常响应数据
+                int byteCount = res[2];
+                int registerCount = byteCount / 2;
+                List<short> registerValues = new List<short>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                for (int i = 0; i < 6; i++)
+                {
+                    alarm[i]= registerValues[i]==1? true : false;
+                }
+                return alarm;
             }
         }
     }

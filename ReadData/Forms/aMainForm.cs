@@ -16,6 +16,7 @@ namespace ReadDataSoftware
 {
     public partial class aMainForm : Form
     {
+        #region 构造函数·私有变量·窗体加载
         /// <summary>
         /// 是否正在读数
         /// </summary>
@@ -28,19 +29,27 @@ namespace ReadDataSoftware
         public aMainForm()
         {
             InitializeComponent();
-           
-        }
-        private void ScrollToBottom(DataGridView dataGridView)
-        {
-            // 获取总行数
-            int rowCount = dataGridView.Rows.Count;
 
-            // 如果行数大于0，滚动到最后一行
-            if (rowCount > 0)
-            {
-                dataGridView.FirstDisplayedScrollingRowIndex = rowCount - 1;
-            }
         }
+
+        /// <summary>
+        /// 窗体加载事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void aMainForm_Load(object sender, EventArgs e)
+        {
+            InitializeChart();
+            string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            this.Text = "读数软件 V" + Version;
+            // 创建标题
+            Title title = new Title("电压、电流和功率随时间变化");
+            title.Font = new Font("Microsoft YaHei", 14F, FontStyle.Bold);
+            chart1.Titles.Add(title);
+        }
+        #endregion
+
+        #region 按键方法
         /// <summary>
         /// 开始读数
         /// </summary>
@@ -54,6 +63,7 @@ namespace ReadDataSoftware
                 Working = true;
                 btn_Start.Enabled = false;
                 btn_End.Enabled = true;
+                _stopEvent.Reset(); // 重置 _stopEvent
                 new Task(() => { Thread_AutoWork(); }).Start();
             }
             catch (Exception)
@@ -78,86 +88,31 @@ namespace ReadDataSoftware
                     btn_Start.Enabled = true;
                     btn_End.Enabled = false;
                     _stopEvent.WaitOne(); // 等待数据记录线程完成
-                    string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
-                    string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
-                    string savefileName = SystemParas.DataFile+ "\\"+ DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
-                    bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Datas, savefileName);
+                    if (DGV1.RowCount > 0)
+                    {
+                        string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
+                        string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
+                        string savefileName = SystemParas.DataFile + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
+                        if (SystemParas.Datas.Count > 0)
+                        {
+                            bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Datas, savefileName);
+                            if (success)
+                            {
+                                MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                SystemParas.Datas = new List<DataStructure>();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                    
                 }
             }
-            //SystemParas.energyMeters.Close();
-        }
-        /// <summary>
-        /// 自动读数线程
-        /// </summary>
-        private void Thread_AutoWork()
-        {
-            try
-            {
-                while (!_stopEvent.WaitOne(0))
-                {
-                    var Voltage = SystemParas.energyMeters.ReadVoltage();
-                    var Current = SystemParas.energyMeters.ReadCurrent();
-                    var Power = SystemParas.energyMeters.ReadPower();
-                    AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
-                    SystemParas.Datas.Add(new DataStructure() {Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
-                    SystemParas.ChartDatas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
-                    if (!Working) throw new Exception("手动取消");
-                    Thread.Sleep(1000);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                SystemParas.energyMeters.Close();
-                _stopEvent.Set(); // 通知主线程数据记录线程已经完成
-            }
-        }
-        /// <summary>
-        /// 系统设置
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void 系统设置ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Form_SystemSet form_SystemSet = new Form_SystemSet();
-            form_SystemSet.ShowDialog();
-            form_SystemSet.Dispose();
-        }
-        /// <summary>
-        /// DGV添加一行数据
-        /// </summary>
-        /// <param name="Voltage">电压值</param>
-        /// <param name="Current">电流值</param>
-        /// <param name="Power"></param>
-        private void AddRow(string Voltage,string Current,string Power)
-        {
-            this.Invoke(new Action(() =>
-            {
-                DGV1.Rows.Add();
-                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Voltage.Name].Value = Voltage;
-                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Current.Name].Value = Current;
-                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power;
-            }));
-        }
-        /// <summary>
-        /// 窗体加载事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void aMainForm_Load(object sender, EventArgs e)
-        {
-            InitializeChart();
-            string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            this.Text = "读数软件 V" + Version;
         }
         /// <summary>
         /// 导出表格数据
@@ -177,7 +132,7 @@ namespace ReadDataSoftware
             {
                 try
                 {
-                    FileHelp.ExportCsv(DGV1,saveFileDialog.FileName);
+                    FileHelp.ExportCsv(DGV1, saveFileDialog.FileName);
                     DialogResult result = MessageBox.Show("是否要打开导出的文件？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.Yes)
                     {
@@ -188,17 +143,145 @@ namespace ReadDataSoftware
                 catch (Exception ex)
                 {
                     MessageBox.Show($"导出失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LogError(ex.Message+ex.StackTrace);
+                    LogError(ex.Message + ex.StackTrace);
                 }
-            
+
             }
         }
-
-        private void 曲线数据ToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 读取文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ReadData_Click(object sender, EventArgs e)
         {
-            Form_Chart form_Chart = new Form_Chart();
-            form_Chart.ShowDialog();
-            form_Chart.Dispose();
+            if (Working)
+            {
+                MessageBox.Show ("工作中，不允许读取", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            DGV1.Rows.Clear();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "JSON 文件 (*.json)|*.json";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filePath = openFileDialog.FileName;
+                SystemParas.Datas = JsonSerializerHelper.LoadFromJsonFile<List<DataStructure>>(filePath);
+                foreach (DataStructure dataStructure in SystemParas.Datas)
+                {
+                    DGV1.Rows.Add(dataStructure.Time.ToString(), dataStructure.Voltage.ToString(), dataStructure.Current.ToString(), dataStructure.Power.ToString());
+                }
+            }
+        }
+        /// <summary>
+        /// 清除表格以及图表数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Clear_Click(object sender, EventArgs e)
+        {
+            if (Working)
+            {
+                MessageBox.Show("工作中，不允许清除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (DGV1.Rows.Count > 0)
+            {
+                SystemParas.Datas.Clear();
+                DGV1.Rows.Clear();
+                ClearChart();
+                MessageBox.Show("表格已清空", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("没有数据可以清除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+        }
+        /// <summary>
+        /// 系统设置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Set_Click(object sender, EventArgs e)
+        {
+            Form_SystemSet form_SystemSet = new Form_SystemSet();
+            form_SystemSet.ShowDialog();
+            form_SystemSet.Dispose();
+        }
+        #endregion
+
+        #region 私有方法
+        /// <summary>
+        /// 自动读数线程
+        /// </summary>
+        private void Thread_AutoWork()
+        {
+            try
+            {
+                while (!_stopEvent.WaitOne(0))
+                {
+                    var Voltage = SystemParas.energyMeters.ReadVoltage();
+                    var Current = SystemParas.energyMeters.ReadCurrent();
+                    var Power = SystemParas.energyMeters.ReadPower();
+                    var alarm = SystemParas.energyMeters.ReadAlarm();
+                    foreach (var v in alarm)
+                    {
+                        if (v)
+                        {
+                            MessageBox.Show("");
+                        }
+                    }
+                    AddRow(Voltage.ToString(), Current.ToString(), Power.ToString());
+                    //AddRow(0.ToString(), 0.ToString (), Power.ToString());
+                    SystemParas.Datas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
+                    //SystemParas.ChartDatas.Add(new DataStructure() { Time = DateTime.Now, Voltage = Voltage, Current = Current, Power = Power });
+                    if (!Working) throw new Exception();
+                    Thread.Sleep(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                SystemParas.energyMeters.Close();
+                _stopEvent.Set(); // 通知主线程数据记录线程已经完成
+            }
+        }
+        /// <summary>
+        /// DGV添加一行数据
+        /// </summary>
+        /// <param name="Voltage">电压值</param>
+        /// <param name="Current">电流值</param>
+        /// <param name="Power"></param>
+        private void AddRow(string Voltage, string Current, string Power)
+        {
+            this.Invoke(new Action(() =>
+            {
+                DGV1.Rows.Add();
+                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Voltage.Name].Value = Voltage;
+                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Current.Name].Value = Current;
+                DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power;
+            }));
+        }
+        /// <summary>
+        /// 设置滑动条
+        /// </summary>
+        /// <param name="dataGridView"></param>
+        private void ScrollToBottom(DataGridView dataGridView)
+        {
+            // 获取总行数
+            int rowCount = dataGridView.Rows.Count;
+
+            // 如果行数大于0，滚动到最后一行
+            if (rowCount > 0)
+            {
+                dataGridView.FirstDisplayedScrollingRowIndex = rowCount - 1;
+            }
         }
         /// <summary>
         /// 错误日志
@@ -218,43 +301,17 @@ namespace ReadDataSoftware
                 writer.WriteLine($"{DateTime.Now}: {message}");
             }
         }
-
-        private void btn_ReadData_Click(object sender, EventArgs e)
-        {
-            DGV1 .Rows.Clear();
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string filePath = openFileDialog.FileName;
-                SystemParas.Datas = JsonSerializerHelper.LoadFromJsonFile<List<DataStructure>>(filePath);
-                foreach (DataStructure dataStructure in SystemParas.Datas)
-                {
-                   DGV1 .Rows.Add(dataStructure.Time .ToString (), dataStructure.Voltage.ToString (),dataStructure.Current.ToString (),dataStructure .Power.ToString ());
-                }
-            }
-        }
-
-        private void btn_Clear_Click(object sender, EventArgs e)
-        {
-            if (DGV1.Rows.Count > 0)
-            {
-                DGV1.Rows.Clear();
-                MessageBox.Show("表格已清空", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show ("没有数据可以清除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            
-        }
+        #endregion
 
         #region 曲线绘制相关
+        /// <summary>
+        /// 初始化图表
+        /// </summary>
         private void InitializeChart()
         {
             // 清除可能存在的旧系列和图表区域
             chart1.Series.Clear();
             chart1.ChartAreas.Clear();
-
             // 创建图表区域
             ChartArea chartArea = new ChartArea("ElectricalParameters");
             chartArea.AxisX.Title = "时间";
@@ -267,18 +324,26 @@ namespace ReadDataSoftware
             chartArea.AxisX.MajorGrid.LineColor = Color.FromArgb(220, 220, 220);
             chartArea.AxisY.MajorGrid.LineColor = Color.FromArgb(220, 220, 220);
             chart1.ChartAreas.Add(chartArea);
-
-            // 创建标题
-            Title title = new Title("电压、电流和功率随时间变化");
-            title.Font = new Font("Microsoft YaHei", 14F, FontStyle.Bold);
-            chart1.Titles.Add(title);
-
             // 创建三个系列：电压、电流和功率
             CreateSeries("电压", Color.Red);
             CreateSeries("电流", Color.Blue);
             CreateSeries("功率", Color.Green);
         }
+        /// <summary>
+        /// 清除图表
+        /// </summary>
+        private void ClearChart()
+        {
+            // 清除可能存在的旧系列和图表区域
+            chart1.Series.Clear();
+            chart1.ChartAreas.Clear();
 
+        }
+        /// <summary>
+        /// 创建曲线实例
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="color"></param>
         private void CreateSeries(string name, Color color)
         {
             Series series = new Series(name);
@@ -288,26 +353,37 @@ namespace ReadDataSoftware
             series.ChartArea = "ElectricalParameters";
             chart1.Series.Add(series);
         }
-
+        /// <summary>
+        /// 定时刷新图表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Timer_Tick(object sender, EventArgs e)
         {
             ScrollToBottom(DGV1);
-            //RefreshChart();
+            RefreshChart();
         }
-
+        /// <summary>
+        /// 增加数据点
+        /// </summary>
+        /// <param name="seriesName"></param>
+        /// <param name="time"></param>
+        /// <param name="value"></param>
         private void AddDataPoint(string seriesName, DateTime time, double value)
         {
             chart1.Series[seriesName].Points.AddXY(time, value);
         }
-
+        /// <summary>
+        /// 刷新图表
+        /// </summary>
         private void RefreshChart()
         {
             if (SystemParas.Datas.Count<=0)
             {
                 return;
             }
-            chart1.Series.Clear();
-            chart1.ChartAreas.Clear();
+            //重绘图表
+            InitializeChart();
             // 添加所有数据点
             foreach (var data in SystemParas.Datas)
             {
@@ -325,7 +401,9 @@ namespace ReadDataSoftware
             // 更新图表
             chart1.Invalidate();
         }
-
+        /// <summary>
+        /// 限制数据点数量
+        /// </summary>
         private void LimitDataPoints()
         {
             foreach (Series series in chart1.Series)
@@ -336,6 +414,9 @@ namespace ReadDataSoftware
                 }
             }
         }
+        /// <summary>
+        /// 调整xy轴范围
+        /// </summary>
         private void AdjustAxisRanges()
         {
             // 调整Y轴范围
@@ -382,6 +463,7 @@ namespace ReadDataSoftware
             }
         }
         #endregion
+
     }
 }
 

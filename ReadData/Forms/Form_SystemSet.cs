@@ -68,6 +68,11 @@ namespace ReadData
             FileHelp.WriteIniKeys("SystemSet", "DataBits", cmb_DataBits.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "StopBits", cmb_StopBits.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "Parity", cmb_Parity.Text, SystemParas.SystemFile);
+            if (SystemParas.energyMeters.isopen)
+            {
+                SystemParas.energyMeters.Close();
+            }
+            SystemParas.Load();
             MessageBox.Show("保存成功");
         }
     }
