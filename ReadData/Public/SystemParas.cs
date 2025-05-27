@@ -37,15 +37,19 @@ namespace ReadDataSoftware
         /// <summary>
         /// 电表实例
         /// </summary>
-        public static DJSF1352EnergyMeters energyMeters;
+        public static EnergyMeters energyMeters;
         /// <summary>
-        /// 原始数据队列
+        /// DJSF1352数据队列
         /// </summary>
-        public static List <DataStructure> Datas = new List <DataStructure>();
+        public static List <DJSF1352_DataStructure> Data1 = new List <DJSF1352_DataStructure>();
         /// <summary>
-        /// 曲线数据队列
+        /// AMC数据队列
         /// </summary>
-        public static List<DataStructure> ChartDatas = new List<DataStructure>();
+        public static List<AMC_DataStructure> Data2 = new List<AMC_DataStructure>();
+        /// <summary>
+        /// 电表类型
+        /// </summary>
+        public static string EnergyMetersType= "DJSF1352";
 
         /// <summary>
         /// 初始化系统参数
@@ -97,9 +101,20 @@ namespace ReadDataSoftware
             {
                 SerialPortSettings.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
             }
+            string energyMetersType = FileHelp.ReadIniKeys("SystemSet", "EnergyMetersType", "", SystemFile);
+            if (!string.IsNullOrEmpty(energyMetersType))
+            {
+                EnergyMetersType = energyMetersType;
+            }
 
-            energyMeters = new DJSF1352EnergyMeters(SerialPortSettings.PortName,SerialPortSettings.BaudRate,SerialPortSettings.DataBits,SerialPortSettings .StopBits,SerialPortSettings .Parity);
+            if (EnergyMetersType == "AMC")
+            {
+                energyMeters = new AMC_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+            }
+            else
+            {
+                energyMeters = new DJSF1352_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+            }
         }
-
     }
 }

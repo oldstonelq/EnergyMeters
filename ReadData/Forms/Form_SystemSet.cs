@@ -44,9 +44,14 @@ namespace ReadData
 
 
             //奇偶位
-            string[] Parity = { "None", "One", "OnePointFive", "Two" };
-            cmb_Parity.Items.AddRange(Parity);
+            string[] parity = { "None", "One", "OnePointFive", "Two" };
+            cmb_Parity.Items.AddRange(parity);
             cmb_Parity.Text = SystemParas.SerialPortSettings.Parity.ToString();
+
+            //电表型号
+            string[] meterType = { "DJSF1352", "AMC" };
+            cmb_EnergyMetersType.Items.AddRange(meterType);
+            cmb_EnergyMetersType.Text = SystemParas.EnergyMetersType;
         }
 
         private void InitTextBox()
@@ -68,7 +73,8 @@ namespace ReadData
             FileHelp.WriteIniKeys("SystemSet", "DataBits", cmb_DataBits.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "StopBits", cmb_StopBits.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "Parity", cmb_Parity.Text, SystemParas.SystemFile);
-            if (SystemParas.energyMeters.isopen)
+            FileHelp.WriteIniKeys("SystemSet", "EnergyMetersType", cmb_EnergyMetersType.Text, SystemParas.SystemFile);
+            if (SystemParas.energyMeters.IsOpen)
             {
                 SystemParas.energyMeters.Close();
             }

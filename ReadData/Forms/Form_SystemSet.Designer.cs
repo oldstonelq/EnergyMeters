@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_SystemSet));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.cmb_EnergyMetersType = new System.Windows.Forms.ComboBox();
+            this.lab_EnergyMetersType = new System.Windows.Forms.Label();
             this.txt_LogFile = new System.Windows.Forms.TextBox();
             this.lab_LogFile = new System.Windows.Forms.Label();
             this.cmb_PortName = new System.Windows.Forms.ComboBox();
@@ -50,6 +52,8 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.cmb_EnergyMetersType);
+            this.panel1.Controls.Add(this.lab_EnergyMetersType);
             this.panel1.Controls.Add(this.txt_LogFile);
             this.panel1.Controls.Add(this.lab_LogFile);
             this.panel1.Controls.Add(this.cmb_PortName);
@@ -71,9 +75,27 @@
             this.panel1.Size = new System.Drawing.Size(523, 356);
             this.panel1.TabIndex = 0;
             // 
+            // cmb_EnergyMetersType
+            // 
+            this.cmb_EnergyMetersType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmb_EnergyMetersType.FormattingEnabled = true;
+            this.cmb_EnergyMetersType.Location = new System.Drawing.Point(129, 27);
+            this.cmb_EnergyMetersType.Name = "cmb_EnergyMetersType";
+            this.cmb_EnergyMetersType.Size = new System.Drawing.Size(121, 20);
+            this.cmb_EnergyMetersType.TabIndex = 16;
+            // 
+            // lab_EnergyMetersType
+            // 
+            this.lab_EnergyMetersType.AutoSize = true;
+            this.lab_EnergyMetersType.Location = new System.Drawing.Point(41, 27);
+            this.lab_EnergyMetersType.Name = "lab_EnergyMetersType";
+            this.lab_EnergyMetersType.Size = new System.Drawing.Size(53, 12);
+            this.lab_EnergyMetersType.TabIndex = 15;
+            this.lab_EnergyMetersType.Text = "电表型号";
+            // 
             // txt_LogFile
             // 
-            this.txt_LogFile.Location = new System.Drawing.Point(129, 232);
+            this.txt_LogFile.Location = new System.Drawing.Point(129, 259);
             this.txt_LogFile.Name = "txt_LogFile";
             this.txt_LogFile.Size = new System.Drawing.Size(373, 21);
             this.txt_LogFile.TabIndex = 14;
@@ -81,7 +103,7 @@
             // lab_LogFile
             // 
             this.lab_LogFile.AutoSize = true;
-            this.lab_LogFile.Location = new System.Drawing.Point(45, 232);
+            this.lab_LogFile.Location = new System.Drawing.Point(45, 259);
             this.lab_LogFile.Name = "lab_LogFile";
             this.lab_LogFile.Size = new System.Drawing.Size(53, 12);
             this.lab_LogFile.TabIndex = 13;
@@ -91,7 +113,7 @@
             // 
             this.cmb_PortName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_PortName.FormattingEnabled = true;
-            this.cmb_PortName.Location = new System.Drawing.Point(129, 160);
+            this.cmb_PortName.Location = new System.Drawing.Point(129, 187);
             this.cmb_PortName.Name = "cmb_PortName";
             this.cmb_PortName.Size = new System.Drawing.Size(121, 20);
             this.cmb_PortName.TabIndex = 12;
@@ -99,7 +121,7 @@
             // lab_COM
             // 
             this.lab_COM.AutoSize = true;
-            this.lab_COM.Location = new System.Drawing.Point(43, 160);
+            this.lab_COM.Location = new System.Drawing.Point(43, 187);
             this.lab_COM.Name = "lab_COM";
             this.lab_COM.Size = new System.Drawing.Size(41, 12);
             this.lab_COM.TabIndex = 11;
@@ -109,7 +131,7 @@
             // 
             this.cmb_Parity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_Parity.FormattingEnabled = true;
-            this.cmb_Parity.Location = new System.Drawing.Point(129, 129);
+            this.cmb_Parity.Location = new System.Drawing.Point(129, 156);
             this.cmb_Parity.Name = "cmb_Parity";
             this.cmb_Parity.Size = new System.Drawing.Size(121, 20);
             this.cmb_Parity.TabIndex = 10;
@@ -118,7 +140,7 @@
             // 
             this.cmb_StopBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_StopBits.FormattingEnabled = true;
-            this.cmb_StopBits.Location = new System.Drawing.Point(129, 98);
+            this.cmb_StopBits.Location = new System.Drawing.Point(129, 125);
             this.cmb_StopBits.Name = "cmb_StopBits";
             this.cmb_StopBits.Size = new System.Drawing.Size(121, 20);
             this.cmb_StopBits.TabIndex = 9;
@@ -127,7 +149,7 @@
             // 
             this.cmb_DataBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_DataBits.FormattingEnabled = true;
-            this.cmb_DataBits.Location = new System.Drawing.Point(129, 67);
+            this.cmb_DataBits.Location = new System.Drawing.Point(129, 94);
             this.cmb_DataBits.Name = "cmb_DataBits";
             this.cmb_DataBits.Size = new System.Drawing.Size(121, 20);
             this.cmb_DataBits.TabIndex = 8;
@@ -136,14 +158,14 @@
             // 
             this.cmb_BaudRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_BaudRate.FormattingEnabled = true;
-            this.cmb_BaudRate.Location = new System.Drawing.Point(129, 36);
+            this.cmb_BaudRate.Location = new System.Drawing.Point(129, 63);
             this.cmb_BaudRate.Name = "cmb_BaudRate";
             this.cmb_BaudRate.Size = new System.Drawing.Size(121, 20);
             this.cmb_BaudRate.TabIndex = 7;
             // 
             // txt_DataFile
             // 
-            this.txt_DataFile.Location = new System.Drawing.Point(129, 200);
+            this.txt_DataFile.Location = new System.Drawing.Point(129, 227);
             this.txt_DataFile.Name = "txt_DataFile";
             this.txt_DataFile.Size = new System.Drawing.Size(373, 21);
             this.txt_DataFile.TabIndex = 6;
@@ -151,7 +173,7 @@
             // lab_DataFile
             // 
             this.lab_DataFile.AutoSize = true;
-            this.lab_DataFile.Location = new System.Drawing.Point(41, 200);
+            this.lab_DataFile.Location = new System.Drawing.Point(41, 227);
             this.lab_DataFile.Name = "lab_DataFile";
             this.lab_DataFile.Size = new System.Drawing.Size(77, 12);
             this.lab_DataFile.TabIndex = 5;
@@ -170,7 +192,7 @@
             // lab_Parity
             // 
             this.lab_Parity.AutoSize = true;
-            this.lab_Parity.Location = new System.Drawing.Point(39, 129);
+            this.lab_Parity.Location = new System.Drawing.Point(39, 156);
             this.lab_Parity.Name = "lab_Parity";
             this.lab_Parity.Size = new System.Drawing.Size(65, 12);
             this.lab_Parity.TabIndex = 3;
@@ -179,7 +201,7 @@
             // lab_StopBits
             // 
             this.lab_StopBits.AutoSize = true;
-            this.lab_StopBits.Location = new System.Drawing.Point(39, 98);
+            this.lab_StopBits.Location = new System.Drawing.Point(39, 125);
             this.lab_StopBits.Name = "lab_StopBits";
             this.lab_StopBits.Size = new System.Drawing.Size(41, 12);
             this.lab_StopBits.TabIndex = 2;
@@ -188,7 +210,7 @@
             // lab_DataBits
             // 
             this.lab_DataBits.AutoSize = true;
-            this.lab_DataBits.Location = new System.Drawing.Point(39, 67);
+            this.lab_DataBits.Location = new System.Drawing.Point(39, 94);
             this.lab_DataBits.Name = "lab_DataBits";
             this.lab_DataBits.Size = new System.Drawing.Size(41, 12);
             this.lab_DataBits.TabIndex = 1;
@@ -197,7 +219,7 @@
             // lab_BaudRate
             // 
             this.lab_BaudRate.AutoSize = true;
-            this.lab_BaudRate.Location = new System.Drawing.Point(39, 36);
+            this.lab_BaudRate.Location = new System.Drawing.Point(39, 63);
             this.lab_BaudRate.Name = "lab_BaudRate";
             this.lab_BaudRate.Size = new System.Drawing.Size(41, 12);
             this.lab_BaudRate.TabIndex = 0;
@@ -240,5 +262,7 @@
         private System.Windows.Forms.Label lab_COM;
         private System.Windows.Forms.TextBox txt_LogFile;
         private System.Windows.Forms.Label lab_LogFile;
+        private System.Windows.Forms.Label lab_EnergyMetersType;
+        private System.Windows.Forms.ComboBox cmb_EnergyMetersType;
     }
 }

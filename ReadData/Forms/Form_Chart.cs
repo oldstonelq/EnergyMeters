@@ -21,6 +21,7 @@ namespace ReadData
         private DateTime startTime;
         private const int MaxPoints = 1000;
         private bool isClosing = false; // 新增：标记窗体是否正在关闭
+        private List<DJSF1352_DataStructure> ChartDatas = new List<DJSF1352_DataStructure>();
        
         public Form_Chart()
         {
@@ -86,13 +87,13 @@ namespace ReadData
                 return;
             
             // 添加新数据点
-            if (SystemParas.ChartDatas.Count > 0)
+            if (ChartDatas.Count > 0)
             {
-                var data=SystemParas.ChartDatas[0];
+                var data=ChartDatas[0];
                 AddDataPoint("电压", data.Time, data.Voltage);
                 AddDataPoint("电流", data.Time,data .Current);
                 AddDataPoint("功率", data.Time, data .Power);
-                SystemParas.ChartDatas.RemoveAt(0);
+                ChartDatas.RemoveAt(0);
             }
 
             // 限制数据点数量

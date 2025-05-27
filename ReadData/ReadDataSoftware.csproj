@@ -55,7 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\DataStructure.cs" />
+    <Compile Include="Interface\EnergyMeters.cs" />
+    <Compile Include="Models\AMC_DataStructure.cs" />
+    <Compile Include="Models\AMC_EnergyMeters.cs" />
+    <Compile Include="Models\DJSF1352_DataStructure.cs" />
     <Compile Include="Forms\Form_Chart.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,7 +68,7 @@
     <Compile Include="Help\JsonSerializerHelper.cs" />
     <Compile Include="Models\SerialPortSettings.cs" />
     <Compile Include="Help\FileHelp.cs" />
-    <Compile Include="Models\DJSF1352EnergyMeters.cs" />
+    <Compile Include="Models\DJSF1352_EnergyMeters.cs" />
     <Compile Include="Forms\aMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -113,5 +116,6 @@
   <ItemGroup>
     <Content Include="CDicon.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

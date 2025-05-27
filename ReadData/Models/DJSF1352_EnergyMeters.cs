@@ -1,7 +1,9 @@
-﻿using System;
+﻿using ReadData;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 
@@ -48,7 +50,7 @@ namespace ReadDataSoftware
     /// <summary>
     /// 电能表实例
     /// </summary>
-    public class DJSF1352EnergyMeters
+    public class DJSF1352_EnergyMeters: EnergyMeters
     {
         /// <summary>
         /// 串口实例
@@ -57,7 +59,7 @@ namespace ReadDataSoftware
         /// <summary>
         /// 串口是否打开
         /// </summary>
-        public bool isopen
+        public bool IsOpen
         {
             get { return serialPort.IsOpen; }
         }
@@ -67,7 +69,7 @@ namespace ReadDataSoftware
         /// </summary>
         /// <param name="portName">串口名称，如"COM1"</param>
         /// <param name="baudRate">波特率，如9600</param>
-        public DJSF1352EnergyMeters(string portName, int baudRate,int dataBits, StopBits stopBits, Parity parity)
+        public DJSF1352_EnergyMeters(string portName, int baudRate,int dataBits, StopBits stopBits, Parity parity)
         {
             serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
         }
@@ -151,134 +153,71 @@ namespace ReadDataSoftware
             int bytesToRead = serialPort.BytesToRead;
             byte[] response = new byte[bytesToRead];
             serialPort.Read(response, 0, bytesToRead);
-            if (response.Length >= 2 && (response[1] & 0x80) != 0)
+            return response;
+        }
+        /// <summary>
+        /// 处理数据
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private double[] DataProcessing(byte[] data)
+        {
+            if (data.Length >= 2 && (data[1] & 0x80) != 0)
             {
                 // 处理异常响应数据
+                return new double[] { 0 };
+            }
+            else if (data.Length < 2)
+            {
+                return new double[] { 0 };
             }
             else
             {
+                //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
+                if (data[3] == 0xff && data[4] == 0xff)
+                {
+                    return new double[] { -1 };
+                }
                 // 处理正常响应数据
-                //int byteCount = response[2];
-                //int registerCount = byteCount / 2;
-                //List<ushort> registerValues = new List<ushort>();
-                //for (int i = 0; i < registerCount; i++)
-                //{
-                //    ushort registerValue = (ushort)((response[3 + i * 2] << 8) | response[4 + i * 2]);
-                //    registerValues.Add(registerValue);
-                //}
-
+                int byteCount = data[2];
+                int registerCount = byteCount / 2;
+                List<short> registerValues = new List<short>();
+                for (int i = 0; i < registerCount; i++)
+                {
+                    short registerValue = (short)((data[3 + i * 2] << 8) | data[4 + i * 2]);
+                    registerValues.Add(registerValue);
+                }
+                return new double[] { registerValues[0] * Math.Pow(10, registerValues[1] - 3) };
             }
-            return response;
         }
         /// <summary>
         /// 读直流电压值（地址00读两位）
         /// </summary>
         /// <returns></returns>
-        public double ReadDirectCurrentVoltage()
+        public double[] ReadVoltage()
         {
             var res = ReadData(1, 0, 2);
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return 0;
-            }
-            else if (res.Length < 2)
-            {
-                return 0;
-            }
-            else
-            {
-                //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
-                if (res[3] == 0xff && res[4] == 0xff)
-                {
-                    return -1;
-                }
-                // 处理正常响应数据
-                int byteCount = res[2];
-                int registerCount = byteCount / 2;
-                List<short> registerValues = new List<short>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
-            }
+            return DataProcessing(res);
         }
         /// <summary>
         /// 读直流电流值（地址02读两位）
         /// </summary>
         /// <returns></returns>
 
-        public double ReadDirectCurrent()
+        public double[] ReadCurrent()
         {
             var res=ReadData(1, 2, 2);
-
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return 0;
-            }
-            else if (res.Length < 2)
-            {
-                return 0;
-            }
-            else
-            {
-                // 处理正常响应数据
-                //：电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为“-1
-                if (res[3] == 0xff && res[4] == 0xff)
-                {
-                    return -1;
-                }
-                int byteCount = res[2];
-                int registerCount = byteCount / 2;
-                List<short> registerValues = new List<short>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
-            }
-            
+            return DataProcessing(res);
         }
         /// <summary>
         /// 读功率值（地址08读两位）
         /// </summary>
         /// <returns></returns>
 
-        public double  ReadPower()
+        public double[]  ReadPower()
         {
             var res = ReadData(1, 8, 2);
-
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return 0;
-            }
-            else if (res.Length < 2)
-            {
-                return 0;
-            }
-            else
-            {
-                // 处理正常响应数据
-                //电压、电流、功率的有效数据与指数位均为有符号数据，若一数读出为“FFFF”，则表示该数据为-1
-                if (res[3] == 0xff&& res[4] == 0xff)
-                {
-                    return -1;
-                }
-                int byteCount = res[2];
-                int registerCount = byteCount / 2;
-                List<short> registerValues = new List<short>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                return registerValues[0] * Math.Pow(10, registerValues[1] - 3);
-            }
+            return DataProcessing(res);
         }
 
         /// <summary>
@@ -348,6 +287,7 @@ namespace ReadDataSoftware
                 string binaryString = Convert.ToString(registerValues[0], 2).PadLeft(8, '0'); // 将 byte 转为二进制字符串，左边填充 0
                 return binaryString;
             }
+            
         }
     }
 }

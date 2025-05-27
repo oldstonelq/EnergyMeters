@@ -8,7 +8,7 @@ namespace ReadData
     /// <summary>
     /// 数据结构
     /// </summary>
-    public  class DataStructure
+    public  class DJSF1352_DataStructure
     {
         /// <summary>
         /// 时间
