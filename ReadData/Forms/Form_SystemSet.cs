@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace ReadData
 {
     public partial class Form_SystemSet : Form
     {
+        // 定义一个事件，当设置保存后触发
+        public event EventHandler SettingsSaved;
         public Form_SystemSet()
         {
             InitializeComponent();
@@ -80,6 +83,18 @@ namespace ReadData
             }
             SystemParas.Load();
             MessageBox.Show("保存成功");
+            //获取当前程序的路径
+            //string exePath = Process.GetCurrentProcess().MainModule.FileName;
+
+            //启动一个新的程序实例
+            //Process.Start(exePath);
+;
+            ////Application.Restart();
+
+            ////退出当前程序
+            ////Environment.Exit(0);
+            //SettingsSaved?.Invoke(this, EventArgs.Empty);
+            //this.Close();
         }
     }
 }

@@ -27,6 +27,14 @@ namespace ReadDataSoftware
         /// </summary>
         public static string DataFile= Application.StartupPath + @"\Data";
         /// <summary>
+        /// DJSF1352数据文件
+        /// </summary>
+        public static string DJSF1352_DataFilePath = DataFile + @"\DJSF1352";
+        /// <summary>
+        /// AMC数据文件
+        /// </summary>
+        public static string AMC_DataFilePath = DataFile + @"\AMC";
+        /// <summary>
         /// 日志文件
         /// </summary>
         public static string logFilePath = Application.StartupPath + @"\Logs\log.txt";
@@ -62,9 +70,14 @@ namespace ReadDataSoftware
                 Directory.CreateDirectory(SystemPath);
             }
             //// 检查数据文件夹是否存在
-            if (!Directory.Exists(DataFile))
+            if (!Directory.Exists(DJSF1352_DataFilePath))
             {
-                Directory.CreateDirectory(DataFile);
+                Directory.CreateDirectory(DJSF1352_DataFilePath);
+            }
+            //// 检查数据文件夹是否存在
+            if (!Directory.Exists(AMC_DataFilePath))
+            {
+                Directory.CreateDirectory(AMC_DataFilePath);
             }
             //// 检查系统文件是否存在
             if (!File.Exists(SystemFile))

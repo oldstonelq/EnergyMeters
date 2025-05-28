@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public static class JsonSerializerHelper
 {
@@ -47,8 +50,24 @@ public static class JsonSerializerHelper
                 Console.WriteLine($"文件不存在: {filePath}");
                 return default;
             }
-
             string jsonString = File.ReadAllText(filePath);
+            // 获取T的类型
+            Type type = typeof(T);
+            // 检查T是否为泛型类型（如List<T>）
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                // 获取List<>中的泛型类型参数（即MyClass）
+                Type itemType = type.GetGenericArguments()[0];
+                //Console.WriteLine($"List中的类型是: {itemType.Name}");
+                foreach (PropertyInfo sp in itemType.GetProperties())
+                {
+                    if (sp.Name == "time") continue;
+                    if(!jsonString.Contains (sp.Name.ToLower()))
+                    {
+                        throw new Exception();
+                    }
+                }//获得传入类型的属性字段
+            }
             return JsonConvert.DeserializeObject<T>(jsonString, _settings);
         }
         catch (Exception ex)

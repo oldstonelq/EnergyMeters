@@ -42,7 +42,7 @@ namespace ReadDataSoftware
         {
             InitializeChart();
             string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            this.Text = "读数软件 V" + Version;
+            this.Text = "读数软件 Version-" + Version;
             if (SystemParas.EnergyMetersType == "AMC")
             {
                 DGV1.Visible = false;
@@ -106,7 +106,7 @@ namespace ReadDataSoftware
                     {
                         string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
                         string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
-                        string savefileName = SystemParas.DataFile + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
+                        string savefileName = SystemParas.DJSF1352_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
                         if (SystemParas.Data1.Count > 0)
                         {
                             bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Data1, savefileName);
@@ -121,7 +121,7 @@ namespace ReadDataSoftware
                     {
                         string startTime = DGV2.Rows[0].Cells[Column_Time.Name].Value.ToString();
                         string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
-                        string savefileName = SystemParas.DataFile + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
+                        string savefileName = SystemParas.AMC_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
                         if (SystemParas.Data2.Count > 0)
                         {
                             bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Data2, savefileName);
@@ -205,24 +205,43 @@ namespace ReadDataSoftware
                 if (SystemParas.EnergyMetersType == "DJSF1352")
                 {
                     SystemParas.Data1 = JsonSerializerHelper.LoadFromJsonFile<List<DJSF1352_DataStructure>>(filePath);
+                    if (SystemParas.Data1 == null)
+                    {
+                        MessageBox.Show("不是该类型仪表数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                    else if (SystemParas.Data1.Count == 0)
+                    {
+                        MessageBox.Show("无数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
                     foreach (var dataStructure in SystemParas.Data1)
                     {
                         if (dataStructure is DJSF1352_DataStructure data)
                         {
                             DGV1.Rows.Add(dataStructure.Time.ToString(), dataStructure.Voltage.ToString(), dataStructure.Current.ToString(), dataStructure.Power.ToString());
                         }
-
                     }
                 }
                 else if (SystemParas.EnergyMetersType == "AMC")
                 {
                     SystemParas.Data2 = JsonSerializerHelper.LoadFromJsonFile<List<AMC_DataStructure>>(filePath);
+                    if (SystemParas.Data2 == null)
+                    {
+                        MessageBox.Show("不是该类型仪表数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                    else if (SystemParas.Data2.Count == 0)
+                    {
+                        MessageBox.Show("无数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
                     foreach (var dataStructure in SystemParas.Data2)
                     {
                         if (dataStructure is AMC_DataStructure data)
                         {
                             DGV2.Rows.Add(
-                                dataStructure.Time.ToString(), 
+                                dataStructure.Time.ToString(),
                                 dataStructure.PhaseVoltageA.ToString(),
                                 dataStructure.PhaseVoltageB.ToString(),
                                 dataStructure.PhaseVoltageC.ToString(),
@@ -287,6 +306,7 @@ namespace ReadDataSoftware
         private void btn_Set_Click(object sender, EventArgs e)
         {
             Form_SystemSet form_SystemSet = new Form_SystemSet();
+            form_SystemSet.SettingsSaved += SettingsForm_SettingsSaved;
             form_SystemSet.ShowDialog();
             form_SystemSet.Dispose();
         }
@@ -425,6 +445,13 @@ namespace ReadDataSoftware
                 writer.WriteLine($"{DateTime.Now}: {message}");
             }
         }
+        private void SettingsForm_SettingsSaved(object sender, EventArgs e)
+        {
+            //this .Close();
+            //// 保存设置后重启应用程序
+            //Application.Restart();
+            //Environment.Exit(0);
+        }
         #endregion
 
         #region 曲线绘制相关
@@ -484,6 +511,14 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void Timer_Tick(object sender, EventArgs e)
         {
+            if (Working && SystemParas.EnergyMetersType == "DJSF1352")
+            {
+                ScrollToBottom(DGV1);
+            }
+            else if (Working && SystemParas.EnergyMetersType == "AMC")
+            {
+                ScrollToBottom(DGV2);
+            }
             RefreshChart();
         }
         /// <summary>

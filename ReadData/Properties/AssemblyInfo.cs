@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("ReadData")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("智能电表数据读取软件")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ReadData")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-[assembly: AssemblyVersion("5.27.16.52")]
-[assembly: AssemblyFileVersion("5.27.16.52")]
+[assembly: AssemblyVersion("5.28.13.17")]
+[assembly: AssemblyFileVersion("5.28.13.17")]
