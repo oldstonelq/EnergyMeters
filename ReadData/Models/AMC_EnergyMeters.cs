@@ -85,7 +85,7 @@ namespace ReadData
         public void Open()
         {
             serialPort.Open();
-
+            GETDecimalPointTermination();
         }
         /// <summary>
         /// 关闭串口
@@ -166,9 +166,9 @@ namespace ReadData
         /// </summary>
         /// <param name="res"></param>
         /// <returns></returns>
-        private static List <byte> DataProcessing(byte[] res)
+        private static List <short> DataProcessing(byte[] res)
         {
-            List<byte> registerValues = new List<byte>();
+            List<short> registerValues = new List<short>();
             if (res.Length >= 2 && (res[1] & 0x80) != 0)
             {
                 // 处理异常响应数据
@@ -187,7 +187,7 @@ namespace ReadData
 
                 for (int i = 0; i < registerCount; i++)
                 {
-                    byte registerValue = (byte)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
                 return registerValues;
@@ -196,15 +196,14 @@ namespace ReadData
         /// <summary>
         /// 获取小数点位（地址23读2位）
         /// </summary>
-        private void GETDecimalPointTermination()
+        private  void GETDecimalPointTermination()
         {
-            var data = ReadData(1, 23, 2);
-            var DecimalPointTerminationList=DataProcessing(data);
-            if (DecimalPointTerminationList.Count > 0)
+            var DecimalPointTerminationList = ReadData(1, 23, 2);
+            if (DecimalPointTerminationList.Length > 0)
             {
-                U_DecimalPointTermination= DecimalPointTerminationList[0];
-                I_DecimalPointTermination = DecimalPointTerminationList[1];
-                PQ_DecimalPointTermination = DecimalPointTerminationList[2];
+                U_DecimalPointTermination = DecimalPointTerminationList[3];
+                I_DecimalPointTermination = DecimalPointTerminationList[4];
+                PQ_DecimalPointTermination = DecimalPointTerminationList[5];
             }
         }
         /// <summary>
@@ -213,16 +212,13 @@ namespace ReadData
         /// <returns></returns>
         public double[] ReadVoltage()
         {
-            var data = ReadData(1, 25, 6);
+            var data = ReadData(1, 37, 6);
             var res= DataProcessing(data);
-            double[] voltage = new double[res.Count / 2];
-            for (int i = 0; i < res.Count; i += 2)
+            double[] voltage = new double[res.Count];
+            for (int i = 0; i < res.Count; i ++)
             {
-                // 将两个字节组合成一个16位整数
-                short value = (short)((res[i] << 8) | res[i + 1]);
-                // 转换为double类型
-                voltage[i / 2] = value;
-                voltage[i / 2] = voltage[i / 2] * Math.Pow(10, U_DecimalPointTermination-4);
+                voltage[i] = res[i];
+                voltage[i] = voltage[i] * Math.Pow(10, U_DecimalPointTermination-4);
             }
             return voltage;
         }
@@ -237,14 +233,11 @@ namespace ReadData
         {
             var data = ReadData(1, 43, 3);
             var res = DataProcessing(data);
-            double[] current = new double[res.Count / 2];
-            for (int i = 0; i < res.Count; i += 2)
+            double[] current = new double[res.Count];
+            for (int i = 0; i < res.Count; i++)
             {
-                // 将两个字节组合成一个16位整数
-                short value = (short)((res[i] << 8) | res[i + 1]);
-                // 转换为double类型
-                current[i / 2] = value;
-                current[i / 2] = current[i / 2] * Math.Pow(10, I_DecimalPointTermination - 4);
+                current[i] = res[i];
+                current[i] = current[i] * Math.Pow(10, U_DecimalPointTermination - 4);
             }
             return current;
         }
@@ -257,14 +250,11 @@ namespace ReadData
         {
             var data = ReadData(1, 46, 8);
             var res = DataProcessing(data);
-            double[] power = new double[res.Count / 2];
-            for (int i = 0; i < res.Count; i += 2)
+            double[] power = new double[res.Count];
+            for (int i = 0; i < res.Count; i++)
             {
-                // 将两个字节组合成一个16位整数
-                short value = (short)((res[i] << 8) | res[i + 1]);
-                // 转换为double类型
-                power[i / 2] = value;
-                power[i / 2] = power[i / 2] * Math.Pow(10, PQ_DecimalPointTermination - 4);
+                power[i] = res[i];
+                power[i] = power[i] * Math.Pow(10, U_DecimalPointTermination - 4);
             }
             return power;
         }

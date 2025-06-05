@@ -58,7 +58,7 @@ namespace ReadDataSoftware
         /// 电表类型
         /// </summary>
         public static string EnergyMetersType= "DJSF1352";
-
+       
         /// <summary>
         /// 初始化系统参数
         /// </summary>

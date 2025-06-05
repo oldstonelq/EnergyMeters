@@ -47,15 +47,17 @@ namespace ReadDataSoftware
             {
                 DGV1.Visible = false;
                 DGV1.Enabled = false;
-                
+                tableLayoutPanel1.ColumnStyles[0] = new ColumnStyle(SizeType.Percent, 99.46f);  // 第一列，占总宽度的 50%
+                tableLayoutPanel1.ColumnStyles[1] = new ColumnStyle(SizeType.Percent, 0.54f);  // 第二列，占总宽度的 30%
+                tableLayoutPanel1.ColumnStyles[2] = new ColumnStyle(SizeType.Absolute, 250f);  // 第三列，占总宽度的250像素
             }
             else
             { 
                 DGV2.Visible = false;
                 DGV2.Enabled = false;
             }
-            this.Width = Convert.ToInt32(Screen.PrimaryScreen.WorkingArea.Width * 0.8);
-            this.Height = Convert.ToInt32(Screen.PrimaryScreen.WorkingArea.Height * 0.8);
+            //this.Width = Convert.ToInt32(Screen.PrimaryScreen.WorkingArea.Width * 0.8);
+            //this.Height = Convert.ToInt32(Screen.PrimaryScreen.WorkingArea.Height * 0.8);
             // 创建标题
             Title title = new Title("电压、电流和功率随时间变化");
             title.Font = new Font("Microsoft YaHei", 14F, FontStyle.Bold);
@@ -80,7 +82,7 @@ namespace ReadDataSoftware
                 _stopEvent.Reset(); // 重置 _stopEvent
                 new Task(() => { Thread_AutoWork(); }).Start();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 MessageBox.Show("设备无法连接，请检查串口是否打开或设备是否连接正常！");
             }
@@ -119,8 +121,8 @@ namespace ReadDataSoftware
                     }
                     else if (DGV2.RowCount > 0 && SystemParas.EnergyMetersType == "AMC")
                     {
-                        string startTime = DGV2.Rows[0].Cells[Column_Time.Name].Value.ToString();
-                        string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
+                        string startTime = DGV2.Rows[0].Cells[Column_RealTime.Name].Value.ToString();
+                        string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_RealTime.Name].Value.ToString();
                         string savefileName = SystemParas.AMC_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
                         if (SystemParas.Data2.Count > 0)
                         {
@@ -200,10 +202,10 @@ namespace ReadDataSoftware
             openFileDialog.Filter = "JSON 文件 (*.json)|*.json";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                DGV1.Rows.Clear();
                 string filePath = openFileDialog.FileName;
                 if (SystemParas.EnergyMetersType == "DJSF1352")
                 {
+                    DGV1.Rows.Clear();
                     SystemParas.Data1 = JsonSerializerHelper.LoadFromJsonFile<List<DJSF1352_DataStructure>>(filePath);
                     if (SystemParas.Data1 == null)
                     {
@@ -225,6 +227,7 @@ namespace ReadDataSoftware
                 }
                 else if (SystemParas.EnergyMetersType == "AMC")
                 {
+                    DGV2.Rows.Clear();
                     SystemParas.Data2 = JsonSerializerHelper.LoadFromJsonFile<List<AMC_DataStructure>>(filePath);
                     if (SystemParas.Data2 == null)
                     {
@@ -391,25 +394,28 @@ namespace ReadDataSoftware
             }
             else if (SystemParas.EnergyMetersType == "AMC")
             {
-                DGV2.Rows.Add();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Voltage.Name].Value = Voltage[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Current.Name].Value = Voltage[1].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Voltage[2].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Voltage[3].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Voltage[4].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Voltage[5].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Current[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Current[1].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Current[2].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
-                DGV2.Rows[DGV1.RowCount - 1].Cells[Column_Power.Name].Value = Power[0].ToString();
+                this.Invoke(new Action(() =>
+                {
+                    DGV2.Rows.Add();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_RealTime.Name].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseVoltageA.Name].Value = Voltage[0].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseVoltageB.Name].Value = Voltage[1].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseVoltageC.Name].Value = Voltage[2].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_LineVoltageUAB.Name].Value = Voltage[3].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_LineVoltageUBC.Name].Value = Voltage[4].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_LineVoltageUAC.Name].Value = Voltage[5].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_CurrentA.Name].Value = Current[0].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_CurrentB.Name].Value = Current[1].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_CurrentC.Name].Value = Current[2].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_ActivePowerOfPhaseA.Name].Value = Power[0].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_ActivePowerOfPhaseB.Name].Value = Power[1].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_ActivePowerOfPhaseC.Name].Value = Power[2].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_TotalActivePower.Name].Value = Power[3].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseReactivePowerA.Name].Value = Power[4].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseReactivePowerB.Name].Value = Power[5].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_PhaseReactivePowerC.Name].Value = Power[6].ToString();
+                    DGV2.Rows[DGV2.RowCount - 1].Cells[Column_TotalReactivePower.Name].Value = Power[7].ToString();
+                }));
             }
         }
         /// <summary>
@@ -536,7 +542,7 @@ namespace ReadDataSoftware
         /// </summary>
         private void RefreshChart()
         {
-            if (SystemParas.Data1.Count<=0)
+            if (SystemParas.Data1 == null||SystemParas.Data1.Count<=0)
             {
                 return;
             }

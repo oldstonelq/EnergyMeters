@@ -50,19 +50,20 @@ public static class JsonSerializerHelper
                 Console.WriteLine($"文件不存在: {filePath}");
                 return default;
             }
+           
             string jsonString = File.ReadAllText(filePath);
             // 获取T的类型
             Type type = typeof(T);
             // 检查T是否为泛型类型（如List<T>）
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            if (jsonString.Contains("time") && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
                 // 获取List<>中的泛型类型参数（即MyClass）
                 Type itemType = type.GetGenericArguments()[0];
                 //Console.WriteLine($"List中的类型是: {itemType.Name}");
                 foreach (PropertyInfo sp in itemType.GetProperties())
                 {
-                    if (sp.Name == "time") continue;
-                    if(!jsonString.Contains (sp.Name.ToLower()))
+                    if (sp.Name.ToLower() == "time") continue;
+                    if(!jsonString.Contains (LowercaseFirstLetter(sp.Name)))
                     {
                         throw new Exception();
                     }
@@ -90,5 +91,14 @@ public static class JsonSerializerHelper
     public static T FromJsonString<T>(string json)
     {
         return JsonConvert.DeserializeObject<T>(json, _settings);
+    }
+
+    public static string LowercaseFirstLetter(string s)
+    {
+        if (string.IsNullOrEmpty(s))
+        {
+            return s;
+        }
+        return char.ToLower(s[0]) + s.Substring(1);
     }
 }    

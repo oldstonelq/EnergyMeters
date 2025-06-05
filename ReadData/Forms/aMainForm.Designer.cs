@@ -46,8 +46,13 @@
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.panel4 = new System.Windows.Forms.Panel();
             this.DGV2 = new System.Windows.Forms.DataGridView();
+            this.DGV1 = new System.Windows.Forms.DataGridView();
+            this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.Column_RealTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_TotalActivePower = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseVoltageA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseVoltageB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseVoltageC = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -60,16 +65,11 @@
             this.Column_ActivePowerOfPhaseA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_ActivePowerOfPhaseB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_ActivePowerOfPhaseC = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_TotalActivePower = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseReactivePowerA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseReactivePowerB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_PhaseReactivePowerC = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column_TotalReactivePower = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DGV1 = new System.Windows.Forms.DataGridView();
-            this.Column_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Voltage = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Current = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Power = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -83,9 +83,9 @@
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 54.87603F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45.12397F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 235F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.75253F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.24747F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 250F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel2, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.panel3, 1, 0);
@@ -94,10 +94,10 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.52364F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 68.47636F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34.96063F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65.03937F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1446, 635);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1734, 635);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // panel1
@@ -106,9 +106,9 @@
             this.panel1.Controls.Add(this.btn_End);
             this.panel1.Controls.Add(this.btn_Start);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(1213, 3);
+            this.panel1.Location = new System.Drawing.Point(1486, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(230, 194);
+            this.panel1.Size = new System.Drawing.Size(245, 216);
             this.panel1.TabIndex = 4;
             // 
             // btn_End
@@ -140,9 +140,9 @@
             this.panel2.Controls.Add(this.btn_ReadData);
             this.panel2.Controls.Add(this.btn_ExportCsv);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(1213, 203);
+            this.panel2.Location = new System.Drawing.Point(1486, 225);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(230, 429);
+            this.panel2.Size = new System.Drawing.Size(245, 407);
             this.panel2.TabIndex = 2;
             // 
             // btn_Set
@@ -190,10 +190,10 @@
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.chart1);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(667, 3);
+            this.panel3.Location = new System.Drawing.Point(726, 3);
             this.panel3.Name = "panel3";
             this.tableLayoutPanel1.SetRowSpan(this.panel3, 2);
-            this.panel3.Size = new System.Drawing.Size(540, 629);
+            this.panel3.Size = new System.Drawing.Size(754, 629);
             this.panel3.TabIndex = 5;
             // 
             // chart1
@@ -209,19 +209,19 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(538, 627);
+            this.chart1.Size = new System.Drawing.Size(752, 627);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
             // 
             // panel4
             // 
-            this.panel4.Controls.Add(this.DGV2);
             this.panel4.Controls.Add(this.DGV1);
+            this.panel4.Controls.Add(this.DGV2);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(3, 3);
             this.panel4.Name = "panel4";
             this.tableLayoutPanel1.SetRowSpan(this.panel4, 2);
-            this.panel4.Size = new System.Drawing.Size(658, 629);
+            this.panel4.Size = new System.Drawing.Size(717, 629);
             this.panel4.TabIndex = 6;
             // 
             // DGV2
@@ -231,12 +231,10 @@
             this.DGV2.AllowUserToResizeColumns = false;
             this.DGV2.AllowUserToResizeRows = false;
             this.DGV2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.DGV2.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.DGV2.BackgroundColor = System.Drawing.Color.Gainsboro;
             this.DGV2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DGV2.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column_RealTime,
-            this.Column_TotalActivePower,
             this.Column_PhaseVoltageA,
             this.Column_PhaseVoltageB,
             this.Column_PhaseVoltageC,
@@ -249,6 +247,7 @@
             this.Column_ActivePowerOfPhaseA,
             this.Column_ActivePowerOfPhaseB,
             this.Column_ActivePowerOfPhaseC,
+            this.Column_TotalActivePower,
             this.Column_PhaseReactivePowerA,
             this.Column_PhaseReactivePowerB,
             this.Column_PhaseReactivePowerC,
@@ -258,134 +257,8 @@
             this.DGV2.Name = "DGV2";
             this.DGV2.RowHeadersVisible = false;
             this.DGV2.RowTemplate.Height = 23;
-            this.DGV2.Size = new System.Drawing.Size(658, 629);
+            this.DGV2.Size = new System.Drawing.Size(717, 629);
             this.DGV2.TabIndex = 8;
-            // 
-            // Column_RealTime
-            // 
-            this.Column_RealTime.HeaderText = "时间";
-            this.Column_RealTime.Name = "Column_RealTime";
-            this.Column_RealTime.ReadOnly = true;
-            this.Column_RealTime.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_TotalActivePower
-            // 
-            this.Column_TotalActivePower.HeaderText = "总有功功率";
-            this.Column_TotalActivePower.Name = "Column_TotalActivePower";
-            this.Column_TotalActivePower.ReadOnly = true;
-            this.Column_TotalActivePower.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseVoltageA
-            // 
-            this.Column_PhaseVoltageA.HeaderText = "相电压UA";
-            this.Column_PhaseVoltageA.Name = "Column_PhaseVoltageA";
-            this.Column_PhaseVoltageA.ReadOnly = true;
-            this.Column_PhaseVoltageA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseVoltageB
-            // 
-            this.Column_PhaseVoltageB.HeaderText = "相电压UB";
-            this.Column_PhaseVoltageB.Name = "Column_PhaseVoltageB";
-            this.Column_PhaseVoltageB.ReadOnly = true;
-            this.Column_PhaseVoltageB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseVoltageC
-            // 
-            this.Column_PhaseVoltageC.HeaderText = "相电压UC";
-            this.Column_PhaseVoltageC.Name = "Column_PhaseVoltageC";
-            this.Column_PhaseVoltageC.ReadOnly = true;
-            this.Column_PhaseVoltageC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_LineVoltageUAB
-            // 
-            this.Column_LineVoltageUAB.HeaderText = "线电压UAB";
-            this.Column_LineVoltageUAB.Name = "Column_LineVoltageUAB";
-            this.Column_LineVoltageUAB.ReadOnly = true;
-            this.Column_LineVoltageUAB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_LineVoltageUBC
-            // 
-            this.Column_LineVoltageUBC.HeaderText = "线电压UBC";
-            this.Column_LineVoltageUBC.Name = "Column_LineVoltageUBC";
-            this.Column_LineVoltageUBC.ReadOnly = true;
-            this.Column_LineVoltageUBC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_LineVoltageUAC
-            // 
-            this.Column_LineVoltageUAC.HeaderText = "线电压UAC";
-            this.Column_LineVoltageUAC.Name = "Column_LineVoltageUAC";
-            this.Column_LineVoltageUAC.ReadOnly = true;
-            this.Column_LineVoltageUAC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_CurrentA
-            // 
-            this.Column_CurrentA.HeaderText = "电流IA";
-            this.Column_CurrentA.Name = "Column_CurrentA";
-            this.Column_CurrentA.ReadOnly = true;
-            this.Column_CurrentA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_CurrentB
-            // 
-            this.Column_CurrentB.HeaderText = "电流IB";
-            this.Column_CurrentB.Name = "Column_CurrentB";
-            this.Column_CurrentB.ReadOnly = true;
-            this.Column_CurrentB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_CurrentC
-            // 
-            this.Column_CurrentC.HeaderText = "电流IC";
-            this.Column_CurrentC.Name = "Column_CurrentC";
-            this.Column_CurrentC.ReadOnly = true;
-            this.Column_CurrentC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_ActivePowerOfPhaseA
-            // 
-            this.Column_ActivePowerOfPhaseA.HeaderText = "A相有功功率";
-            this.Column_ActivePowerOfPhaseA.Name = "Column_ActivePowerOfPhaseA";
-            this.Column_ActivePowerOfPhaseA.ReadOnly = true;
-            this.Column_ActivePowerOfPhaseA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_ActivePowerOfPhaseB
-            // 
-            this.Column_ActivePowerOfPhaseB.HeaderText = "B相有功功率";
-            this.Column_ActivePowerOfPhaseB.Name = "Column_ActivePowerOfPhaseB";
-            this.Column_ActivePowerOfPhaseB.ReadOnly = true;
-            this.Column_ActivePowerOfPhaseB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_ActivePowerOfPhaseC
-            // 
-            this.Column_ActivePowerOfPhaseC.HeaderText = "C相有功功率";
-            this.Column_ActivePowerOfPhaseC.Name = "Column_ActivePowerOfPhaseC";
-            this.Column_ActivePowerOfPhaseC.ReadOnly = true;
-            this.Column_ActivePowerOfPhaseC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseReactivePowerA
-            // 
-            this.Column_PhaseReactivePowerA.HeaderText = "A相无功功率";
-            this.Column_PhaseReactivePowerA.Name = "Column_PhaseReactivePowerA";
-            this.Column_PhaseReactivePowerA.ReadOnly = true;
-            this.Column_PhaseReactivePowerA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseReactivePowerB
-            // 
-            this.Column_PhaseReactivePowerB.HeaderText = "B相无功功率";
-            this.Column_PhaseReactivePowerB.Name = "Column_PhaseReactivePowerB";
-            this.Column_PhaseReactivePowerB.ReadOnly = true;
-            this.Column_PhaseReactivePowerB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_PhaseReactivePowerC
-            // 
-            this.Column_PhaseReactivePowerC.HeaderText = "C相无功功率";
-            this.Column_PhaseReactivePowerC.Name = "Column_PhaseReactivePowerC";
-            this.Column_PhaseReactivePowerC.ReadOnly = true;
-            this.Column_PhaseReactivePowerC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // Column_TotalReactivePower
-            // 
-            this.Column_TotalReactivePower.HeaderText = "总无功功率";
-            this.Column_TotalReactivePower.Name = "Column_TotalReactivePower";
-            this.Column_TotalReactivePower.ReadOnly = true;
-            this.Column_TotalReactivePower.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // DGV1
             // 
@@ -406,7 +279,7 @@
             this.DGV1.Name = "DGV1";
             this.DGV1.RowHeadersVisible = false;
             this.DGV1.RowTemplate.Height = 23;
-            this.DGV1.Size = new System.Drawing.Size(658, 629);
+            this.DGV1.Size = new System.Drawing.Size(717, 629);
             this.DGV1.TabIndex = 1;
             // 
             // Column_Time
@@ -443,11 +316,173 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.Timer_Tick);
             // 
+            // Column_RealTime
+            // 
+            this.Column_RealTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_RealTime.FillWeight = 191.8782F;
+            this.Column_RealTime.HeaderText = "时间";
+            this.Column_RealTime.Name = "Column_RealTime";
+            this.Column_RealTime.ReadOnly = true;
+            this.Column_RealTime.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseVoltageA
+            // 
+            this.Column_PhaseVoltageA.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseVoltageA.FillWeight = 94.59541F;
+            this.Column_PhaseVoltageA.HeaderText = "相电压UA  （KV）";
+            this.Column_PhaseVoltageA.Name = "Column_PhaseVoltageA";
+            this.Column_PhaseVoltageA.ReadOnly = true;
+            this.Column_PhaseVoltageA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseVoltageB
+            // 
+            this.Column_PhaseVoltageB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseVoltageB.FillWeight = 94.59541F;
+            this.Column_PhaseVoltageB.HeaderText = "相电压UB  （KV）";
+            this.Column_PhaseVoltageB.Name = "Column_PhaseVoltageB";
+            this.Column_PhaseVoltageB.ReadOnly = true;
+            this.Column_PhaseVoltageB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseVoltageC
+            // 
+            this.Column_PhaseVoltageC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseVoltageC.FillWeight = 94.59541F;
+            this.Column_PhaseVoltageC.HeaderText = "相电压UC  （KV）";
+            this.Column_PhaseVoltageC.Name = "Column_PhaseVoltageC";
+            this.Column_PhaseVoltageC.ReadOnly = true;
+            this.Column_PhaseVoltageC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_LineVoltageUAB
+            // 
+            this.Column_LineVoltageUAB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_LineVoltageUAB.FillWeight = 94.59541F;
+            this.Column_LineVoltageUAB.HeaderText = "线电压UAB （KV）";
+            this.Column_LineVoltageUAB.Name = "Column_LineVoltageUAB";
+            this.Column_LineVoltageUAB.ReadOnly = true;
+            this.Column_LineVoltageUAB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_LineVoltageUBC
+            // 
+            this.Column_LineVoltageUBC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_LineVoltageUBC.FillWeight = 94.59541F;
+            this.Column_LineVoltageUBC.HeaderText = "线电压UBC （KV）";
+            this.Column_LineVoltageUBC.Name = "Column_LineVoltageUBC";
+            this.Column_LineVoltageUBC.ReadOnly = true;
+            this.Column_LineVoltageUBC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_LineVoltageUAC
+            // 
+            this.Column_LineVoltageUAC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_LineVoltageUAC.FillWeight = 94.59541F;
+            this.Column_LineVoltageUAC.HeaderText = "线电压UAC （KV）";
+            this.Column_LineVoltageUAC.Name = "Column_LineVoltageUAC";
+            this.Column_LineVoltageUAC.ReadOnly = true;
+            this.Column_LineVoltageUAC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_CurrentA
+            // 
+            this.Column_CurrentA.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_CurrentA.FillWeight = 94.59541F;
+            this.Column_CurrentA.HeaderText = "电流IA";
+            this.Column_CurrentA.Name = "Column_CurrentA";
+            this.Column_CurrentA.ReadOnly = true;
+            this.Column_CurrentA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_CurrentB
+            // 
+            this.Column_CurrentB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_CurrentB.FillWeight = 94.59541F;
+            this.Column_CurrentB.HeaderText = "电流IB";
+            this.Column_CurrentB.Name = "Column_CurrentB";
+            this.Column_CurrentB.ReadOnly = true;
+            this.Column_CurrentB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_CurrentC
+            // 
+            this.Column_CurrentC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_CurrentC.FillWeight = 94.59541F;
+            this.Column_CurrentC.HeaderText = "电流IC";
+            this.Column_CurrentC.Name = "Column_CurrentC";
+            this.Column_CurrentC.ReadOnly = true;
+            this.Column_CurrentC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_ActivePowerOfPhaseA
+            // 
+            this.Column_ActivePowerOfPhaseA.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_ActivePowerOfPhaseA.FillWeight = 94.59541F;
+            this.Column_ActivePowerOfPhaseA.HeaderText = "A相有功功率";
+            this.Column_ActivePowerOfPhaseA.Name = "Column_ActivePowerOfPhaseA";
+            this.Column_ActivePowerOfPhaseA.ReadOnly = true;
+            this.Column_ActivePowerOfPhaseA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_ActivePowerOfPhaseB
+            // 
+            this.Column_ActivePowerOfPhaseB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_ActivePowerOfPhaseB.FillWeight = 94.59541F;
+            this.Column_ActivePowerOfPhaseB.HeaderText = "B相有功功率";
+            this.Column_ActivePowerOfPhaseB.Name = "Column_ActivePowerOfPhaseB";
+            this.Column_ActivePowerOfPhaseB.ReadOnly = true;
+            this.Column_ActivePowerOfPhaseB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_ActivePowerOfPhaseC
+            // 
+            this.Column_ActivePowerOfPhaseC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_ActivePowerOfPhaseC.FillWeight = 94.59541F;
+            this.Column_ActivePowerOfPhaseC.HeaderText = "C相有功功率";
+            this.Column_ActivePowerOfPhaseC.Name = "Column_ActivePowerOfPhaseC";
+            this.Column_ActivePowerOfPhaseC.ReadOnly = true;
+            this.Column_ActivePowerOfPhaseC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_TotalActivePower
+            // 
+            this.Column_TotalActivePower.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_TotalActivePower.FillWeight = 94.59541F;
+            this.Column_TotalActivePower.HeaderText = "总有功功率";
+            this.Column_TotalActivePower.Name = "Column_TotalActivePower";
+            this.Column_TotalActivePower.ReadOnly = true;
+            this.Column_TotalActivePower.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseReactivePowerA
+            // 
+            this.Column_PhaseReactivePowerA.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseReactivePowerA.FillWeight = 94.59541F;
+            this.Column_PhaseReactivePowerA.HeaderText = "A相无功功率";
+            this.Column_PhaseReactivePowerA.Name = "Column_PhaseReactivePowerA";
+            this.Column_PhaseReactivePowerA.ReadOnly = true;
+            this.Column_PhaseReactivePowerA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseReactivePowerB
+            // 
+            this.Column_PhaseReactivePowerB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseReactivePowerB.FillWeight = 94.59541F;
+            this.Column_PhaseReactivePowerB.HeaderText = "B相无功功率";
+            this.Column_PhaseReactivePowerB.Name = "Column_PhaseReactivePowerB";
+            this.Column_PhaseReactivePowerB.ReadOnly = true;
+            this.Column_PhaseReactivePowerB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_PhaseReactivePowerC
+            // 
+            this.Column_PhaseReactivePowerC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_PhaseReactivePowerC.FillWeight = 94.59541F;
+            this.Column_PhaseReactivePowerC.HeaderText = "C相无功功率";
+            this.Column_PhaseReactivePowerC.Name = "Column_PhaseReactivePowerC";
+            this.Column_PhaseReactivePowerC.ReadOnly = true;
+            this.Column_PhaseReactivePowerC.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Column_TotalReactivePower
+            // 
+            this.Column_TotalReactivePower.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column_TotalReactivePower.FillWeight = 94.59541F;
+            this.Column_TotalReactivePower.HeaderText = "总无功功率";
+            this.Column_TotalReactivePower.Name = "Column_TotalReactivePower";
+            this.Column_TotalReactivePower.ReadOnly = true;
+            this.Column_TotalReactivePower.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
             // aMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1446, 635);
+            this.ClientSize = new System.Drawing.Size(1734, 635);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -473,7 +508,6 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btn_End;
@@ -490,8 +524,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Voltage;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Current;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_Power;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_RealTime;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column_TotalActivePower;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseVoltageA;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseVoltageB;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseVoltageC;
@@ -504,6 +538,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_ActivePowerOfPhaseA;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_ActivePowerOfPhaseB;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_ActivePowerOfPhaseC;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column_TotalActivePower;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseReactivePowerA;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseReactivePowerB;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_PhaseReactivePowerC;
