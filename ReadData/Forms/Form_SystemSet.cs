@@ -11,7 +11,7 @@ using System.Text;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace ReadData
+namespace ReadDataSoftware
 {
     public partial class Form_SystemSet : Form
     {
@@ -52,7 +52,7 @@ namespace ReadData
             cmb_Parity.Text = SystemParas.SerialPortSettings.Parity.ToString();
 
             //电表型号
-            string[] meterType = { "DJSF1352", "AMC" };
+            string[] meterType = { "DJSF1352", "AMC", "ADL400" };
             cmb_EnergyMetersType.Items.AddRange(meterType);
             cmb_EnergyMetersType.Text = SystemParas.EnergyMetersType;
         }
@@ -81,8 +81,8 @@ namespace ReadData
             {
                 SystemParas.energyMeters.Close();
             }
-            SystemParas.Load();
-            MessageBox.Show("保存成功");
+            ///SystemParas.Load();
+            MessageBox.Show("保存成功，请重启软件生效");
             //获取当前程序的路径
             //string exePath = Process.GetCurrentProcess().MainModule.FileName;
 

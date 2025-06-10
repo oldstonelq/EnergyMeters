@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ReadData
+namespace ReadDataSoftware
 {
+    /// <summary>
+    /// AMC电表和ADL电表数据类
+    /// </summary>
     public class AMC_DataStructure
     {
         /// <summary>

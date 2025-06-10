@@ -1,4 +1,4 @@
-﻿namespace ReadData
+﻿namespace ReadDataSoftware
 {
     partial class Form_SystemSet
     {

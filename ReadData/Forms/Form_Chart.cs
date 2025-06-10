@@ -13,7 +13,7 @@ using ChartArea = System.Windows.Forms.DataVisualization.Charting.ChartArea;
 using Font = System.Drawing.Font;
 using Series = System.Windows.Forms.DataVisualization.Charting.Series;
 
-namespace ReadData
+namespace ReadDataSoftware
 {
     public partial class Form_Chart : Form
     {

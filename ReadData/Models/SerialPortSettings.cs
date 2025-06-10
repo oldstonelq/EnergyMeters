@@ -2,6 +2,9 @@
 
 namespace ReadDataSoftware
 {
+    /// <summary>
+    /// 串口设置类
+    /// </summary>
     public class SerialPortSettings
     {
         /// <summary>

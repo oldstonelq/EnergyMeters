@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ReadData
+namespace ReadDataSoftware
 {
     /// <summary>
-    /// 数据结构
+    /// DJSF1352电表数据类
     /// </summary>
     public  class DJSF1352_DataStructure
     {

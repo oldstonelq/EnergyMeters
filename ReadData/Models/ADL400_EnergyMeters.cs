@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -8,9 +9,9 @@ using static ReadDataSoftware.Enums;
 namespace ReadDataSoftware
 {
     /// <summary>
-    /// AMC系列电表
+    /// ADL电表
     /// </summary>
-    public class AMC_EnergyMeters: EnergyMeters
+    public  class ADL400_EnergyMeters : EnergyMeters
     {
         /// <summary>
         /// 串口实例
@@ -23,25 +24,13 @@ namespace ReadDataSoftware
         {
             get { return serialPort.IsOpen; }
         }
-        /// <summary>
-        /// 小数点U(DPT)
-        /// </summary>
-        private double U_DecimalPointTermination;
-        /// <summary>
-        /// 小数点I(DCT)
-        /// </summary>
-        private double I_DecimalPointTermination;
-        /// <summary>
-        /// 小数点PQ(DPQ)
-        /// </summary>
-        private double PQ_DecimalPointTermination;
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="portName">串口名称，如"COM1"</param>
         /// <param name="baudRate">波特率，如9600</param>
-        public AMC_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        public ADL400_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
         {
             serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
         }
@@ -51,7 +40,7 @@ namespace ReadDataSoftware
         public void Open()
         {
             serialPort.Open();
-            GETDecimalPointTermination();
+
         }
         /// <summary>
         /// 关闭串口
@@ -121,7 +110,7 @@ namespace ReadDataSoftware
         {
             byte[] request = BuildRequest(slaveAddress, ModbusRtuFunctionCode.ReadHoldingRegisters, startAddress, quantity);
             serialPort.Write(request, 0, request.Length);
-            System.Threading.Thread.Sleep(100); // 等待响应
+            System.Threading.Thread.Sleep(300); // 等待响应
             int bytesToRead = serialPort.BytesToRead;
             byte[] response = new byte[bytesToRead];
             serialPort.Read(response, 0, bytesToRead);
@@ -130,120 +119,117 @@ namespace ReadDataSoftware
         /// <summary>
         /// 处理数据
         /// </summary>
-        /// <param name="res"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        private static List <short> DataProcessing(byte[] res)
+        private double[] DataProcessing(byte[] data)
         {
-            List<short> registerValues = new List<short>();
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
+            if (data.Length >= 2 && (data[1] & 0x80) != 0)
             {
                 // 处理异常响应数据
-                return registerValues;
+                return new double[] { 0 };
             }
-            else if (res.Length < 2)
+            else if (data.Length < 2)
             {
                 //数据长度不足
-                return registerValues;
+                return new double[] { 0 };
             }
             else
             {
                 // 处理正常响应数据
-                int byteCount = res[2];
+                int byteCount = data[2];
                 int registerCount = byteCount / 2;
-
+                List<double> registerValues = new List<double>();
                 for (int i = 0; i < registerCount; i++)
                 {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
+                    double registerValue = (double)((data[3 + i * 2] << 8) | data[4 + i * 2]);
                     registerValues.Add(registerValue);
                 }
-                return registerValues;
+                return registerValues.ToArray ();
             }
         }
         /// <summary>
-        /// 获取小数点位（地址23读2位）
-        /// </summary>
-        private  void GETDecimalPointTermination()
-        {
-            var DecimalPointTerminationList = ReadData(1, 23, 2);
-            if (DecimalPointTerminationList.Length > 0)
-            {
-                U_DecimalPointTermination = DecimalPointTerminationList[3];
-                I_DecimalPointTermination = DecimalPointTerminationList[4];
-                PQ_DecimalPointTermination = DecimalPointTerminationList[5];
-            }
-        }
-        /// <summary>
-        /// 读电压（地址25读12位）
+        /// 读直流电压值（地址97读三位,120读三位 地址120 读三位）
         /// </summary>
         /// <returns></returns>
         public double[] ReadVoltage()
         {
-            var data = ReadData(1, 37, 6);
-            var res= DataProcessing(data);
-            double[] voltage = new double[res.Count];
-            if (res.Count ==6)
+            var res1 = ReadData(177, 97, 3);///相电压
+            var res2=ReadData(177, 120, 3);//线电压
+            var res3 = ConcatenateArrays(DataProcessing(res1), DataProcessing(res2));
+            if (res3.Length == 6)
             {
-                for (int i = 0; i < res.Count; i++)
+                for (int i = 0; i < res3.Length; i++)
                 {
-                    voltage[i] = res[i];
-                    voltage[i] = voltage[i] * Math.Pow(10, U_DecimalPointTermination - 4);
+                    res3[i] = res3[i] / 10;
                 }
-                return voltage;
+                return res3;
             }
             else
-            {
-                return new double[] { 0 ,0,0,0,0,0 };
+            { 
+              return new double[] { 0,0,0,0,0,0 };
             }
         }
-        
-
         /// <summary>
-        /// 读电流值（地址2B读3位）
+        /// 读直流电流值（地址100读三位）
         /// </summary>
         /// <returns></returns>
 
         public double[] ReadCurrent()
         {
-            var data = ReadData(1, 43, 3);
-            var res = DataProcessing(data);
-            double[] current = new double[res.Count];
-            if (res.Count == 3)
+            //读A相电流
+            ///查询数据帧01 03 0064 0001 C5 D5
+            //返回数据帧01 03 02 03 B2 38 C1
+            //处理如下：03 B2（十六进制） = 946（十进制）
+            //计算：946 * 0.01 = 9.46 单位：A
+            var res = ReadData(177, 100, 3);
+            var res1 = DataProcessing(res);
+            if (res1.Length == 3)
             {
-                for (int i = 0; i < res.Count; i++)
+                for (int i = 0; i < res1.Length; i++)
                 {
-                    current[i] = res[i];
-                    current[i] = current[i] * Math.Pow(10, I_DecimalPointTermination - 4);
+                    res1[i] = res1[i] / 100;
                 }
-                return current;
+                return res1;
             }
             else
             {
-                return new double[] { 0, 0, 0 };
+                return new double[] { 0,0,0 };
             }
         }
         /// <summary>
-        /// 读功率值（地址2E读8位）
+        /// 读功率值（地址356读八位）
         /// </summary>
         /// <returns></returns>
 
         public double[] ReadPower()
         {
-            var data = ReadData(1, 46, 8);
-            var res = DataProcessing(data);
-            double[] power = new double[res.Count];
-            if (res.Count == 8)
+            var res = ReadData(177, 356, 8);
+            var res1 = DataProcessing(res);
+            if (res1.Length == 8)
             {
-                for (int i = 0; i < res.Count; i++)
+                for (int i = 0; i < res1.Length; i++)
                 {
-                    power[i] = res[i];
-                    power[i] = power[i] * Math.Pow(10, PQ_DecimalPointTermination - 4);
+                    res1[i] = res1[i] / 1000;
                 }
-                return power;
+                return res1;
             }
             else
             {
-                return new double[] { 0, 0, 0, 0, 0, 0, 0, 0 }; 
+                return new double[] { 0,0,0,0,0,0,0,0 };
             }
+        }
+        /// <summary>
+        ///拼接两个double数组
+        /// </summary>
+        /// <param name="array1"></param>
+        /// <param name="array2"></param>
+        /// <returns></returns>
+        public static double[] ConcatenateArrays(double[] array1, double[] array2)
+        {
+            double[] result = new double[array1.Length + array2.Length];
+            Array.Copy(array1, 0, result, 0, array1.Length);
+            Array.Copy(array2, 0, result, array1.Length, array2.Length);
+            return result;
         }
     }
 }

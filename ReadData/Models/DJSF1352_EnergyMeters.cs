@@ -6,47 +6,11 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
+using static ReadDataSoftware.Enums;
 
 namespace ReadDataSoftware
 {
-    /// <summary>
-    /// ModbusRTU功能码枚举
-    /// </summary>
-    public enum ModbusRtuFunctionCode : byte
-    {
-        /// <summary>
-        /// 读取线圈状态
-        /// </summary>
-        ReadCoils = 0x01,
-        /// <summary>
-        /// 读取离散输入状态
-        /// </summary>
-        ReadDiscreteInputs = 0x02,
-        /// <summary>
-        /// 读取保持寄存器
-        /// </summary>
-        ReadHoldingRegisters = 0x03,
-        /// <summary>
-        /// 读取输入寄存器
-        /// </summary>
-        ReadInputRegisters = 0x04,
-        /// <summary>
-        /// 写单个线圈
-        /// </summary>
-        WriteSingleCoil = 0x05,
-        /// <summary>
-        /// 写单个寄存器
-        /// </summary>
-        WriteSingleRegister = 0x06,
-        /// <summary>
-        /// 写多个线圈
-        /// </summary>
-        WriteMultipleCoils = 0x0F,
-        /// <summary>
-        /// 写多个寄存器
-        /// </summary>
-        WriteMultipleRegisters = 0x10
-    }
+ 
     /// <summary>
     /// 电能表实例
     /// </summary>
@@ -206,7 +170,11 @@ namespace ReadDataSoftware
 
         public double[] ReadCurrent()
         {
-            var res=ReadData(1, 2, 2);
+            //查询报文 01 03 00 02 00 02 65 cb
+            //应答报文 01 03 04 03 b2 00 00 5a 50
+            //处理如下：03 b2(16 进制) = 946(10 进制电流数据) 00 00(16 进制) = 0(10 进制小数点数据）
+            //计算：946乘以10的（0- 3）次方 = 0.946；单位：安培（A）
+            var res =ReadData(1, 2, 2);
             return DataProcessing(res);
         }
         /// <summary>
@@ -218,76 +186,6 @@ namespace ReadDataSoftware
         {
             var res = ReadData(1, 8, 2);
             return DataProcessing(res);
-        }
-
-        /// <summary>
-        /// 读取报警状态（地址19读1位）
-        /// </summary>
-        /// <returns></returns>
-        public bool[] ReadAlarmStateToBoolArray()
-        {
-            var res = ReadData(1, 19, 1);
-            bool[] alarm = new bool[8];
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return alarm;
-            }
-            else if (res.Length < 2)
-            {
-                return alarm;
-            }
-            else
-            {
-                // 处理正常响应数据
-                int byteCount = res[2];
-                int registerCount = byteCount / 2;
-                List<short> registerValues = new List<short>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    alarm[7 - i] = (registerValues[0] & (1 << i)) != 0; // 使用位运算提取每一位
-                }
-                return alarm;
-            }
-        }
-
-        /// <summary>
-        /// 读取报警状态（地址19读1位）
-        /// </summary>
-        /// <returns></returns>
-        public string  ReadAlarmStateToString()
-        {
-            var res = ReadData(1, 19, 1);
-            bool[] alarm = new bool[8];
-            if (res.Length >= 2 && (res[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return "异常响应";
-            }
-            else if (res.Length < 2)
-            {
-                return "数据长度不足";
-            }
-            else
-            {
-                // 处理正常响应数据
-                int byteCount = res[2];
-                int registerCount = byteCount / 2;
-                List<short> registerValues = new List<short>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    short registerValue = (short)((res[3 + i * 2] << 8) | res[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                string binaryString = Convert.ToString(registerValues[0], 2).PadLeft(8, '0'); // 将 byte 转为二进制字符串，左边填充 0
-                return binaryString;
-            }
-            
         }
     }
 }

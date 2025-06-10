@@ -35,6 +35,10 @@ namespace ReadDataSoftware
         /// </summary>
         public static string AMC_DataFilePath = DataFile + @"\AMC";
         /// <summary>
+        /// ADL400数据文件
+        /// </summary>
+        public static string ADL400_DataFilePath = DataFile + @"\ADL400";
+        /// <summary>
         /// 日志文件
         /// </summary>
         public static string logFilePath = Application.StartupPath + @"\Logs\log.txt";
@@ -58,7 +62,7 @@ namespace ReadDataSoftware
         /// 电表类型
         /// </summary>
         public static string EnergyMetersType= "DJSF1352";
-       
+
         /// <summary>
         /// 初始化系统参数
         /// </summary>
@@ -79,12 +83,17 @@ namespace ReadDataSoftware
             {
                 Directory.CreateDirectory(AMC_DataFilePath);
             }
+            //// 检查数据文件夹是否存在
+            if (!Directory.Exists(ADL400_DataFilePath))
+            {
+                Directory.CreateDirectory(ADL400_DataFilePath);
+            }
             //// 检查系统文件是否存在
             if (!File.Exists(SystemFile))
             {
                 File.Create(SystemFile);
             }
-           //串口配置
+            //串口配置
             string portName = FileHelp.ReadIniKeys("SystemSet", "PortName", "", SystemFile);
             if (!string.IsNullOrEmpty(portName))
             {
@@ -124,9 +133,13 @@ namespace ReadDataSoftware
             {
                 energyMeters = new AMC_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
             }
-            else
+            else if (EnergyMetersType == "DJSF1352")
             {
                 energyMeters = new DJSF1352_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+            }
+            else if (EnergyMetersType == "ADL400")
+            {
+                energyMeters = new ADL400_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
             }
         }
     }
