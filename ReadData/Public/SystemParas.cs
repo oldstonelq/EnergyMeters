@@ -49,7 +49,7 @@ namespace ReadDataSoftware
         /// <summary>
         /// 电表实例
         /// </summary>
-        public static EnergyMeters energyMeters;
+        public static IEnergyMeters EnergyMeters;
         /// <summary>
         /// DJSF1352数据队列
         /// </summary>
@@ -91,7 +91,11 @@ namespace ReadDataSoftware
             //// 检查系统文件是否存在
             if (!File.Exists(SystemFile))
             {
-                File.Create(SystemFile);
+                // File.Create 返回的流必须释放，否则句柄会一直占用到 GC，
+                // 导致后续 WritePrivateProfileString 写配置失败。
+                using (File.Create(SystemFile))
+                {
+                }
             }
             //串口配置
             string portName = FileHelp.ReadIniKeys("SystemSet", "PortName", "", SystemFile);
@@ -115,13 +119,23 @@ namespace ReadDataSoftware
             string stopBits = FileHelp.ReadIniKeys("SystemSet", "StopBits", "", SystemFile);
             if (!string.IsNullOrEmpty(stopBits))
             {
-                SerialPortSettings.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
+                StopBits parsedStopBits;
+                if (Enum.TryParse(stopBits, out parsedStopBits))
+                {
+                    SerialPortSettings.StopBits = parsedStopBits;
+                }
             }
             //校验位设置
+            //旧版本的校验位下拉框误用了停止位的取值(One/OnePointFive)，配置文件里可能残留这类非法值，
+            //这里用 TryParse 容错，解析失败则保留默认值，避免启动时直接抛异常。
             string parity = FileHelp.ReadIniKeys("SystemSet", "Parity", "", SystemFile);
             if (!string.IsNullOrEmpty(parity))
             {
-                SerialPortSettings.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
+                Parity parsedParity;
+                if (Enum.TryParse(parity, out parsedParity))
+                {
+                    SerialPortSettings.Parity = parsedParity;
+                }
             }
             string energyMetersType = FileHelp.ReadIniKeys("SystemSet", "EnergyMetersType", "", SystemFile);
             if (!string.IsNullOrEmpty(energyMetersType))
@@ -131,15 +145,15 @@ namespace ReadDataSoftware
 
             if (EnergyMetersType == "AMC")
             {
-                energyMeters = new AMC_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+                EnergyMeters = new AMC_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
             }
             else if (EnergyMetersType == "DJSF1352")
             {
-                energyMeters = new DJSF1352_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+                EnergyMeters = new DJSF1352_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
             }
             else if (EnergyMetersType == "ADL400")
             {
-                energyMeters = new ADL400_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
+                EnergyMeters = new ADL400_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
             }
         }
     }

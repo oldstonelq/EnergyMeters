@@ -22,9 +22,24 @@ namespace ReadDataSoftware
         /// <summary>
         /// 是否正在读数
         /// </summary>
-        private bool Working;
+        private bool _isWorking;
         private const int MaxPoints = 1000;
-        private ManualResetEvent _stopEvent = new ManualResetEvent(false);
+        /// <summary>
+        /// 采集数据的读写锁，避免界面刷新与采集线程同时访问集合
+        /// </summary>
+        private readonly object _sampleLock = new object();
+        /// <summary>
+        /// 已绘制到图表的数据条数
+        /// </summary>
+        private int _chartedSampleCount;
+        /// <summary>
+        /// 读数线程的取消信号
+        /// </summary>
+        private CancellationTokenSource _cancellation;
+        /// <summary>
+        /// 读数任务，停止时用于等待线程真正退出
+        /// </summary>
+        private Task _workTask;
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -75,91 +90,66 @@ namespace ReadDataSoftware
         {
             try
             {
-                SystemParas.energyMeters.Open();
-                Working = true;
-                btn_Start.Enabled = false;
-                btn_End.Enabled = true;
-                _stopEvent.Reset(); // 重置 _stopEvent
-                new Task(() => { Thread_AutoWork(); }).Start();
+                SystemParas.EnergyMeters.Open();
             }
             catch (Exception ex)
             {
+                LogError("打开串口失败，异常原因为：" + ex.Message + ex.StackTrace);
                 MessageBox.Show("设备无法连接，请检查串口是否打开或设备是否连接正常！");
+                return;
             }
+
+            _isWorking = true;
+            btn_Start.Enabled = false;
+            btn_End.Enabled = true;
+            _cancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = _cancellation.Token;
+            _workTask = Task.Run(() => Thread_AutoWork(cancellationToken));
         }
         /// <summary>
         /// 手动停止
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_End_Click(object sender, EventArgs e)
+        private async void btn_End_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("确定停止并保存数据？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
+            if (result != DialogResult.Yes)
             {
-                try
+                return;
+            }
+
+            btn_End.Enabled = false;
+            _isWorking = false;
+            if (_cancellation != null)
+            {
+                _cancellation.Cancel();
+            }
+
+            try
+            {
+                // 必须等采集线程真正退出后再落盘，否则保存过程中集合仍会被追加。
+                if (_workTask != null)
                 {
-                    _stopEvent.Set(); // 通知数据记录线程停止
-                    Working = false;
-                    btn_Start.Enabled = true;
-                    btn_End.Enabled = false;
-                    _stopEvent.WaitOne(); // 等待数据记录线程完成
-                    if (DGV1.RowCount > 0 && SystemParas.EnergyMetersType == "DJSF1352")
-                    {
-                        string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
-                        string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
-                        string savefileName = SystemParas.DJSF1352_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
-                        if (SystemParas.Data1.Count > 0)
-                        {
-                            bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Data1, savefileName);
-                            if (success)
-                            {
-                                MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                SystemParas.Data1 = new List<DJSF1352_DataStructure>();
-                            }
-                        }
-                    }
-                    else if (DGV2.RowCount > 0 && SystemParas.EnergyMetersType == "AMC")
-                    {
-                        string startTime = DGV2.Rows[0].Cells[Column_RealTime.Name].Value.ToString();
-                        string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_RealTime.Name].Value.ToString();
-                        string savefileName = SystemParas.AMC_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
-                        if (SystemParas.Data2.Count > 0)
-                        {
-                            bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Data2, savefileName);
-                            if (success)
-                            {
-                                MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                SystemParas.Data2 = new List<AMC_DataStructure>();
-                            }
-                        }
-                    }
-                    else if(SystemParas.EnergyMetersType == "ADL400")
-                    {
-                        string startTime = DGV2.Rows[0].Cells[Column_RealTime.Name].Value.ToString();
-                        string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_RealTime.Name].Value.ToString();
-                        string savefileName = SystemParas.ADL400_DataFilePath + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至" + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
-                        if (SystemParas.Data2.Count > 0)
-                        {
-                            bool success = JsonSerializerHelper.SaveToJsonFile(SystemParas.Data2, savefileName);
-                            if (success)
-                            {
-                                MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                SystemParas.Data2 = new List<AMC_DataStructure>();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //MessageBox.Show(ex.Message);
-                    LogError("手动停止工作时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
+                    await _workTask;
                 }
             }
+            catch (Exception ex)
+            {
+                LogError("停止读数时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
+            }
+            finally
+            {
+                _workTask = null;
+                if (_cancellation != null)
+                {
+                    _cancellation.Dispose();
+                    _cancellation = null;
+                }
+            }
+
+            btn_Start.Enabled = true;
+            SaveCollectedData();
         }
         /// <summary>
         /// 导出表格数据
@@ -208,7 +198,7 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void btn_ReadData_Click(object sender, EventArgs e)
         {
-            if (Working)
+            if (_isWorking)
             {
                 MessageBox.Show ("工作中，不允许读取", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -220,65 +210,64 @@ namespace ReadDataSoftware
                 string filePath = openFileDialog.FileName;
                 if (SystemParas.EnergyMetersType == "DJSF1352")
                 {
-                    DGV1.Rows.Clear();
-                    SystemParas.Data1 = JsonSerializerHelper.LoadFromJsonFile<List<DJSF1352_DataStructure>>(filePath);
-                    if (SystemParas.Data1 == null)
+                    List<DJSF1352_DataStructure> loaded = JsonSerializerHelper.LoadFromJsonFile<List<DJSF1352_DataStructure>>(filePath);
+                    if (loaded == null)
                     {
                         MessageBox.Show("不是该类型仪表数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    else if (SystemParas.Data1.Count == 0)
+                    else if (loaded.Count == 0)
                     {
                         MessageBox.Show("无数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    foreach (var dataStructure in SystemParas.Data1)
+                    // 校验通过后再替换原有集合，避免读取失败时把当前数据置空。
+                    SystemParas.Data1 = loaded;
+                    DGV1.Rows.Clear();
+                    ResetChart();
+                    foreach (DJSF1352_DataStructure dataStructure in loaded)
                     {
-                        if (dataStructure is DJSF1352_DataStructure data)
-                        {
-                            DGV1.Rows.Add(dataStructure.Time.ToString(), dataStructure.Voltage.ToString(), dataStructure.Current.ToString(), dataStructure.Power.ToString());
-                        }
+                        DGV1.Rows.Add(dataStructure.Time.ToString(), dataStructure.Voltage.ToString(), dataStructure.Current.ToString(), dataStructure.Power.ToString());
                     }
                 }
                 else if (SystemParas.EnergyMetersType == "AMC" || SystemParas.EnergyMetersType == "ADL400")
                 {
-                    DGV2.Rows.Clear();
-                    SystemParas.Data2 = JsonSerializerHelper.LoadFromJsonFile<List<AMC_DataStructure>>(filePath);
-                    if (SystemParas.Data2 == null)
+                    List<AMC_DataStructure> loaded = JsonSerializerHelper.LoadFromJsonFile<List<AMC_DataStructure>>(filePath);
+                    if (loaded == null)
                     {
                         MessageBox.Show("不是该类型仪表数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    else if (SystemParas.Data2.Count == 0)
+                    else if (loaded.Count == 0)
                     {
                         MessageBox.Show("无数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    foreach (var dataStructure in SystemParas.Data2)
+                    SystemParas.Data2 = loaded;
+                    DGV2.Rows.Clear();
+                    ResetChart();
+                    foreach (AMC_DataStructure dataStructure in loaded)
                     {
-                        if (dataStructure is AMC_DataStructure data)
-                        {
-                            DGV2.Rows.Add(
-                                dataStructure.Time.ToString(),
-                                dataStructure.PhaseVoltageA.ToString(),
-                                dataStructure.PhaseVoltageB.ToString(),
-                                dataStructure.PhaseVoltageC.ToString(),
-                                dataStructure.LineVoltageUAB.ToString(),
-                                dataStructure.LineVoltageUBC.ToString(),
-                                dataStructure.LineVoltageUAC.ToString(),
-                                dataStructure.CurrentA.ToString(),
-                                dataStructure.CurrentB.ToString(),
-                                dataStructure.CurrentC.ToString(),
-                                dataStructure.ActivePowerOfPhaseA.ToString(),
-                                dataStructure.ActivePowerOfPhaseB.ToString(),
-                                dataStructure.ActivePowerOfPhaseC.ToString(),
-                                dataStructure.TotalActivePower.ToString(),
-                                dataStructure.PhaseReactivePowerA.ToString(),
-                                dataStructure.PhaseReactivePowerB.ToString(),
-                                dataStructure.PhaseReactivePowerC.ToString(),
-                                dataStructure.TotalReactivePower.ToString()
-                                );
-                        }
+                        DGV2.Rows.Add(
+                            dataStructure.Time.ToString(),
+                            dataStructure.PhaseVoltageA.ToString(),
+                            dataStructure.PhaseVoltageB.ToString(),
+                            dataStructure.PhaseVoltageC.ToString(),
+                            dataStructure.LineVoltageUAB.ToString(),
+                            dataStructure.LineVoltageUBC.ToString(),
+                            dataStructure.LineVoltageUAC.ToString(),
+                            dataStructure.CurrentA.ToString(),
+                            dataStructure.CurrentB.ToString(),
+                            dataStructure.CurrentC.ToString(),
+                            dataStructure.ActivePowerOfPhaseA.ToString(),
+                            dataStructure.ActivePowerOfPhaseB.ToString(),
+                            dataStructure.ActivePowerOfPhaseC.ToString(),
+                            dataStructure.TotalActivePower.ToString(),
+                            dataStructure.PhaseReactivePowerA.ToString(),
+                            dataStructure.PhaseReactivePowerB.ToString(),
+                            dataStructure.PhaseReactivePowerC.ToString(),
+                            dataStructure.TotalReactivePower.ToString()
+                            );
                     }
                 }
             }
@@ -290,7 +279,7 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void btn_Clear_Click(object sender, EventArgs e)
         {
-            if (Working)
+            if (_isWorking)
             {
                 MessageBox.Show("工作中，不允许清除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -300,14 +289,14 @@ namespace ReadDataSoftware
             {
                 SystemParas.Data1.Clear();
                 DGV1.Rows.Clear();
-                ClearChart();
+                ResetChart();
                 MessageBox.Show("表格已清空", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else if (DGV2.Rows.Count > 0 && SystemParas.EnergyMetersType == "AMC"|| SystemParas.EnergyMetersType == "ADL400")
             {
                 SystemParas.Data2.Clear();
                 DGV2.Rows.Clear();
-                ClearChart();
+                ResetChart();
                 MessageBox.Show("表格已清空", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
@@ -324,7 +313,6 @@ namespace ReadDataSoftware
         private void btn_Set_Click(object sender, EventArgs e)
         {
             Form_SystemSet form_SystemSet = new Form_SystemSet();
-            form_SystemSet.SettingsSaved += SettingsForm_SettingsSaved;
             form_SystemSet.ShowDialog();
             form_SystemSet.Dispose();
         }
@@ -332,60 +320,174 @@ namespace ReadDataSoftware
 
         #region 私有方法
         /// <summary>
-        /// 自动读数线程
+        /// 把本次采集的数据写入 JSON 文件
         /// </summary>
-        private void Thread_AutoWork()
+        private void SaveCollectedData()
         {
             try
             {
-                while (!_stopEvent.WaitOne(0))
+                if (SystemParas.EnergyMetersType == "DJSF1352")
                 {
-                    var Voltage = SystemParas.energyMeters.ReadVoltage();
-                    var Current = SystemParas.energyMeters.ReadCurrent();
-                    var Power = SystemParas.energyMeters.ReadPower();
-                    AddRow(Voltage, Current, Power);
-                    if (SystemParas.EnergyMetersType == "DJSF1352")
+                    if (DGV1.RowCount == 0 || SystemParas.Data1.Count == 0)
                     {
-                        SystemParas.Data1.Add(new DJSF1352_DataStructure() 
-                        { Time = DateTime.Now, Voltage = Voltage[0], Current = Current[0], Power = Power[0] });
+                        MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
                     }
-                    else if (SystemParas.EnergyMetersType == "AMC" || SystemParas.EnergyMetersType == "ADL400")
+                    string startTime = DGV1.Rows[0].Cells[Column_Time.Name].Value.ToString();
+                    string endTime = DGV1.Rows[DGV1.RowCount - 1].Cells[Column_Time.Name].Value.ToString();
+                    string saveFileName = BuildDataFileName(SystemParas.DJSF1352_DataFilePath, startTime, endTime);
+                    if (JsonSerializerHelper.SaveToJsonFile(SystemParas.Data1, saveFileName))
                     {
-                        SystemParas.Data2.Add(new AMC_DataStructure()
-                        { 
-                            Time = DateTime.Now,
-                            PhaseVoltageA = Voltage[0],
-                            PhaseVoltageB = Voltage[1],
-                            PhaseVoltageC = Voltage[2],
-                            LineVoltageUAB = Voltage[3],
-                            LineVoltageUBC = Voltage[4],
-                            LineVoltageUAC = Voltage[5],
-                            CurrentA = Current[0],
-                            CurrentB = Current[1],
-                            CurrentC = Current[2],
-                            ActivePowerOfPhaseA= Power[0],
-                            ActivePowerOfPhaseB = Power[1],
-                            ActivePowerOfPhaseC= Power[2],
-                            TotalActivePower = Power[3],
-                            PhaseReactivePowerA= Power[4],
-                            PhaseReactivePowerB= Power[5],
-                            PhaseReactivePowerC= Power[6],
-                            TotalReactivePower= Power[7],
-                        }
-                        );
+                        MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SystemParas.Data1 = new List<DJSF1352_DataStructure>();
                     }
-                    if (!Working) throw new Exception("手动停止工作");
-                    Thread.Sleep(1000);
+                }
+                else if (SystemParas.EnergyMetersType == "AMC")
+                {
+                    SaveThreePhaseData(SystemParas.AMC_DataFilePath);
+                }
+                else if (SystemParas.EnergyMetersType == "ADL400")
+                {
+                    SaveThreePhaseData(SystemParas.ADL400_DataFilePath);
+                }
+                else
+                {
+                    MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                SystemParas.energyMeters.Close();
-                LogError("Thread_AutoWork线程执行出现异常,异常原因为：" +ex.Message + ex.StackTrace);
+                LogError("保存数据时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// 保存三相表（AMC / ADL400）采集的数据
+        /// </summary>
+        /// <param name="directory">数据文件目录</param>
+        private void SaveThreePhaseData(string directory)
+        {
+            if (DGV2.RowCount == 0 || SystemParas.Data2.Count == 0)
+            {
+                MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            string startTime = DGV2.Rows[0].Cells[Column_RealTime.Name].Value.ToString();
+            string endTime = DGV2.Rows[DGV2.RowCount - 1].Cells[Column_RealTime.Name].Value.ToString();
+            string saveFileName = BuildDataFileName(directory, startTime, endTime);
+            if (JsonSerializerHelper.SaveToJsonFile(SystemParas.Data2, saveFileName))
+            {
+                MessageBox.Show("数据保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                SystemParas.Data2 = new List<AMC_DataStructure>();
+            }
+        }
+
+        /// <summary>
+        /// 按起止时间生成数据文件名
+        /// </summary>
+        private static string BuildDataFileName(string directory, string startTime, string endTime)
+        {
+            return directory + "\\" + DateTime.Parse(startTime).ToString("yyyyMMddHHmmss") + "至"
+                + DateTime.Parse(endTime).ToString("yyyyMMddHHmmss") + ".json";
+        }
+
+        /// <summary>
+        /// 自动读数线程
+        /// </summary>
+        /// <param name="cancellationToken">停止信号</param>
+        private void Thread_AutoWork(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    double[] voltage = SystemParas.EnergyMeters.ReadVoltage();
+                    double[] current = SystemParas.EnergyMeters.ReadCurrent();
+                    double[] power = SystemParas.EnergyMeters.ReadPower();
+                    AddRow(voltage, current, power);
+                    RecordSample(voltage, current, power);
+                    // 取消时立即返回，不必等满整个采样周期。
+                    cancellationToken.WaitHandle.WaitOne(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("Thread_AutoWork线程执行出现异常,异常原因为：" + ex.Message + ex.StackTrace);
+                NotifyWorkerFailed(ex);
             }
             finally
             {
-                _stopEvent.Set(); // 通知主线程数据记录线程已经完成
+                SystemParas.EnergyMeters.Close();
+            }
+        }
+
+        /// <summary>
+        /// 采集线程异常退出时恢复按钮状态并提示用户
+        /// </summary>
+        /// <param name="exception">导致线程退出的异常</param>
+        private void NotifyWorkerFailed(Exception exception)
+        {
+            if (IsDisposed || !IsHandleCreated)
+            {
+                return;
+            }
+            // 用 BeginInvoke 投递，避免本线程阻塞在等待界面线程上。
+            BeginInvoke(new Action(() =>
+            {
+                _isWorking = false;
+                btn_Start.Enabled = true;
+                btn_End.Enabled = false;
+                MessageBox.Show("读数中断：" + exception.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }));
+        }
+
+        /// <summary>
+        /// 把一次采样追加到对应型号的数据集合
+        /// </summary>
+        /// <param name="voltage">电压值</param>
+        /// <param name="current">电流值</param>
+        /// <param name="power">功率值</param>
+        private void RecordSample(double[] voltage, double[] current, double[] power)
+        {
+            if (SystemParas.EnergyMetersType == "DJSF1352")
+            {
+                lock (_sampleLock)
+                {
+                    SystemParas.Data1.Add(new DJSF1352_DataStructure()
+                    {
+                        Time = DateTime.Now,
+                        Voltage = voltage[0],
+                        Current = current[0],
+                        Power = power[0]
+                    });
+                }
+            }
+            else if (SystemParas.EnergyMetersType == "AMC" || SystemParas.EnergyMetersType == "ADL400")
+            {
+                lock (_sampleLock)
+                {
+                    SystemParas.Data2.Add(new AMC_DataStructure()
+                    {
+                        Time = DateTime.Now,
+                        PhaseVoltageA = voltage[0],
+                        PhaseVoltageB = voltage[1],
+                        PhaseVoltageC = voltage[2],
+                        LineVoltageUAB = voltage[3],
+                        LineVoltageUBC = voltage[4],
+                        LineVoltageUAC = voltage[5],
+                        CurrentA = current[0],
+                        CurrentB = current[1],
+                        CurrentC = current[2],
+                        ActivePowerOfPhaseA = power[0],
+                        ActivePowerOfPhaseB = power[1],
+                        ActivePowerOfPhaseC = power[2],
+                        TotalActivePower = power[3],
+                        PhaseReactivePowerA = power[4],
+                        PhaseReactivePowerB = power[5],
+                        PhaseReactivePowerC = power[6],
+                        TotalReactivePower = power[7],
+                    });
+                }
             }
         }
         /// <summary>
@@ -466,13 +568,6 @@ namespace ReadDataSoftware
                 writer.WriteLine($"{DateTime.Now}: {message}");
             }
         }
-        private void SettingsForm_SettingsSaved(object sender, EventArgs e)
-        {
-            //this .Close();
-            //// 保存设置后重启应用程序
-            //Application.Restart();
-            //Environment.Exit(0);
-        }
         #endregion
 
         #region 曲线绘制相关
@@ -502,14 +597,12 @@ namespace ReadDataSoftware
             CreateSeries("功率", Color.Green);
         }
         /// <summary>
-        /// 清除图表
+        /// 重置图表：清空曲线并让绘制进度归零
         /// </summary>
-        private void ClearChart()
+        private void ResetChart()
         {
-            // 清除可能存在的旧系列和图表区域
-            chart1.Series.Clear();
-            chart1.ChartAreas.Clear();
-
+            InitializeChart();
+            _chartedSampleCount = 0;
         }
         /// <summary>
         /// 创建曲线实例
@@ -532,11 +625,11 @@ namespace ReadDataSoftware
         /// <param name="e"></param>
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if (Working && SystemParas.EnergyMetersType == "DJSF1352")
+            if (_isWorking && SystemParas.EnergyMetersType == "DJSF1352")
             {
                 ScrollToBottom(DGV1);
             }
-            else if (Working && SystemParas.EnergyMetersType == "AMC")
+            else if (_isWorking && (SystemParas.EnergyMetersType == "AMC" || SystemParas.EnergyMetersType == "ADL400"))
             {
                 ScrollToBottom(DGV2);
             }
@@ -553,31 +646,81 @@ namespace ReadDataSoftware
             chart1.Series[seriesName].Points.AddXY(time, value);
         }
         /// <summary>
-        /// 刷新图表
+        /// 刷新图表。只追加新增的数据点，不再每次重建全部曲线。
         /// </summary>
         private void RefreshChart()
         {
-            if (SystemParas.Data1 == null||SystemParas.Data1.Count<=0)
+            if (SystemParas.EnergyMetersType == "DJSF1352")
+            {
+                RefreshChartFromSinglePhaseData();
+            }
+            else
+            {
+                RefreshChartFromThreePhaseData();
+            }
+        }
+        /// <summary>
+        /// 刷新直流表(DJSF1352)曲线
+        /// </summary>
+        private void RefreshChartFromSinglePhaseData()
+        {
+            // 采集线程仍在追加数据，先取快照再遍历，避免枚举过程中集合被修改。
+            List<DJSF1352_DataStructure> samples;
+            lock (_sampleLock)
+            {
+                samples = new List<DJSF1352_DataStructure>(SystemParas.Data1);
+            }
+            if (samples.Count < _chartedSampleCount)
+            {
+                // 数据被清空或整体替换，重新开始绘制
+                ResetChart();
+            }
+            if (samples.Count == _chartedSampleCount)
             {
                 return;
             }
-            //重绘图表
-            InitializeChart();
-            // 添加所有数据点
-            foreach (var data in SystemParas.Data1)
+            for (int i = _chartedSampleCount; i < samples.Count; i++)
             {
+                DJSF1352_DataStructure data = samples[i];
                 AddDataPoint("电压", data.Time, data.Voltage);
                 AddDataPoint("电流", data.Time, data.Current);
                 AddDataPoint("功率", data.Time, data.Power);
             }
+            _chartedSampleCount = samples.Count;
 
-            // 限制数据点数量
             LimitDataPoints();
-
-            // 自动调整Y轴范围
             AdjustAxisRanges();
+            chart1.Invalidate();
+        }
+        /// <summary>
+        /// 刷新三相表(AMC / ADL400)曲线，取 A 相电压、A 相电流与总有功功率作代表
+        /// </summary>
+        private void RefreshChartFromThreePhaseData()
+        {
+            List<AMC_DataStructure> samples;
+            lock (_sampleLock)
+            {
+                samples = new List<AMC_DataStructure>(SystemParas.Data2);
+            }
+            if (samples.Count < _chartedSampleCount)
+            {
+                ResetChart();
+            }
+            if (samples.Count == _chartedSampleCount)
+            {
+                return;
+            }
+            for (int i = _chartedSampleCount; i < samples.Count; i++)
+            {
+                AMC_DataStructure data = samples[i];
+                AddDataPoint("电压", data.Time, data.PhaseVoltageA);
+                AddDataPoint("电流", data.Time, data.CurrentA);
+                AddDataPoint("功率", data.Time, data.TotalActivePower);
+            }
+            _chartedSampleCount = samples.Count;
 
-            // 更新图表
+            LimitDataPoints();
+            AdjustAxisRanges();
             chart1.Invalidate();
         }
         /// <summary>
@@ -587,7 +730,7 @@ namespace ReadDataSoftware
         {
             foreach (Series series in chart1.Series)
             {
-                if (series.Points.Count > MaxPoints)
+                while (series.Points.Count > MaxPoints)
                 {
                     series.Points.RemoveAt(0);
                 }

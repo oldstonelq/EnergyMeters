@@ -5,7 +5,10 @@ using System.Text;
 
 namespace ReadDataSoftware
 {
-    public  interface EnergyMeters
+    /// <summary>
+    /// 电能表统一读取接口
+    /// </summary>
+    public interface IEnergyMeters
     {
         bool IsOpen { get; }
         void Open();

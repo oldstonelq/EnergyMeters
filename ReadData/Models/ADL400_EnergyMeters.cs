@@ -1,235 +1,140 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using static ReadDataSoftware.Enums;
 
 namespace ReadDataSoftware
 {
     /// <summary>
-    /// ADL电表
+    /// ADL400 导轨式多功能电能表。
+    /// 读取二次侧数据：电压保留 1 位小数，电流保留 2 位小数，
+    /// 功率为 32 位有符号整型、保留 3 位小数，单位 kW/kvar。
     /// </summary>
-    public  class ADL400_EnergyMeters : EnergyMeters
+    public class ADL400_EnergyMeters : IEnergyMeters
     {
         /// <summary>
-        /// 串口实例
+        /// 从站地址。Modbus 地址范围 1~254。
         /// </summary>
-        private SerialPort serialPort;
+        private const byte SlaveAddress = 177;
+        /// <summary>
+        /// 二次侧 A/B/C 相电压，共 3 个寄存器，单位 V 保留 1 位小数。
+        /// </summary>
+        private const ushort PhaseVoltageAddress = 0x0061;
+        /// <summary>
+        /// 二次侧 A/B/C 相电流，共 3 个寄存器，单位 A 保留 2 位小数。
+        /// </summary>
+        private const ushort CurrentAddress = 0x0064;
+        /// <summary>
+        /// 二次侧 A-B、C-B、A-C 线电压，共 3 个寄存器。
+        /// </summary>
+        private const ushort LineVoltageAddress = 0x0078;
+        /// <summary>
+        /// 有功、无功功率起始地址。每项 4 字节(2 个寄存器)，8 项共 16 个寄存器。
+        /// </summary>
+        private const ushort PowerAddress = 0x0164;
+        /// <summary>
+        /// 功率项数量：A/B/C 相有功、总有功、A/B/C 相无功、总无功。
+        /// </summary>
+        private const ushort PowerItemCount = 8;
+        /// <summary>
+        /// 每个功率项占用的寄存器数量，对应 32 位整型。
+        /// </summary>
+        private const int RegistersPerPowerItem = 2;
+
+        private readonly ModbusRtuClient _client;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="portName">串口名称，如 "COM1"</param>
+        /// <param name="baudRate">波特率，如 9600</param>
+        /// <param name="dataBits">数据位</param>
+        /// <param name="stopBits">停止位</param>
+        /// <param name="parity">校验位</param>
+        public ADL400_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        {
+            _client = new ModbusRtuClient(portName, baudRate, dataBits, stopBits, parity);
+        }
+
         /// <summary>
         /// 串口是否打开
         /// </summary>
         public bool IsOpen
         {
-            get { return serialPort.IsOpen; }
+            get { return _client.IsOpen; }
         }
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="portName">串口名称，如"COM1"</param>
-        /// <param name="baudRate">波特率，如9600</param>
-        public ADL400_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
-        {
-            serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
-        }
         /// <summary>
         /// 打开串口
         /// </summary>
         public void Open()
         {
-            serialPort.Open();
-
+            _client.Open();
         }
+
         /// <summary>
         /// 关闭串口
         /// </summary>
         public void Close()
         {
-            serialPort.Close();
+            _client.Close();
         }
+
         /// <summary>
-        /// 计算CRC校验码
+        /// 读电压，依次为相电压 UA、UB、UC 与线电压 UAB、UBC、UAC，单位 V
         /// </summary>
-        /// <param name="data">要计算的数据数组</param>
-        /// <param name="length">数据的长度</param>
-        /// <returns></returns>
-        private ushort CalculateCRC(byte[] data, int length)
-        {
-            ushort crc = 0xFFFF;
-            for (int i = 0; i < length; i++)
-            {
-                crc ^= data[i];
-                for (int j = 0; j < 8; j++)
-                {
-                    if ((crc & 0x0001) == 1)
-                    {
-                        crc >>= 1;
-                        crc ^= 0xA001;
-                    }
-                    else
-                    {
-                        crc >>= 1;
-                    }
-                }
-            }
-            return crc;
-        }
-        /// <summary>
-        /// 构建读取类请求帧
-        /// </summary>
-        /// <param name="slaveAddress">从站地址</param>
-        /// <param name="ModbusRtuFunctionCode">功能码</param>
-        /// <param name="startAddress">起始地址</param>
-        /// <param name="quantity">数量</param>
-        /// <returns></returns>
-        private byte[] BuildRequest(byte slaveAddress, ModbusRtuFunctionCode ModbusRtuFunctionCode, ushort startAddress, ushort quantity)
-        {
-            //从站地址（1个字节）+功能码（1个字节）+起始地址高位（1个字节）+起始地址低位(1个字节) +数量高位（1个字节）+数量低位（1个字节） +CRC校验码低位（1个字节）+CRC校验码高位（1个字节）
-            byte[] request = new byte[8];
-            request[0] = slaveAddress;
-            request[1] = (byte)ModbusRtuFunctionCode;
-            request[2] = (byte)(startAddress >> 8);
-            request[3] = (byte)startAddress;
-            request[4] = (byte)(quantity >> 8);
-            request[5] = (byte)quantity;
-            ushort crc = CalculateCRC(request, 6);
-            request[6] = (byte)crc;
-            request[7] = (byte)(crc >> 8);
-            return request;
-        }
-        /// <summary>
-        /// 读数据
-        /// </summary>
-        /// <param name="slaveAddress"></param>
-        /// <param name="startAddress"></param>
-        /// <param name="quantity"></param>
-        /// <returns></returns>
-        private byte[] ReadData(byte slaveAddress, ushort startAddress, ushort quantity)
-        {
-            byte[] request = BuildRequest(slaveAddress, ModbusRtuFunctionCode.ReadHoldingRegisters, startAddress, quantity);
-            serialPort.Write(request, 0, request.Length);
-            System.Threading.Thread.Sleep(300); // 等待响应
-            int bytesToRead = serialPort.BytesToRead;
-            byte[] response = new byte[bytesToRead];
-            serialPort.Read(response, 0, bytesToRead);
-            return response;
-        }
-        /// <summary>
-        /// 处理数据
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        private double[] DataProcessing(byte[] data)
-        {
-            if (data.Length >= 2 && (data[1] & 0x80) != 0)
-            {
-                // 处理异常响应数据
-                return new double[] { 0 };
-            }
-            else if (data.Length < 2)
-            {
-                //数据长度不足
-                return new double[] { 0 };
-            }
-            else
-            {
-                // 处理正常响应数据
-                int byteCount = data[2];
-                int registerCount = byteCount / 2;
-                List<double> registerValues = new List<double>();
-                for (int i = 0; i < registerCount; i++)
-                {
-                    double registerValue = (double)((data[3 + i * 2] << 8) | data[4 + i * 2]);
-                    registerValues.Add(registerValue);
-                }
-                return registerValues.ToArray ();
-            }
-        }
-        /// <summary>
-        /// 读直流电压值（地址97读三位,120读三位 地址120 读三位）
-        /// </summary>
-        /// <returns></returns>
         public double[] ReadVoltage()
         {
-            var res1 = ReadData(177, 97, 3);///相电压
-            var res2=ReadData(177, 120, 3);//线电压
-            var res3 = ConcatenateArrays(DataProcessing(res1), DataProcessing(res2));
-            if (res3.Length == 6)
-            {
-                for (int i = 0; i < res3.Length; i++)
-                {
-                    res3[i] = res3[i] / 10;
-                }
-                return res3;
-            }
-            else
-            { 
-              return new double[] { 0,0,0,0,0,0 };
-            }
-        }
-        /// <summary>
-        /// 读直流电流值（地址100读三位）
-        /// </summary>
-        /// <returns></returns>
+            ushort[] phaseVoltage = _client.ReadHoldingRegisters(SlaveAddress, PhaseVoltageAddress, 3);
+            ushort[] lineVoltage = _client.ReadHoldingRegisters(SlaveAddress, LineVoltageAddress, 3);
 
+            double[] voltage = new double[phaseVoltage.Length + lineVoltage.Length];
+            for (int i = 0; i < phaseVoltage.Length; i++)
+            {
+                voltage[i] = phaseVoltage[i] / 10.0;
+            }
+            for (int i = 0; i < lineVoltage.Length; i++)
+            {
+                voltage[phaseVoltage.Length + i] = lineVoltage[i] / 10.0;
+            }
+            return voltage;
+        }
+
+        /// <summary>
+        /// 读电流，依次为 IA、IB、IC，单位 A
+        /// </summary>
         public double[] ReadCurrent()
         {
-            //读A相电流
-            ///查询数据帧01 03 0064 0001 C5 D5
-            //返回数据帧01 03 02 03 B2 38 C1
-            //处理如下：03 B2（十六进制） = 946（十进制）
-            //计算：946 * 0.01 = 9.46 单位：A
-            var res = ReadData(177, 100, 3);
-            var res1 = DataProcessing(res);
-            if (res1.Length == 3)
+            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, CurrentAddress, 3);
+            double[] current = new double[registers.Length];
+            for (int i = 0; i < registers.Length; i++)
             {
-                for (int i = 0; i < res1.Length; i++)
-                {
-                    res1[i] = res1[i] / 100;
-                }
-                return res1;
+                current[i] = registers[i] / 100.0;
             }
-            else
-            {
-                return new double[] { 0,0,0 };
-            }
+            return current;
         }
-        /// <summary>
-        /// 读功率值（地址356读八位）
-        /// </summary>
-        /// <returns></returns>
 
+        /// <summary>
+        /// 读功率，依次为 A/B/C 相有功、总有功、A/B/C 相无功、总无功，单位 kW / kvar
+        /// </summary>
         public double[] ReadPower()
         {
-            var res = ReadData(177, 356, 8);
-            var res1 = DataProcessing(res);
-            if (res1.Length == 8)
+            ushort quantity = (ushort)(PowerItemCount * RegistersPerPowerItem);
+            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, PowerAddress, quantity);
+
+            double[] power = new double[PowerItemCount];
+            for (int i = 0; i < PowerItemCount; i++)
             {
-                for (int i = 0; i < res1.Length; i++)
-                {
-                    res1[i] = res1[i] / 1000;
-                }
-                return res1;
+                int rawValue = ToInt32(registers[i * RegistersPerPowerItem], registers[i * RegistersPerPowerItem + 1]);
+                power[i] = rawValue / 1000.0;
             }
-            else
-            {
-                return new double[] { 0,0,0,0,0,0,0,0 };
-            }
+            return power;
         }
+
         /// <summary>
-        ///拼接两个double数组
+        /// 将高字在前的两个寄存器拼接为 32 位有符号整型。
         /// </summary>
-        /// <param name="array1"></param>
-        /// <param name="array2"></param>
-        /// <returns></returns>
-        public static double[] ConcatenateArrays(double[] array1, double[] array2)
+        private static int ToInt32(ushort highWord, ushort lowWord)
         {
-            double[] result = new double[array1.Length + array2.Length];
-            Array.Copy(array1, 0, result, 0, array1.Length);
-            Array.Copy(array2, 0, result, array1.Length, array2.Length);
-            return result;
+            return (int)(((uint)highWord << 16) | lowWord);
         }
     }
 }

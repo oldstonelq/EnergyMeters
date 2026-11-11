@@ -15,8 +15,6 @@ namespace ReadDataSoftware
 {
     public partial class Form_SystemSet : Form
     {
-        // 定义一个事件，当设置保存后触发
-        public event EventHandler SettingsSaved;
         public Form_SystemSet()
         {
             InitializeComponent();
@@ -47,7 +45,7 @@ namespace ReadDataSoftware
 
 
             //奇偶位
-            string[] parity = { "None", "One", "OnePointFive", "Two" };
+            string[] parity = { "None", "Odd", "Even", "Mark", "Space" };
             cmb_Parity.Items.AddRange(parity);
             cmb_Parity.Text = SystemParas.SerialPortSettings.Parity.ToString();
 
@@ -77,24 +75,11 @@ namespace ReadDataSoftware
             FileHelp.WriteIniKeys("SystemSet", "StopBits", cmb_StopBits.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "Parity", cmb_Parity.Text, SystemParas.SystemFile);
             FileHelp.WriteIniKeys("SystemSet", "EnergyMetersType", cmb_EnergyMetersType.Text, SystemParas.SystemFile);
-            if (SystemParas.energyMeters.IsOpen)
+            if (SystemParas.EnergyMeters.IsOpen)
             {
-                SystemParas.energyMeters.Close();
+                SystemParas.EnergyMeters.Close();
             }
-            ///SystemParas.Load();
             MessageBox.Show("保存成功，请重启软件生效");
-            //获取当前程序的路径
-            //string exePath = Process.GetCurrentProcess().MainModule.FileName;
-
-            //启动一个新的程序实例
-            //Process.Start(exePath);
-;
-            ////Application.Restart();
-
-            ////退出当前程序
-            ////Environment.Exit(0);
-            //SettingsSaved?.Invoke(this, EventArgs.Empty);
-            //this.Close();
         }
     }
 }
