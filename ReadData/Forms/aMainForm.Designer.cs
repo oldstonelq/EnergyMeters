@@ -29,7 +29,7 @@
             this._stopButton = new System.Windows.Forms.ToolStripButton();
             this._separator1 = new System.Windows.Forms.ToolStripSeparator();
             this._exportButton = new System.Windows.Forms.ToolStripButton();
-            this._loadButton = new System.Windows.Forms.ToolStripButton();
+            this._replayButton = new System.Windows.Forms.ToolStripButton();
             this._clearButton = new System.Windows.Forms.ToolStripButton();
             this._separator2 = new System.Windows.Forms.ToolStripSeparator();
             this._settingsButton = new System.Windows.Forms.ToolStripButton();
@@ -58,7 +58,7 @@
             this._stopButton,
             this._separator1,
             this._exportButton,
-            this._loadButton,
+            this._replayButton,
             this._clearButton,
             this._separator2,
             this._settingsButton,
@@ -99,13 +99,13 @@
             this._exportButton.Text = "导出 CSV";
             this._exportButton.Click += new System.EventHandler(this._exportButton_Click);
             // 
-            // _loadButton
+            // _replayButton
             // 
-            this._loadButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this._loadButton.Name = "_loadButton";
-            this._loadButton.Size = new System.Drawing.Size(36, 24);
-            this._loadButton.Text = "读取";
-            this._loadButton.Click += new System.EventHandler(this._loadButton_Click);
+            this._replayButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this._replayButton.Name = "_replayButton";
+            this._replayButton.Size = new System.Drawing.Size(64, 24);
+            this._replayButton.Text = "打开回放";
+            this._replayButton.Click += new System.EventHandler(this._replayButton_Click);
             // 
             // _clearButton
             // 
@@ -235,7 +235,7 @@
         private System.Windows.Forms.ToolStripButton _stopButton;
         private System.Windows.Forms.ToolStripSeparator _separator1;
         private System.Windows.Forms.ToolStripButton _exportButton;
-        private System.Windows.Forms.ToolStripButton _loadButton;
+        private System.Windows.Forms.ToolStripButton _replayButton;
         private System.Windows.Forms.ToolStripButton _clearButton;
         private System.Windows.Forms.ToolStripSeparator _separator2;
         private System.Windows.Forms.ToolStripButton _settingsButton;

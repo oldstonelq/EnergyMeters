@@ -131,7 +131,7 @@ namespace ReadDataSoftware
             }
         }
 
-        private void _loadButton_Click(object sender, EventArgs e)
+        private void _replayButton_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
@@ -158,20 +158,11 @@ namespace ReadDataSoftware
                     MessageBox.Show("文件里没有可显示的数据", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                if (document.Channels.Count != _channels.Count)
+
+                using (Form_Replay form = new Form_Replay(document, dialog.FileName))
                 {
-                    MessageBox.Show("文件中的表型与当前配置不一致，无法显示", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
+                    form.ShowDialog(this);
                 }
-
-                _samples.Clear();
-                _samples.AddRange(document.Samples);
-                _sampleTable.Reload();
-                _trendChart.Reload(_samples);
-                _cardPanel.UpdateValues(_samples[_samples.Count - 1]);
-
-                UpdateButtons();
-                UpdateStatus();
             }
         }
 
@@ -333,7 +324,7 @@ namespace ReadDataSoftware
             _startButton.Enabled = !_isWorking;
             _stopButton.Enabled = _isWorking;
             _exportButton.Enabled = hasData && !_isWorking;
-            _loadButton.Enabled = !_isWorking;
+            _replayButton.Enabled = !_isWorking;
             _clearButton.Enabled = hasData && !_isWorking;
             _settingsButton.Enabled = !_isWorking;
         }
