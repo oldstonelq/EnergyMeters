@@ -55,14 +55,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\AppPaths.cs" />
+    <Compile Include="Config\DeviceConfig.cs" />
+    <Compile Include="Core\ChannelDescriptor.cs" />
+    <Compile Include="Core\IEnergyMeters.cs" />
+    <Compile Include="Core\MeterChannels.cs" />
+    <Compile Include="Core\MeterFactory.cs" />
+    <Compile Include="Core\MeterSample.cs" />
+    <Compile Include="Core\MeterType.cs" />
     <Compile Include="Enum\Enums.cs" />
     <Compile Include="Models\ADL400_EnergyMeters.cs" />
-    <Compile Include="Interface\IEnergyMeters.cs" />
-    <Compile Include="Models\AMC_DataStructure.cs" />
     <Compile Include="Models\AMC_EnergyMeters.cs" />
-    <Compile Include="Models\DJSF1352_DataStructure.cs" />
-    <Compile Include="Help\JsonSerializerHelper.cs" />
-    <Compile Include="Models\SerialPortSettings.cs" />
     <Compile Include="Help\FileHelp.cs" />
     <Compile Include="Models\DJSF1352_EnergyMeters.cs" />
     <Compile Include="Forms\aMainForm.cs">
@@ -76,6 +79,8 @@
     <Compile Include="Protocol\ModbusRtuClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Public\SystemParas.cs" />
+    <Compile Include="Services\MeterSampler.cs" />
+    <Compile Include="Storage\SampleRepository.cs" />
     <Compile Include="Forms\Form_SystemSet.cs">
       <SubType>Form</SubType>
     </Compile>

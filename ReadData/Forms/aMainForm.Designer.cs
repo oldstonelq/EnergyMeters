@@ -491,6 +491,7 @@
             this.Name = "aMainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "ReadDataSoftware";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.aMainForm_FormClosing);
             this.Load += new System.EventHandler(this.aMainForm_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

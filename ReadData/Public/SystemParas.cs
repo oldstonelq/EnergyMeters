@@ -1,160 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO.Ports;
-using ReadData;
+﻿using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
     /// <summary>
-    /// 系统参数
+    /// 组合根：只在启动时装配目录、配置与电表实例，运行期不再承担其他职责。
     /// </summary>
-    public  class SystemParas
+    public static class SystemParas
     {
         /// <summary>
-        /// 系统路径
+        /// 目录与文件位置。
         /// </summary>
-        public static string SystemPath = Application.StartupPath + @"\System";
-        /// <summary>
-        /// 系统配置文件
-        /// </summary>
-        public static string SystemFile = SystemPath + @"\system.ini";
-        /// <summary>
-        /// 数据文件路径
-        /// </summary>
-        public static string DataFile= Application.StartupPath + @"\Data";
-        /// <summary>
-        /// DJSF1352数据文件
-        /// </summary>
-        public static string DJSF1352_DataFilePath = DataFile + @"\DJSF1352";
-        /// <summary>
-        /// AMC数据文件
-        /// </summary>
-        public static string AMC_DataFilePath = DataFile + @"\AMC";
-        /// <summary>
-        /// ADL400数据文件
-        /// </summary>
-        public static string ADL400_DataFilePath = DataFile + @"\ADL400";
-        /// <summary>
-        /// 日志文件
-        /// </summary>
-        public static string logFilePath = Application.StartupPath + @"\Logs\log.txt";
-        /// <summary>
-        /// 串口配置
-        /// </summary>
-        public static SerialPortSettings SerialPortSettings = new SerialPortSettings();
-        /// <summary>
-        /// 电表实例
-        /// </summary>
-        public static IEnergyMeters EnergyMeters;
-        /// <summary>
-        /// DJSF1352数据队列
-        /// </summary>
-        public static List <DJSF1352_DataStructure> Data1 = new List <DJSF1352_DataStructure>();
-        /// <summary>
-        /// AMC数据队列
-        /// </summary>
-        public static List<AMC_DataStructure> Data2 = new List<AMC_DataStructure>();
-        /// <summary>
-        /// 电表类型
-        /// </summary>
-        public static string EnergyMetersType= "DJSF1352";
+        public static AppPaths Paths { get; private set; }
 
         /// <summary>
-        /// 初始化系统参数
+        /// 当前设备配置。
+        /// </summary>
+        public static DeviceConfig Device { get; private set; }
+
+        /// <summary>
+        /// 当前电表实例。
+        /// </summary>
+        public static IEnergyMeters EnergyMeters { get; private set; }
+
+        /// <summary>
+        /// 初始化系统参数并创建电表实例。
         /// </summary>
         public static void Load()
         {
-            //// 检查系统文件夹是否存在
-            if (!Directory.Exists(SystemPath))
-            {
-                Directory.CreateDirectory(SystemPath);
-            }
-            //// 检查数据文件夹是否存在
-            if (!Directory.Exists(DJSF1352_DataFilePath))
-            {
-                Directory.CreateDirectory(DJSF1352_DataFilePath);
-            }
-            //// 检查数据文件夹是否存在
-            if (!Directory.Exists(AMC_DataFilePath))
-            {
-                Directory.CreateDirectory(AMC_DataFilePath);
-            }
-            //// 检查数据文件夹是否存在
-            if (!Directory.Exists(ADL400_DataFilePath))
-            {
-                Directory.CreateDirectory(ADL400_DataFilePath);
-            }
-            //// 检查系统文件是否存在
-            if (!File.Exists(SystemFile))
-            {
-                // File.Create 返回的流必须释放，否则句柄会一直占用到 GC，
-                // 导致后续 WritePrivateProfileString 写配置失败。
-                using (File.Create(SystemFile))
-                {
-                }
-            }
-            //串口配置
-            string portName = FileHelp.ReadIniKeys("SystemSet", "PortName", "", SystemFile);
-            if (!string.IsNullOrEmpty(portName))
-            {
-                SerialPortSettings.PortName = portName;
-            }
-            //波特率设置
-            string baudRate = FileHelp.ReadIniKeys("SystemSet", "BaudRate", "", SystemFile);
-            if (!string.IsNullOrEmpty(baudRate))
-            {
-                SerialPortSettings.BaudRate = int.Parse(baudRate);
-            }
-            //数据位设置
-            string dataBits = FileHelp.ReadIniKeys("SystemSet", "DataBits", "", SystemFile);
-            if (!string.IsNullOrEmpty(dataBits))
-            {
-                SerialPortSettings.DataBits = int.Parse(dataBits);
-            }
-            //停止位设置
-            string stopBits = FileHelp.ReadIniKeys("SystemSet", "StopBits", "", SystemFile);
-            if (!string.IsNullOrEmpty(stopBits))
-            {
-                StopBits parsedStopBits;
-                if (Enum.TryParse(stopBits, out parsedStopBits))
-                {
-                    SerialPortSettings.StopBits = parsedStopBits;
-                }
-            }
-            //校验位设置
-            //旧版本的校验位下拉框误用了停止位的取值(One/OnePointFive)，配置文件里可能残留这类非法值，
-            //这里用 TryParse 容错，解析失败则保留默认值，避免启动时直接抛异常。
-            string parity = FileHelp.ReadIniKeys("SystemSet", "Parity", "", SystemFile);
-            if (!string.IsNullOrEmpty(parity))
-            {
-                Parity parsedParity;
-                if (Enum.TryParse(parity, out parsedParity))
-                {
-                    SerialPortSettings.Parity = parsedParity;
-                }
-            }
-            string energyMetersType = FileHelp.ReadIniKeys("SystemSet", "EnergyMetersType", "", SystemFile);
-            if (!string.IsNullOrEmpty(energyMetersType))
-            {
-                EnergyMetersType = energyMetersType;
-            }
-
-            if (EnergyMetersType == "AMC")
-            {
-                EnergyMeters = new AMC_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
-            }
-            else if (EnergyMetersType == "DJSF1352")
-            {
-                EnergyMeters = new DJSF1352_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
-            }
-            else if (EnergyMetersType == "ADL400")
-            {
-                EnergyMeters = new ADL400_EnergyMeters(SerialPortSettings.PortName, SerialPortSettings.BaudRate, SerialPortSettings.DataBits, SerialPortSettings.StopBits, SerialPortSettings.Parity);
-            }
+            Paths = new AppPaths(Application.StartupPath);
+            Paths.EnsureCreated();
+            Device = DeviceConfig.Load(Paths.SystemFile);
+            EnergyMeters = MeterFactory.Create(Device);
         }
     }
 }

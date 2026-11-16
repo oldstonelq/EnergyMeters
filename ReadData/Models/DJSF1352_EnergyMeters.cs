@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO.Ports;
+using System.Collections.Generic;
 
 namespace ReadDataSoftware
 {
@@ -7,12 +7,12 @@ namespace ReadDataSoftware
     /// DJSF1352-RN 导轨式直流电能表。
     /// 读数规则：实际值 = 有效值 x 10^(指数-3)，有效值与指数均为有符号 16 位。
     /// </summary>
-    public class DJSF1352_EnergyMeters : IEnergyMeters
+    public sealed class DJSF1352_EnergyMeters : IEnergyMeters
     {
         /// <summary>
-        /// 从站地址。V2.5 起选配双路时第二路地址顺延，届时需改为可配置。
+        /// 协议默认从站地址。V2.5 起选配双路时第二路地址顺延。
         /// </summary>
-        private const byte SlaveAddress = 1;
+        private const byte DefaultSlaveAddress = 1;
         /// <summary>
         /// 电压值 + 小数点指数，占 2 个寄存器。
         /// </summary>
@@ -27,18 +27,24 @@ namespace ReadDataSoftware
         private const ushort PowerAddress = 8;
 
         private readonly ModbusRtuClient _client;
+        private readonly byte _slaveAddress;
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="portName">串口名称，如 "COM1"</param>
-        /// <param name="baudRate">波特率，如 9600</param>
-        /// <param name="dataBits">数据位</param>
-        /// <param name="stopBits">停止位</param>
-        /// <param name="parity">校验位</param>
-        public DJSF1352_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        /// <param name="config">设备配置</param>
+        public DJSF1352_EnergyMeters(DeviceConfig config)
         {
-            _client = new ModbusRtuClient(portName, baudRate, dataBits, stopBits, parity);
+            _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
+            _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);
+        }
+
+        /// <summary>
+        /// 通道定义：电压、电流、功率
+        /// </summary>
+        public IReadOnlyList<ChannelDescriptor> Channels
+        {
+            get { return MeterChannels.SinglePhase; }
         }
 
         /// <summary>
@@ -66,27 +72,17 @@ namespace ReadDataSoftware
         }
 
         /// <summary>
-        /// 读直流电压，返回单元素数组，单位 V
+        /// 采集一次，返回电压、电流、功率三个值
         /// </summary>
-        public double[] ReadVoltage()
+        public MeterSample Read()
         {
-            return new[] { ReadScaledValue(VoltageAddress) };
-        }
-
-        /// <summary>
-        /// 读直流电流，返回单元素数组，单位 A
-        /// </summary>
-        public double[] ReadCurrent()
-        {
-            return new[] { ReadScaledValue(CurrentAddress) };
-        }
-
-        /// <summary>
-        /// 读直流功率，返回单元素数组，单位 W
-        /// </summary>
-        public double[] ReadPower()
-        {
-            return new[] { ReadScaledValue(PowerAddress) };
+            double[] values =
+            {
+                ReadScaledValue(VoltageAddress),
+                ReadScaledValue(CurrentAddress),
+                ReadScaledValue(PowerAddress)
+            };
+            return new MeterSample(DateTime.Now, values);
         }
 
         /// <summary>
@@ -94,7 +90,7 @@ namespace ReadDataSoftware
         /// </summary>
         private double ReadScaledValue(ushort address)
         {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, address, 2);
+            ushort[] registers = _client.ReadHoldingRegisters(_slaveAddress, address, 2);
 
             // 说明书：电压、电流、功率的有效数据与指数位均为有符号数，读数为 FFFF 表示 -1。
             // 指数位若也是 FFFF，说明该项尚未建立有效数据，直接返回 -1。

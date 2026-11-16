@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO.Ports;
+using System.Collections.Generic;
 
 namespace ReadDataSoftware
 {
@@ -8,12 +8,12 @@ namespace ReadDataSoftware
     /// 读取一次侧数据，读数规则：实际值 = 通讯值 x 10^(小数点位数-4)，
     /// 小数点位数分别由 DPT(电压)、DCT(电流)、DPQ(功率) 决定。
     /// </summary>
-    public class AMC_EnergyMeters : IEnergyMeters
+    public sealed class AMC_EnergyMeters : IEnergyMeters
     {
         /// <summary>
-        /// 从站地址。AMC 出厂默认 1，如需多表并联应改为可配置。
+        /// 协议默认从站地址。AMC 出厂默认 1。
         /// </summary>
-        private const byte SlaveAddress = 1;
+        private const byte DefaultSlaveAddress = 1;
         /// <summary>
         /// 小数点信息：0023H 高字节为 DPT、低字节为 DCT，0024H 高字节为 DPQ。
         /// </summary>
@@ -27,7 +27,7 @@ namespace ReadDataSoftware
         /// </summary>
         private const ushort CurrentAddress = 0x002B;
         /// <summary>
-        /// 功率起始地址。每项 1 个寄存器，有功 4 项 + 无功 4 项共 8 个。
+        /// 一次侧有功、无功，每相各 1 个寄存器加总值，共 8 个寄存器。
         /// </summary>
         private const ushort PowerAddress = 0x002E;
         /// <summary>
@@ -36,6 +36,7 @@ namespace ReadDataSoftware
         private const ushort PowerSignAddress = 0x0024;
 
         private readonly ModbusRtuClient _client;
+        private readonly byte _slaveAddress;
         /// <summary>
         /// 电压小数点位数(DPT)
         /// </summary>
@@ -52,14 +53,19 @@ namespace ReadDataSoftware
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="portName">串口名称，如 "COM1"</param>
-        /// <param name="baudRate">波特率，如 9600</param>
-        /// <param name="dataBits">数据位</param>
-        /// <param name="stopBits">停止位</param>
-        /// <param name="parity">校验位</param>
-        public AMC_EnergyMeters(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        /// <param name="config">设备配置</param>
+        public AMC_EnergyMeters(DeviceConfig config)
         {
-            _client = new ModbusRtuClient(portName, baudRate, dataBits, stopBits, parity);
+            _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
+            _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);
+        }
+
+        /// <summary>
+        /// 通道定义：相电压、线电压、电流、有功、无功
+        /// </summary>
+        public IReadOnlyList<ChannelDescriptor> Channels
+        {
+            get { return MeterChannels.ThreePhase; }
         }
 
         /// <summary>
@@ -88,61 +94,37 @@ namespace ReadDataSoftware
         }
 
         /// <summary>
-        /// 读电压，依次为 UA、UB、UC、UAB、UBC、UAC，单位 V
+        /// 采集一次，按通道顺序返回 17 个值
         /// </summary>
-        public double[] ReadVoltage()
+        public MeterSample Read()
         {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, VoltageAddress, 6);
-            double[] voltage = new double[registers.Length];
-            for (int i = 0; i < registers.Length; i++)
-            {
-                voltage[i] = Scale(registers[i], _voltageDecimalPoint);
-            }
-            return voltage;
-        }
-
-        /// <summary>
-        /// 读电流，依次为 IA、IB、IC，单位 A
-        /// </summary>
-        public double[] ReadCurrent()
-        {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, CurrentAddress, 3);
-            double[] current = new double[registers.Length];
-            for (int i = 0; i < registers.Length; i++)
-            {
-                current[i] = Scale(registers[i], _currentDecimalPoint);
-            }
-            return current;
-        }
-
-        /// <summary>
-        /// 读功率，依次为 A/B/C 相有功、总有功、A/B/C 相无功、总无功
-        /// </summary>
-        public double[] ReadPower()
-        {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, PowerAddress, 8);
+            ushort[] voltage = _client.ReadHoldingRegisters(_slaveAddress, VoltageAddress, 6);
+            ushort[] current = _client.ReadHoldingRegisters(_slaveAddress, CurrentAddress, 3);
+            ushort[] power = _client.ReadHoldingRegisters(_slaveAddress, PowerAddress, 8);
             int signBits = ReadPowerSignBits();
-            double[] power = new double[registers.Length];
-            for (int i = 0; i < registers.Length; i++)
+
+            double[] values = new double[17];
+            for (int i = 0; i < 6; i++)
             {
-                power[i] = Scale(registers[i], _powerDecimalPoint);
-                // 符号位自高到低为 Q、Qc、Qb、Qa、P、Pc、Pb、Pa，
-                // 与本数组下标 (Pa、Pb、Pc、P、Qa、Qb、Qc、Q) 正好反序对应，故第 i 项取第 i 位。
+                values[i] = Scale(voltage[i], _voltageDecimalPoint);
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                values[6 + i] = Scale(current[i], _currentDecimalPoint);
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                double value = Scale(power[i], _powerDecimalPoint);
+                // 符号位自高到低为 Q、Qc、Qb、Qa、P、Pc、Pb、Pa，与功率项顺序正好反序，
+                // 故第 i 项取第 i 位。
                 if ((signBits & (1 << i)) != 0)
                 {
-                    power[i] = -power[i];
+                    value = -value;
                 }
+                values[9 + i] = value;
             }
-            return power;
-        }
 
-        /// <summary>
-        /// 读取功率符号位，0 为正、1 为负。
-        /// </summary>
-        private int ReadPowerSignBits()
-        {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, PowerSignAddress, 1);
-            return registers[0] & 0xFF;
+            return new MeterSample(DateTime.Now, values);
         }
 
         /// <summary>
@@ -150,10 +132,19 @@ namespace ReadDataSoftware
         /// </summary>
         private void LoadDecimalPoints()
         {
-            ushort[] registers = _client.ReadHoldingRegisters(SlaveAddress, DecimalPointAddress, 2);
+            ushort[] registers = _client.ReadHoldingRegisters(_slaveAddress, DecimalPointAddress, 2);
             _voltageDecimalPoint = (registers[0] >> 8) & 0xFF;
             _currentDecimalPoint = registers[0] & 0xFF;
             _powerDecimalPoint = (registers[1] >> 8) & 0xFF;
+        }
+
+        /// <summary>
+        /// 读取功率符号位，0 为正、1 为负。
+        /// </summary>
+        private int ReadPowerSignBits()
+        {
+            ushort[] registers = _client.ReadHoldingRegisters(_slaveAddress, PowerSignAddress, 1);
+            return registers[0] & 0xFF;
         }
 
         /// <summary>
