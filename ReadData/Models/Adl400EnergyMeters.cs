@@ -8,7 +8,7 @@ namespace ReadDataSoftware
     /// 读取二次侧数据：电压保留 1 位小数，电流保留 2 位小数，
     /// 功率为 32 位有符号整型、保留 3 位小数，单位 kW/kvar。
     /// </summary>
-    public sealed class ADL400_EnergyMeters : IEnergyMeters
+    public sealed class Adl400EnergyMeters : IEnergyMeters
     {
         /// <summary>
         /// 协议默认从站地址。Modbus 地址范围 1~254。
@@ -46,7 +46,7 @@ namespace ReadDataSoftware
         /// 构造函数
         /// </summary>
         /// <param name="config">设备配置</param>
-        public ADL400_EnergyMeters(DeviceConfig config)
+        public Adl400EnergyMeters(DeviceConfig config)
         {
             _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);

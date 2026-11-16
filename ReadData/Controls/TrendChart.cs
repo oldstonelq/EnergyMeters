@@ -11,7 +11,7 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed partial class TrendChart : UserControl
     {
-        private static readonly Color[] SeriesColors = { Color.Red, Color.Blue, Color.Green };
+        private static readonly Color[] s_seriesColors = { Color.Red, Color.Blue, Color.Green };
 
         private IReadOnlyList<ChannelDescriptor> _channels;
         private int[] _channelIndexes = new int[0];
@@ -73,7 +73,7 @@ namespace ReadDataSoftware
                 Series series = new Series(_seriesNames[i]);
                 series.ChartType = SeriesChartType.Line;
                 series.BorderWidth = 2;
-                series.Color = SeriesColors[i % SeriesColors.Length];
+                series.Color = s_seriesColors[i % s_seriesColors.Length];
                 series.ChartArea = "Trend";
                 _chart.Series.Add(series);
             }

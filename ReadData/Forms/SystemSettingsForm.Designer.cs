@@ -1,6 +1,6 @@
 ﻿namespace ReadDataSoftware
 {
-    partial class Form_SystemSet
+    partial class SystemSettingsForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_SystemSet));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SystemSettingsForm));
             this.panel1 = new System.Windows.Forms.Panel();
             this.cmb_EnergyMetersType = new System.Windows.Forms.ComboBox();
             this.lab_EnergyMetersType = new System.Windows.Forms.Label();
@@ -225,7 +225,7 @@
             this.lab_BaudRate.TabIndex = 0;
             this.lab_BaudRate.Text = "波特率";
             // 
-            // Form_SystemSet
+            // SystemSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -234,10 +234,10 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Form_SystemSet";
+            this.Name = "SystemSettingsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "系统设置";
-            this.Load += new System.EventHandler(this.SystemSet_Load);
+            this.Load += new System.EventHandler(this.SystemSettingsForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);

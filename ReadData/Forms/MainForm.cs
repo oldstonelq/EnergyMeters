@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
-    public partial class aMainForm : Form
+    public partial class MainForm : Form
     {
         /// <summary>
         /// 两次采样的间隔，单位毫秒
@@ -21,15 +21,15 @@ namespace ReadDataSoftware
         private MeterSampler _sampler;
         private bool _isWorking;
 
-        public aMainForm()
+        public MainForm()
         {
             InitializeComponent();
         }
 
         #region 窗体加载与关闭
-        private void aMainForm_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
-            _channels = SystemParas.EnergyMeters.Channels;
+            _channels = SystemParameters.EnergyMeters.Channels;
             _cardPanel.BindChannels(_channels);
             _sampleTable.Bind(_channels, () => _samples);
             _sampleTable.ActiveGroupChanged += SampleTable_ActiveGroupChanged;
@@ -38,7 +38,7 @@ namespace ReadDataSoftware
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             this.Text = "读数软件 Version-" + version;
 
-            _sampler = new MeterSampler(SystemParas.EnergyMeters);
+            _sampler = new MeterSampler(SystemParameters.EnergyMeters);
             _sampler.SampleReady += OnSampleReady;
             _sampler.SampleFailed += OnSampleFailed;
 
@@ -46,7 +46,7 @@ namespace ReadDataSoftware
             UpdateStatus();
         }
 
-        private void aMainForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_sampler != null)
             {
@@ -159,7 +159,7 @@ namespace ReadDataSoftware
                     return;
                 }
 
-                using (Form_Replay form = new Form_Replay(document, dialog.FileName))
+                using (ReplayForm form = new ReplayForm(document, dialog.FileName))
                 {
                     form.ShowDialog(this);
                 }
@@ -185,7 +185,7 @@ namespace ReadDataSoftware
 
         private void _settingsButton_Click(object sender, EventArgs e)
         {
-            using (Form_SystemSet form = new Form_SystemSet())
+            using (SystemSettingsForm form = new SystemSettingsForm())
             {
                 form.ShowDialog();
             }
@@ -282,8 +282,8 @@ namespace ReadDataSoftware
             string fileName;
             try
             {
-                MeterType meterType = SystemParas.Device.MeterType;
-                fileName = Path.Combine(SystemParas.Paths.GetDataDirectory(meterType), BuildDataFileName());
+                MeterType meterType = SystemParameters.Device.MeterType;
+                fileName = Path.Combine(SystemParameters.Paths.GetDataDirectory(meterType), BuildDataFileName());
                 SampleRepository.Save(fileName, meterType, _channels, _samples);
             }
             catch (Exception ex)
@@ -332,8 +332,8 @@ namespace ReadDataSoftware
         private void UpdateStatus()
         {
             _statusLabel.Text = string.Format("{0} · {1} · {2} · 本次 {3} 条",
-                SystemParas.Device.PortName,
-                SystemParas.Device.MeterType.ToConfigValue(),
+                SystemParameters.Device.PortName,
+                SystemParameters.Device.MeterType.ToConfigValue(),
                 _isWorking ? "采集中" : "空闲",
                 _samples.Count);
         }
@@ -345,12 +345,12 @@ namespace ReadDataSoftware
         {
             try
             {
-                string logFolderPath = Path.GetDirectoryName(SystemParas.Paths.LogFile);
+                string logFolderPath = Path.GetDirectoryName(SystemParameters.Paths.LogFile);
                 if (!Directory.Exists(logFolderPath))
                 {
                     Directory.CreateDirectory(logFolderPath);
                 }
-                using (StreamWriter writer = new StreamWriter(SystemParas.Paths.LogFile, true))
+                using (StreamWriter writer = new StreamWriter(SystemParameters.Paths.LogFile, true))
                 {
                     writer.WriteLine($"{DateTime.Now}: {message}");
                 }

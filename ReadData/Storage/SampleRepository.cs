@@ -42,7 +42,7 @@ namespace ReadDataSoftware
         /// </summary>
         public const int CurrentVersion = 1;
 
-        private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        private static readonly JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
@@ -62,7 +62,7 @@ namespace ReadDataSoftware
                 Channels = new List<ChannelDescriptor>(channels),
                 Samples = new List<MeterSample>(samples)
             };
-            string json = JsonConvert.SerializeObject(document, SerializerSettings);
+            string json = JsonConvert.SerializeObject(document, s_serializerSettings);
             System.IO.File.WriteAllText(filePath, json, System.Text.Encoding.UTF8);
         }
 
@@ -84,7 +84,7 @@ namespace ReadDataSoftware
                 return LoadLegacyArray(json);
             }
 
-            SampleDocument document = JsonConvert.DeserializeObject<SampleDocument>(json, SerializerSettings);
+            SampleDocument document = JsonConvert.DeserializeObject<SampleDocument>(json, s_serializerSettings);
             if (document == null)
             {
                 return null;

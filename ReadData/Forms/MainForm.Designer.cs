@@ -1,6 +1,6 @@
 ﻿namespace ReadDataSoftware
 {
-    partial class aMainForm
+    partial class MainForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -23,7 +23,7 @@
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(aMainForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this._toolStrip = new System.Windows.Forms.ToolStrip();
             this._startButton = new System.Windows.Forms.ToolStripButton();
             this._stopButton = new System.Windows.Forms.ToolStripButton();
@@ -200,7 +200,7 @@
             this._sampleTable.Size = new System.Drawing.Size(1280, 283);
             this._sampleTable.TabIndex = 0;
             // 
-            // aMainForm
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -209,11 +209,11 @@
             this.Controls.Add(this._toolStrip);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1100, 700);
-            this.Name = "aMainForm";
+            this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ReadDataSoftware";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.aMainForm_FormClosing);
-            this.Load += new System.EventHandler(this.aMainForm_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this._toolStrip.ResumeLayout(false);
             this._toolStrip.PerformLayout();
             this._outerSplit.Panel1.ResumeLayout(false);

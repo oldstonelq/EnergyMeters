@@ -13,11 +13,11 @@ namespace ReadDataSoftware
             switch (config.MeterType)
             {
                 case MeterType.Amc:
-                    return new AMC_EnergyMeters(config);
+                    return new AmcEnergyMeters(config);
                 case MeterType.Adl400:
-                    return new ADL400_EnergyMeters(config);
+                    return new Adl400EnergyMeters(config);
                 default:
-                    return new DJSF1352_EnergyMeters(config);
+                    return new Djsf1352EnergyMeters(config);
             }
         }
     }

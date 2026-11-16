@@ -24,8 +24,8 @@ namespace ReadDataSoftware
                 MessageBox.Show("程序已在运行中，不能同时执行多个程序");
                 Environment.Exit(0);
             }
-            SystemParas.Load();
-            Application.Run(new aMainForm());
+            SystemParameters.Load();
+            Application.Run(new MainForm());
            
         }
     }

@@ -1,6 +1,6 @@
 namespace ReadDataSoftware
 {
-    partial class Form_Replay
+    partial class ReplayForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -188,7 +188,7 @@ namespace ReadDataSoftware
             this._sampleTable.Size = new System.Drawing.Size(1100, 230);
             this._sampleTable.TabIndex = 0;
             // 
-            // Form_Replay
+            // ReplayForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -197,10 +197,10 @@ namespace ReadDataSoftware
             this.Controls.Add(this._footerPanel);
             this.Controls.Add(this._metaPanel);
             this.MinimumSize = new System.Drawing.Size(900, 600);
-            this.Name = "Form_Replay";
+            this.Name = "ReplayForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "历史数据回放";
-            this.Load += new System.EventHandler(this.Form_Replay_Load);
+            this.Load += new System.EventHandler(this.ReplayForm_Load);
             this._metaPanel.ResumeLayout(false);
             this._metaPanel.PerformLayout();
             this._footerPanel.ResumeLayout(false);

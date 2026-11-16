@@ -5,7 +5,7 @@ namespace ReadDataSoftware
     /// <summary>
     /// 组合根：只在启动时装配目录、配置与电表实例，运行期不再承担其他职责。
     /// </summary>
-    public static class SystemParas
+    public static class SystemParameters
     {
         /// <summary>
         /// 目录与文件位置。

@@ -7,7 +7,7 @@ namespace ReadDataSoftware
     /// DJSF1352-RN 导轨式直流电能表。
     /// 读数规则：实际值 = 有效值 x 10^(指数-3)，有效值与指数均为有符号 16 位。
     /// </summary>
-    public sealed class DJSF1352_EnergyMeters : IEnergyMeters
+    public sealed class Djsf1352EnergyMeters : IEnergyMeters
     {
         /// <summary>
         /// 协议默认从站地址。V2.5 起选配双路时第二路地址顺延。
@@ -33,7 +33,7 @@ namespace ReadDataSoftware
         /// 构造函数
         /// </summary>
         /// <param name="config">设备配置</param>
-        public DJSF1352_EnergyMeters(DeviceConfig config)
+        public Djsf1352EnergyMeters(DeviceConfig config)
         {
             _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);

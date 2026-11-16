@@ -8,7 +8,7 @@ namespace ReadDataSoftware
     /// 读取一次侧数据，读数规则：实际值 = 通讯值 x 10^(小数点位数-4)，
     /// 小数点位数分别由 DPT(电压)、DCT(电流)、DPQ(功率) 决定。
     /// </summary>
-    public sealed class AMC_EnergyMeters : IEnergyMeters
+    public sealed class AmcEnergyMeters : IEnergyMeters
     {
         /// <summary>
         /// 协议默认从站地址。AMC 出厂默认 1。
@@ -54,7 +54,7 @@ namespace ReadDataSoftware
         /// 构造函数
         /// </summary>
         /// <param name="config">设备配置</param>
-        public AMC_EnergyMeters(DeviceConfig config)
+        public AmcEnergyMeters(DeviceConfig config)
         {
             _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);

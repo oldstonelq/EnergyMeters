@@ -9,7 +9,7 @@ namespace ReadDataSoftware
     /// 历史数据回放。只读、模态打开，与主窗体共用记录表与曲线控件，
     /// 通道定义取自文件本身，因此不受当前程序配置的表型影响。
     /// </summary>
-    public partial class Form_Replay : Form
+    public partial class ReplayForm : Form
     {
         /// <summary>
         /// 曲线上最多的通道数量
@@ -20,7 +20,7 @@ namespace ReadDataSoftware
         private readonly string _filePath;
         private bool _suppressItemCheck;
 
-        public Form_Replay(SampleDocument document, string filePath)
+        public ReplayForm(SampleDocument document, string filePath)
         {
             if (document == null)
             {
@@ -31,7 +31,7 @@ namespace ReadDataSoftware
             InitializeComponent();
         }
 
-        private void Form_Replay_Load(object sender, EventArgs e)
+        private void ReplayForm_Load(object sender, EventArgs e)
         {
             _fileLabel.Text = Path.GetFileName(_filePath);
             _infoLabel.Text = BuildInfoText();
