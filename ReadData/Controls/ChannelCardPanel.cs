@@ -31,6 +31,10 @@ namespace ReadDataSoftware
         /// </summary>
         public void BindChannels(IReadOnlyList<ChannelDescriptor> channels)
         {
+            if (channels == null)
+            {
+                channels = new ChannelDescriptor[0];
+            }
             _channels = channels;
 
             _layout.SuspendLayout();
@@ -38,19 +42,29 @@ namespace ReadDataSoftware
             {
                 _layout.Controls.Clear();
                 _layout.RowStyles.Clear();
-                _layout.RowCount = 0;
                 _valueLabels.Clear();
+
+                // 行数要一次定好：TableLayoutPanel 允许 RowCount 为 0（表示不限行数），
+                // 但设计器不允许，打开这个控件就会报 RowCount 必须大于零。
+                int rowCount = Math.Max(1, CountGroups(channels) * 2);
+                _layout.RowCount = rowCount;
+                for (int i = 0; i < rowCount; i++)
+                {
+                    _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                }
 
                 string currentGroup = null;
                 FlowLayoutPanel cardRow = null;
+                int rowIndex = 0;
 
                 for (int i = 0; i < channels.Count; i++)
                 {
                     ChannelDescriptor channel = channels[i];
-                    if (!string.Equals(channel.Group, currentGroup, StringComparison.Ordinal))
+                    if (cardRow == null || !string.Equals(channel.Group, currentGroup, StringComparison.Ordinal))
                     {
                         currentGroup = channel.Group;
-                        cardRow = AddGroupRow(currentGroup);
+                        cardRow = AddGroupRow(currentGroup, rowIndex);
+                        rowIndex += 2;
                     }
                     cardRow.Controls.Add(CreateCard(channel, i));
                 }
@@ -88,9 +102,29 @@ namespace ReadDataSoftware
         }
 
         /// <summary>
-        /// 追加一行「分组标题 + 卡片容器」，返回卡片容器供后续填充。
+        /// 统计分组数。通道按分组连续排列，分组一换就另起一段。
         /// </summary>
-        private FlowLayoutPanel AddGroupRow(string groupName)
+        private static int CountGroups(IReadOnlyList<ChannelDescriptor> channels)
+        {
+            if (channels.Count == 0)
+            {
+                return 0;
+            }
+            int count = 1;
+            for (int i = 1; i < channels.Count; i++)
+            {
+                if (!string.Equals(channels[i].Group, channels[i - 1].Group, StringComparison.Ordinal))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// 在第 <paramref name="rowIndex"/> 行放分组标题、下一行放卡片容器，返回卡片容器供后续填充。
+        /// </summary>
+        private FlowLayoutPanel AddGroupRow(string groupName, int rowIndex)
         {
             Label caption = new Label
             {
@@ -99,9 +133,7 @@ namespace ReadDataSoftware
                 Margin = new Padding(6, 6, 6, 0),
                 ForeColor = SystemColors.GrayText
             };
-            _layout.RowCount++;
-            _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            _layout.Controls.Add(caption, 0, _layout.RowCount - 1);
+            _layout.Controls.Add(caption, 0, rowIndex);
 
             FlowLayoutPanel cardRow = new FlowLayoutPanel
             {
@@ -111,9 +143,7 @@ namespace ReadDataSoftware
                 WrapContents = true,
                 Margin = new Padding(0)
             };
-            _layout.RowCount++;
-            _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            _layout.Controls.Add(cardRow, 0, _layout.RowCount - 1);
+            _layout.Controls.Add(cardRow, 0, rowIndex + 1);
             return cardRow;
         }
 

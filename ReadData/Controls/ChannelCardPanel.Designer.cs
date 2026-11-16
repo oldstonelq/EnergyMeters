@@ -34,7 +34,8 @@ namespace ReadDataSoftware
             this._layout.Dock = System.Windows.Forms.DockStyle.Fill;
             this._layout.Location = new System.Drawing.Point(0, 0);
             this._layout.Name = "_layout";
-            this._layout.RowCount = 0;
+            this._layout.RowCount = 1;
+            this._layout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
             this._layout.Size = new System.Drawing.Size(640, 400);
             this._layout.TabIndex = 0;
             // 
