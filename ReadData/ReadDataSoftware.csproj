@@ -53,6 +53,24 @@
   <ItemGroup>
     <Compile Include="Config\AppPaths.cs" />
     <Compile Include="Config\DeviceConfig.cs" />
+    <Compile Include="Controls\ChannelCardPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ChannelCardPanel.Designer.cs">
+      <DependentUpon>ChannelCardPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SampleTable.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SampleTable.Designer.cs">
+      <DependentUpon>SampleTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TrendChart.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TrendChart.Designer.cs">
+      <DependentUpon>TrendChart.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\ChannelDescriptor.cs" />
     <Compile Include="Core\IEnergyMeters.cs" />
     <Compile Include="Core\MeterChannels.cs" />
