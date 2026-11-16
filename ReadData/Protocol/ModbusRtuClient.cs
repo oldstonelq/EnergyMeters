@@ -27,7 +27,13 @@ namespace ReadDataSoftware
         /// </summary>
         private const int DefaultResponseTimeoutMilliseconds = 500;
 
+        /// <summary>
+        /// 串口对象，构造时创建，Open 时才真正打开。
+        /// </summary>
         private readonly SerialPort _serialPort;
+        /// <summary>
+        /// 是否已释放，避免重复 Dispose。
+        /// </summary>
         private bool _disposed;
 
         /// <summary>

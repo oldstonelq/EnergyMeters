@@ -35,7 +35,13 @@ namespace ReadDataSoftware
         /// </summary>
         private const ushort PowerSignAddress = 0x0024;
 
+        /// <summary>
+        /// Modbus 主站，串口在 Open 时打开。
+        /// </summary>
         private readonly ModbusRtuClient _client;
+        /// <summary>
+        /// 从站地址，未配置时取本表型的内置默认值。
+        /// </summary>
         private readonly byte _slaveAddress;
         /// <summary>
         /// 电压小数点位数(DPT)

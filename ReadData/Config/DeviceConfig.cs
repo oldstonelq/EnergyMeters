@@ -9,8 +9,17 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class DeviceConfig
     {
+        /// <summary>
+        /// ini 中的节点名。
+        /// </summary>
         private const string SectionName = "SystemSet";
+        /// <summary>
+        /// 波特率的合法下限。
+        /// </summary>
         private const int MinBaudRate = 300;
+        /// <summary>
+        /// 波特率的合法上限。
+        /// </summary>
         private const int MaxBaudRate = 115200;
 
         /// <summary>
@@ -118,6 +127,14 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 读取整数值。缺失、无法解析或超出范围时返回默认值。
+        /// </summary>
+        /// <param name="iniPath">ini 文件路径</param>
+        /// <param name="key">键名</param>
+        /// <param name="defaultValue">回落的默认值</param>
+        /// <param name="minValue">允许的最小值</param>
+        /// <param name="maxValue">允许的最大值</param>
         private static int ReadInt(string iniPath, string key, int defaultValue, int minValue, int maxValue)
         {
             string text = FileHelp.ReadIniKeys(SectionName, key, string.Empty, iniPath);
@@ -129,6 +146,12 @@ namespace ReadDataSoftware
             return defaultValue;
         }
 
+        /// <summary>
+        /// 读取枚举值。解析失败时返回默认值，不抛异常。
+        /// </summary>
+        /// <param name="iniPath">ini 文件路径</param>
+        /// <param name="key">键名</param>
+        /// <param name="defaultValue">回落的默认值</param>
         private static TEnum ReadEnum<TEnum>(string iniPath, string key, TEnum defaultValue) where TEnum : struct
         {
             // 旧版本的校验位下拉框误用了停止位的取值，配置文件里可能残留 One / OnePointFive

@@ -50,10 +50,25 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class MeterSampler : IDisposable
     {
+        /// <summary>
+        /// 被采集的电表。
+        /// </summary>
         private readonly IEnergyMeters _meter;
+        /// <summary>
+        /// 当前采集循环的取消源，未采集时为 null。
+        /// </summary>
         private CancellationTokenSource _cancellation;
+        /// <summary>
+        /// 采集循环所在的任务，停止时用它等待线程退出。
+        /// </summary>
         private Task _loop;
+        /// <summary>
+        /// 两次采样的间隔。
+        /// </summary>
         private TimeSpan _interval;
+        /// <summary>
+        /// 是否已释放。
+        /// </summary>
         private bool _disposed;
 
         /// <summary>
@@ -180,6 +195,10 @@ namespace ReadDataSoftware
             IsRunning = false;
         }
 
+        /// <summary>
+        /// 采集循环：读一帧、抛出事件、等待一个间隔，直到取消或异常。
+        /// </summary>
+        /// <param name="token">取消标记</param>
         private void Run(CancellationToken token)
         {
             try
@@ -207,6 +226,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 关闭端口并忽略异常。端口已断开时关闭会抛错，此处不必上报。
+        /// </summary>
         private void CloseQuietly()
         {
             try

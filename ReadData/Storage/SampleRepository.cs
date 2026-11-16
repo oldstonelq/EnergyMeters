@@ -151,6 +151,10 @@ namespace ReadDataSoftware
             };
         }
 
+        /// <summary>
+        /// 把旧版直流数据的一条记录转成样本，缺电压字段时返回 null。
+        /// </summary>
+        /// <param name="item">JSON 数组里的一条记录</param>
         private static MeterSample BuildSinglePhaseSample(JObject item)
         {
             if (item["voltage"] == null)
@@ -165,6 +169,10 @@ namespace ReadDataSoftware
             });
         }
 
+        /// <summary>
+        /// 把旧版三相数据的一条记录转成样本，缺相电压字段时返回 null。
+        /// </summary>
+        /// <param name="item">JSON 数组里的一条记录</param>
         private static MeterSample BuildThreePhaseSample(JObject item)
         {
             if (item["phaseVoltageA"] == null)
@@ -194,6 +202,10 @@ namespace ReadDataSoftware
             return new MeterSample(ReadTime(item), values);
         }
 
+        /// <summary>
+        /// 读取时间字段，缺失时返回 DateTime.MinValue。
+        /// </summary>
+        /// <param name="item">JSON 对象</param>
         private static DateTime ReadTime(JObject item)
         {
             JToken token = item["time"];
@@ -204,6 +216,11 @@ namespace ReadDataSoftware
             return token.Value<DateTime>();
         }
 
+        /// <summary>
+        /// 读取数值字段，缺失或为 null 时返回 0。
+        /// </summary>
+        /// <param name="item">JSON 对象</param>
+        /// <param name="propertyName">字段名</param>
         private static double ReadDouble(JObject item, string propertyName)
         {
             JToken token = item[propertyName];

@@ -7,6 +7,9 @@ using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
+    /// <summary>
+    /// 程序入口。
+    /// </summary>
     internal static class Program
     {
         /// <summary>

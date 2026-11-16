@@ -17,6 +17,9 @@ namespace ReadDataSoftware
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 用当前配置填充各下拉框。
+        /// </summary>
         private void InitializeComboBoxes()
         {
             // 端口列表固定给出 COM1~COM10，避免枚举到虚拟串口
@@ -50,18 +53,27 @@ namespace ReadDataSoftware
             cmb_EnergyMetersType.Text = SystemParameters.Device.MeterType.ToConfigValue();
         }
 
+        /// <summary>
+        /// 显示当前的数据目录与日志文件路径。
+        /// </summary>
         private void InitializeTextBoxes()
         {
             txt_DataFile.Text = SystemParameters.Paths.DataDirectory;
             txt_LogFile.Text = SystemParameters.Paths.LogFile;
         }
 
+        /// <summary>
+        /// 窗体加载：填充全部输入控件。
+        /// </summary>
         private void SystemSettingsForm_Load(object sender, EventArgs e)
         {
             InitializeComboBoxes();
             InitializeTextBoxes();
         }
 
+        /// <summary>
+        /// 把界面上的值写回 ini。写入失败时提示原因，内存中的配置保持不变。
+        /// </summary>
         private void btn_Save_Click(object sender, EventArgs e)
         {
             // 在现有配置的副本上改，保存失败时内存里的配置不受影响。

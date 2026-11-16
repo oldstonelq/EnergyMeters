@@ -11,12 +11,30 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed partial class SampleTable : UserControl
     {
+        /// <summary>
+        /// 「全部」分组的名称，所有通道显示在同一张表里时用它。
+        /// </summary>
         private const string AllGroups = "全部";
 
+        /// <summary>
+        /// 当前绑定的通道定义。
+        /// </summary>
         private IReadOnlyList<ChannelDescriptor> _channels;
+        /// <summary>
+        /// 取当前样本集合的委托，切换分组或重填时调用。
+        /// </summary>
         private Func<IReadOnlyList<MeterSample>> _samplesProvider;
+        /// <summary>
+        /// 当前选中的分组名称。
+        /// </summary>
         private string _activeGroup = AllGroups;
+        /// <summary>
+        /// 各数据列对应的通道下标，不含固定在首列的时间。
+        /// </summary>
         private int[] _columnChannelIndexes = new int[0];
+        /// <summary>
+        /// 重建分组按钮时置位，避免程序性勾选被当成用户切换。
+        /// </summary>
         private bool _suppressGroupChange;
 
         /// <summary>
@@ -174,6 +192,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 收集全部分组名称，「全部」固定排在最前。
+        /// </summary>
         private List<string> CollectGroups()
         {
             List<string> groups = new List<string> { AllGroups };
@@ -191,6 +212,9 @@ namespace ReadDataSoftware
             return groups;
         }
 
+        /// <summary>
+        /// 分组按钮被选中：重建列、重填表格，并通知外部。
+        /// </summary>
         private void GroupButton_CheckedChanged(object sender, EventArgs e)
         {
             if (_suppressGroupChange)
@@ -251,6 +275,12 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 按统一格式创建只读文本列。
+        /// </summary>
+        /// <param name="headerText">列标题</param>
+        /// <param name="name">列名</param>
+        /// <param name="fillWeight">列宽占比</param>
         private static DataGridViewTextBoxColumn CreateColumn(string headerText, string name, float fillWeight)
         {
             return new DataGridViewTextBoxColumn

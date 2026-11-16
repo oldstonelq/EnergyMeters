@@ -11,11 +11,23 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed partial class ChannelCardPanel : UserControl
     {
+        /// <summary>
+        /// 单张卡片的宽度，单位像素。
+        /// </summary>
         private const int CardWidth = 112;
+        /// <summary>
+        /// 单张卡片的高度，单位像素。
+        /// </summary>
         private const int CardHeight = 56;
+        /// <summary>
+        /// 数值字体的基准字号，显示时在此基础上放大。
+        /// </summary>
         private const int DefaultFontSize = 9;
 
         private readonly Dictionary<int, Label> _valueLabels = new Dictionary<int, Label>();
+        /// <summary>
+        /// 当前绑定的通道定义，下标与卡片一一对应。
+        /// </summary>
         private IReadOnlyList<ChannelDescriptor> _channels;
 
         /// <summary>

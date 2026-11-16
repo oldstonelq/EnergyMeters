@@ -19,9 +19,21 @@ namespace ReadDataSoftware
         /// </summary>
         private const int MaxChartSeries = 3;
 
+        /// <summary>
+        /// 本次采集的样本，界面显示与落盘都读这一份。
+        /// </summary>
         private readonly List<MeterSample> _samples = new List<MeterSample>();
+        /// <summary>
+        /// 当前表型的通道定义。
+        /// </summary>
         private IReadOnlyList<ChannelDescriptor> _channels;
+        /// <summary>
+        /// 采集服务，窗体关闭时释放。
+        /// </summary>
         private MeterSampler _sampler;
+        /// <summary>
+        /// 是否正在采集，用于控制按钮与状态栏。
+        /// </summary>
         private bool _isWorking;
 
         /// <summary>
@@ -33,6 +45,9 @@ namespace ReadDataSoftware
         }
 
         #region 窗体加载与关闭
+        /// <summary>
+        /// 窗体加载：绑定三个视图控件、创建采集服务并刷新按钮状态。
+        /// </summary>
         private void MainForm_Load(object sender, EventArgs e)
         {
             _channels = SystemParameters.EnergyMeters.Channels;
@@ -52,6 +67,9 @@ namespace ReadDataSoftware
             UpdateStatus();
         }
 
+        /// <summary>
+        /// 关闭前释放采集服务，避免后台线程继续读串口。
+        /// </summary>
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_sampler != null)
@@ -62,6 +80,9 @@ namespace ReadDataSoftware
         #endregion
 
         #region 工具条
+        /// <summary>
+        /// 开始采集。端口打不开时提示用户，并保持空闲状态。
+        /// </summary>
         private void _startButton_Click(object sender, EventArgs e)
         {
             try
@@ -80,6 +101,9 @@ namespace ReadDataSoftware
             UpdateStatus();
         }
 
+        /// <summary>
+        /// 停止采集。等采集线程真正退出后再落盘，避免漏掉最后几帧。
+        /// </summary>
         private async void _stopButton_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("确定停止并保存数据？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -105,6 +129,9 @@ namespace ReadDataSoftware
             SaveCollectedData();
         }
 
+        /// <summary>
+        /// 把当前分组的数据导出为 CSV。
+        /// </summary>
         private void _exportButton_Click(object sender, EventArgs e)
         {
             if (_samples.Count == 0)
@@ -137,6 +164,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 选择数据文件，以模态方式打开回放窗体。
+        /// </summary>
         private void _replayButton_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
@@ -172,6 +202,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 确认后清空本次采集的数据与界面。
+        /// </summary>
         private void _clearButton_Click(object sender, EventArgs e)
         {
             if (_samples.Count == 0)
@@ -189,6 +222,9 @@ namespace ReadDataSoftware
             ResetView();
         }
 
+        /// <summary>
+        /// 打开系统设置窗体，配置保存后需重启才生效。
+        /// </summary>
         private void _settingsButton_Click(object sender, EventArgs e)
         {
             using (SystemSettingsForm form = new SystemSettingsForm())
@@ -199,6 +235,9 @@ namespace ReadDataSoftware
         #endregion
 
         #region 采集回调
+        /// <summary>
+        /// 采集线程推送样本，切回界面线程追加。
+        /// </summary>
         private void OnSampleReady(object sender, MeterSampleEventArgs e)
         {
             if (IsDisposed || !IsHandleCreated)
@@ -216,6 +255,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 采集中断：记录日志、恢复按钮状态并提示原因。
+        /// </summary>
         private void OnSampleFailed(object sender, SamplingErrorEventArgs e)
         {
             LogError("采集线程执行出现异常,异常原因为：" + e.Error.Message + e.Error.StackTrace);
@@ -232,6 +274,9 @@ namespace ReadDataSoftware
             }));
         }
 
+        /// <summary>
+        /// 把一帧样本同时追加到卡片区、曲线与记录表。
+        /// </summary>
         private void AppendSample(MeterSample sample)
         {
             _samples.Add(sample);
@@ -276,6 +321,9 @@ namespace ReadDataSoftware
             return new[] { 0, 6, 12 };
         }
 
+        /// <summary>
+        /// 把本次采集写入数据目录，成功后清空界面并显示文件名。
+        /// </summary>
         private void SaveCollectedData()
         {
             if (_samples.Count == 0)
@@ -304,6 +352,9 @@ namespace ReadDataSoftware
             _statusLabel.Text = string.Format("已保存 {0} 条：{1}", savedCount, Path.GetFileName(fileName));
         }
 
+        /// <summary>
+        /// 用首末样本时间生成文件名，如 20261116142000至20261116143000.json。
+        /// </summary>
         private string BuildDataFileName()
         {
             string startTime = _samples[0].Time.ToString("yyyyMMddHHmmss");
@@ -324,6 +375,9 @@ namespace ReadDataSoftware
             UpdateStatus();
         }
 
+        /// <summary>
+        /// 按采集状态与是否有数据刷新各按钮是否可用。
+        /// </summary>
         private void UpdateButtons()
         {
             bool hasData = _samples.Count > 0;
@@ -335,6 +389,9 @@ namespace ReadDataSoftware
             _settingsButton.Enabled = !_isWorking;
         }
 
+        /// <summary>
+        /// 刷新状态栏：串口、表型、采集状态与本次条数。
+        /// </summary>
         private void UpdateStatus()
         {
             _statusLabel.Text = string.Format("{0} · {1} · {2} · 本次 {3} 条",

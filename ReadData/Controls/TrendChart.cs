@@ -11,10 +11,22 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed partial class TrendChart : UserControl
     {
+        /// <summary>
+        /// 曲线配色，通道多于三种时循环取用。
+        /// </summary>
         private static readonly Color[] s_seriesColors = { Color.Red, Color.Blue, Color.Green };
 
+        /// <summary>
+        /// 当前绑定的通道定义。
+        /// </summary>
         private IReadOnlyList<ChannelDescriptor> _channels;
+        /// <summary>
+        /// 各条曲线对应的通道下标。
+        /// </summary>
         private int[] _channelIndexes = new int[0];
+        /// <summary>
+        /// 各条曲线的名称，同时用作 Series 的键。
+        /// </summary>
         private string[] _seriesNames = new string[0];
 
         /// <summary>

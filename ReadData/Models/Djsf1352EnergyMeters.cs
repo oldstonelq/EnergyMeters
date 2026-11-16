@@ -26,7 +26,13 @@ namespace ReadDataSoftware
         /// </summary>
         private const ushort PowerAddress = 8;
 
+        /// <summary>
+        /// Modbus 主站，串口在 Open 时打开。
+        /// </summary>
         private readonly ModbusRtuClient _client;
+        /// <summary>
+        /// 从站地址，未配置时取本表型的内置默认值。
+        /// </summary>
         private readonly byte _slaveAddress;
 
         /// <summary>

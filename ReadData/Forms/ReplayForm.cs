@@ -16,8 +16,17 @@ namespace ReadDataSoftware
         /// </summary>
         private const int MaxSeries = 3;
 
+        /// <summary>
+        /// 文件内容，通道定义与样本都取自它。
+        /// </summary>
         private readonly SampleDocument _document;
+        /// <summary>
+        /// 文件路径，用于标题与导出时的默认文件名。
+        /// </summary>
         private readonly string _filePath;
+        /// <summary>
+        /// 批量填充勾选列表时置位，避免逐项触发重建曲线。
+        /// </summary>
         private bool _suppressItemCheck;
 
         /// <summary>
@@ -36,6 +45,9 @@ namespace ReadDataSoftware
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 窗体加载：填元信息与通道列表，并画出默认曲线。
+        /// </summary>
         private void ReplayForm_Load(object sender, EventArgs e)
         {
             _fileLabel.Text = Path.GetFileName(_filePath);
@@ -111,6 +123,9 @@ namespace ReadDataSoftware
             return new[] { 0, 1, 2 };
         }
 
+        /// <summary>
+        /// 取当前勾选的通道下标。
+        /// </summary>
         private int[] GetCheckedChannelIndexes()
         {
             List<int> indexes = new List<int>();
@@ -121,6 +136,9 @@ namespace ReadDataSoftware
             return indexes.ToArray();
         }
 
+        /// <summary>
+        /// 勾选数量超过上限时拒绝本次勾选，并把重建曲线推迟到状态生效之后。
+        /// </summary>
         private void _channelList_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (_suppressItemCheck)
@@ -139,6 +157,9 @@ namespace ReadDataSoftware
             BeginInvoke(new Action(RebuildChart));
         }
 
+        /// <summary>
+        /// 按勾选的通道重建曲线并重灌数据。
+        /// </summary>
         private void RebuildChart()
         {
             int[] indexes = GetCheckedChannelIndexes();
@@ -146,6 +167,9 @@ namespace ReadDataSoftware
             _trendChart.Reload(_document.Samples);
         }
 
+        /// <summary>
+        /// 把表格导出为 CSV，默认文件名与数据文件同名。
+        /// </summary>
         private void _exportButton_Click(object sender, EventArgs e)
         {
             using (SaveFileDialog dialog = new SaveFileDialog())
@@ -168,6 +192,9 @@ namespace ReadDataSoftware
             }
         }
 
+        /// <summary>
+        /// 关闭窗体。
+        /// </summary>
         private void _closeButton_Click(object sender, EventArgs e)
         {
             Close();

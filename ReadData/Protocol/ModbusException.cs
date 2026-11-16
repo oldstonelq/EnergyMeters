@@ -49,6 +49,10 @@ namespace ReadDataSoftware
             SlaveAddress = slaveAddress;
         }
 
+        /// <summary>
+        /// 把 Modbus 异常码翻译成中文说明。
+        /// </summary>
+        /// <param name="exceptionCode">从站返回的异常码</param>
         private static string DescribeExceptionCode(byte exceptionCode)
         {
             switch (exceptionCode)
