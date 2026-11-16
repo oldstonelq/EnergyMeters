@@ -98,18 +98,24 @@ namespace ReadDataSoftware
         }
 
         /// <summary>
-        /// 写回 ini。
+        /// 写回 ini。任一项写入失败都会抛出异常，避免配置文件只写了一半却提示成功。
         /// </summary>
+        /// <exception cref="IOException">文件只读、被占用或路径无效</exception>
         public void Save(string iniPath)
         {
-            FileHelp.WriteIniKeys(SectionName, "PortName", PortName, iniPath);
-            FileHelp.WriteIniKeys(SectionName, "BaudRate", BaudRate.ToString(), iniPath);
-            FileHelp.WriteIniKeys(SectionName, "DataBits", DataBits.ToString(), iniPath);
-            FileHelp.WriteIniKeys(SectionName, "StopBits", StopBits.ToString(), iniPath);
-            FileHelp.WriteIniKeys(SectionName, "Parity", Parity.ToString(), iniPath);
-            FileHelp.WriteIniKeys(SectionName, "EnergyMetersType", MeterType.ToConfigValue(), iniPath);
-            FileHelp.WriteIniKeys(SectionName, "SlaveAddress",
+            bool written = FileHelp.WriteIniKeys(SectionName, "PortName", PortName, iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "BaudRate", BaudRate.ToString(), iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "DataBits", DataBits.ToString(), iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "StopBits", StopBits.ToString(), iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "Parity", Parity.ToString(), iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "EnergyMetersType", MeterType.ToConfigValue(), iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, "SlaveAddress",
                 SlaveAddress.HasValue ? SlaveAddress.Value.ToString() : string.Empty, iniPath);
+
+            if (!written)
+            {
+                throw new IOException("写入配置文件失败：" + iniPath + "，请检查文件是否只读或被其他程序占用。");
+            }
         }
 
         private static int ReadInt(string iniPath, string key, int defaultValue, int minValue, int maxValue)

@@ -94,6 +94,7 @@
 - **现状**：`JsonSerializerHelper.cs:34` 与 `:74` 的 `catch` 里只有 `Console.WriteLine`。本项目是 `WinExe`，没有控制台，输出直接丢弃。
 - **影响**：采集几小时的数据可能一条没存下来，用户却看到"数据保存成功"以外的沉默。
 - **动作**：失败时写 `LogError` 并向调用方返回明确结果；`SaveCollectedData` 里对失败要弹提示。
+- **完成情况**：JSON 落盘改为抛异常 + 弹窗；后续复查又补了两条同类静默失败 —— `FileHelp.WriteIniKeys` 改为返回 `bool`（原先忽略 Win32 返回值），`DeviceConfig.Save` 任一项写失败即抛 `IOException`；`FileHelp.ExportCsv` 增加 `out string error`，导出失败不再提示"是否打开文件"。
 
 ### [x] 7. 配置读取加校验
 

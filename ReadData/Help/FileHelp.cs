@@ -26,9 +26,10 @@ namespace ReadDataSoftware
         /// <param name="key">项/Key名称</param>
         /// <param name="value">值</param>
         /// <param name="filePath">ini文件路径</param>
-        public static void WriteIniKeys(string section, string key, string value, string filePath)
+        /// <returns>写入成功返回 true；文件只读或路径无效时返回 false</returns>
+        public static bool WriteIniKeys(string section, string key, string value, string filePath)
         {
-            WritePrivateProfileString(section, key, value, filePath);
+            return WritePrivateProfileString(section, key, value, filePath) != 0;
         }
 
         /*
@@ -107,11 +108,12 @@ namespace ReadDataSoftware
         /// <summary>
         /// 导出DGV表格
         /// </summary>
-        /// <param name="dgv"></param>
-        /// <param name="fileName"></param>
-        /// <param name="appendTexts"></param>
-        /// <returns></returns>
-        public static bool ExportCsv(DataGridView dgv, string fileName, string[] appendTexts = null)
+        /// <param name="dgv">要导出的表格</param>
+        /// <param name="fileName">目标文件</param>
+        /// <param name="error">失败原因；成功时为空字符串</param>
+        /// <param name="appendTexts">追加在末尾的额外行</param>
+        /// <returns>写入成功返回 true</returns>
+        public static bool ExportCsv(DataGridView dgv, string fileName, out string error, string[] appendTexts = null)
         {
             List<string> mList = new List<string>();
             var sb = new StringBuilder();
@@ -135,7 +137,10 @@ namespace ReadDataSoftware
             {
                 mList.AddRange(appendTexts);
             }
-            return FileHelp.WriteCSV(fileName, mList.ToArray(), System.IO.FileMode.Create) == "ok";
+
+            string result = WriteCSV(fileName, mList.ToArray(), System.IO.FileMode.Create);
+            error = result == "ok" ? string.Empty : result;
+            return error.Length == 0;
         }
 
         /// <summary>

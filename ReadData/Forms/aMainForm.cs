@@ -171,7 +171,14 @@ namespace ReadDataSoftware
 
             try
             {
-                FileHelp.ExportCsv(grid, saveFileDialog.FileName);
+                string error;
+                if (!FileHelp.ExportCsv(grid, saveFileDialog.FileName, out error))
+                {
+                    LogError("导出表格数据失败：" + error);
+                    MessageBox.Show("导出失败：" + error, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 DialogResult openResult = MessageBox.Show("是否要打开导出的文件？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (openResult == DialogResult.Yes)
                 {
