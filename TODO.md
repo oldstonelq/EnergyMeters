@@ -107,11 +107,12 @@
 
 ## P2 清理
 
-### [ ] 8. 移除 Excel COM 依赖
+### [x] 8. 移除 Excel COM 依赖
 
 - **现状**：`Help/FileHelp.cs:83` 的 `ReadExcelFile` 与 `:61` 的 `ReadCsvFile` 无人调用，但 `ReadExcelFile` 拖着一整个 `Microsoft.Office.Interop.Excel` 引用。
 - **影响**：部署包必须要求目标机器装 Office；`packages/` 里多一个几十 MB 的依赖。
 - **动作**：删除这两个方法 → 移除 csproj 中的 Excel 引用与 `packages.config` 条目 → 确认 `ExportCsv` 不受影响。
+- **完成情况**：两个方法与 `using Excel = ...` 一并删除，顺带清掉 `FileHelp` 里另外四个无用的 using；csproj 引用与 `packages.config` 条目移除，`packages/` 下的 Excel 包缓存也删了。删完后全量编译通过，产物里不再有 interop 程序集 —— 目标机器不再需要装 Office。
 
 ### [x] 9. 数据模型命名与复用
 

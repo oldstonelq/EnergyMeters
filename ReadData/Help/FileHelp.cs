@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Excel = Microsoft.Office.Interop.Excel;
 
 
 namespace ReadDataSoftware
@@ -54,57 +50,6 @@ namespace ReadDataSoftware
         }
 
 
-        /// <summary>
-        /// 读取csv文件
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static string ReadCsvFile(string filePath)
-        {
-            StringBuilder queryBuilder = new StringBuilder();
-            string[] lines = File.ReadAllLines(filePath);
-            foreach (string line in lines)
-            {
-                string[] values = line.Split(',');
-                foreach (string value in values)
-                {
-                    // 转义双引号
-                    string escapedValue = value.Replace("\"", "");
-                    queryBuilder.Append(escapedValue);
-                    queryBuilder.AppendLine();
-                }
-            }
-            return queryBuilder.ToString();
-        }
-        /// <summary>
-        /// 读取excel文件
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static string ReadExcelFile(string filePath)
-        {
-            Excel.Application excelApp = new Excel.Application();
-            Excel.Workbook workbook = excelApp.Workbooks.Open(filePath);
-            Excel.Worksheet worksheet = workbook.Sheets[1];
-            Excel.Range range = worksheet.UsedRange;
-
-            StringBuilder queryBuilder = new StringBuilder();
-            for (int row = 1; row <= range.Rows.Count; row++)
-            {
-                for (int col = 1; col <= range.Columns.Count; col++)
-                {
-                    if (range.Cells[row, col]?.Value2 != null)
-                    {
-                        queryBuilder.Append(range.Cells[row, col].Value2.ToString());
-                        queryBuilder.AppendLine();
-                    }
-                }
-            }
-
-            workbook.Close(false);
-            excelApp.Quit();
-            return queryBuilder.ToString();
-        }
         /// <summary>
         /// 导出DGV表格
         /// </summary>
