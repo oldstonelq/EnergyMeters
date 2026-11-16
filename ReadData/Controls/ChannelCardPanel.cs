@@ -18,6 +18,9 @@ namespace ReadDataSoftware
         private readonly Dictionary<int, Label> _valueLabels = new Dictionary<int, Label>();
         private IReadOnlyList<ChannelDescriptor> _channels;
 
+        /// <summary>
+        /// 初始化实时值卡片区。
+        /// </summary>
         public ChannelCardPanel()
         {
             InitializeComponent();

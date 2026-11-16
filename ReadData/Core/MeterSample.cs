@@ -8,6 +8,11 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class MeterSample
     {
+        /// <summary>
+        /// 创建一次采样结果。
+        /// </summary>
+        /// <param name="time">采样时间</param>
+        /// <param name="values">各通道读数，顺序与通道定义一致</param>
         [JsonConstructor]
         public MeterSample(DateTime time, double[] values)
         {

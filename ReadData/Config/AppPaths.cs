@@ -7,6 +7,10 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class AppPaths
     {
+        /// <summary>
+        /// 按程序所在目录构造路径集合。
+        /// </summary>
+        /// <param name="startupPath">程序所在目录</param>
         public AppPaths(string startupPath)
         {
             StartupPath = startupPath;

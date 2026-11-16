@@ -17,6 +17,9 @@ namespace ReadDataSoftware
         private int[] _channelIndexes = new int[0];
         private string[] _seriesNames = new string[0];
 
+        /// <summary>
+        /// 初始化趋势曲线控件。
+        /// </summary>
         public TrendChart()
         {
             InitializeComponent();

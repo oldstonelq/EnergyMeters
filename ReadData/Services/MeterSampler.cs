@@ -9,6 +9,10 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class MeterSampleEventArgs : EventArgs
     {
+        /// <summary>
+        /// 初始化采样完成事件参数。
+        /// </summary>
+        /// <param name="sample">本次采样结果</param>
         public MeterSampleEventArgs(MeterSample sample)
         {
             Sample = sample;
@@ -25,6 +29,10 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class SamplingErrorEventArgs : EventArgs
     {
+        /// <summary>
+        /// 初始化采集中断事件参数。
+        /// </summary>
+        /// <param name="error">导致中断的异常</param>
         public SamplingErrorEventArgs(Exception error)
         {
             Error = error;
@@ -48,6 +56,10 @@ namespace ReadDataSoftware
         private TimeSpan _interval;
         private bool _disposed;
 
+        /// <summary>
+        /// 为指定电表创建采集服务。
+        /// </summary>
+        /// <param name="meter">要采集的电表</param>
         public MeterSampler(IEnergyMeters meter)
         {
             if (meter == null)

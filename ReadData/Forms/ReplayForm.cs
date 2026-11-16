@@ -20,6 +20,11 @@ namespace ReadDataSoftware
         private readonly string _filePath;
         private bool _suppressItemCheck;
 
+        /// <summary>
+        /// 用已加载的采集文件初始化回放窗体。
+        /// </summary>
+        /// <param name="document">文件内容</param>
+        /// <param name="filePath">文件路径，用于显示名称与导出时的默认文件名</param>
         public ReplayForm(SampleDocument document, string filePath)
         {
             if (document == null)

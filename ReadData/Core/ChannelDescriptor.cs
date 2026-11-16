@@ -8,6 +8,14 @@ namespace ReadDataSoftware
     /// </summary>
     public sealed class ChannelDescriptor
     {
+        /// <summary>
+        /// 描述一个参量通道。
+        /// </summary>
+        /// <param name="key">通道标识</param>
+        /// <param name="name">显示名称</param>
+        /// <param name="unit">单位</param>
+        /// <param name="decimals">显示小数位</param>
+        /// <param name="group">所属分组</param>
         [JsonConstructor]
         public ChannelDescriptor(string key, string name, string unit, int decimals, string group)
         {

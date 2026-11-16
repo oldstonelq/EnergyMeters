@@ -5,6 +5,9 @@ using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
+    /// <summary>
+    /// 主窗体：本次采集的实时值、趋势曲线与记录表。
+    /// </summary>
     public partial class MainForm : Form
     {
         /// <summary>
@@ -21,6 +24,9 @@ namespace ReadDataSoftware
         private MeterSampler _sampler;
         private bool _isWorking;
 
+        /// <summary>
+        /// 初始化主窗体。
+        /// </summary>
         public MainForm()
         {
             InitializeComponent();

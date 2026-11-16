@@ -4,8 +4,14 @@ using System.Windows.Forms;
 
 namespace ReadDataSoftware
 {
+    /// <summary>
+    /// 系统设置窗体：串口参数与电表型号。
+    /// </summary>
     public partial class SystemSettingsForm : Form
     {
+        /// <summary>
+        /// 初始化系统设置窗体。
+        /// </summary>
         public SystemSettingsForm()
         {
             InitializeComponent();
@@ -13,8 +19,7 @@ namespace ReadDataSoftware
 
         private void InitializeComboBoxes()
         {
-            //获取当前计算机上所有串口
-            //string[] ports = SerialPort.GetPortNames();
+            // 端口列表固定给出 COM1~COM10，避免枚举到虚拟串口
             string[] ports = { "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10" };
             cmb_PortName.Items.AddRange(ports);
             cmb_PortName.Text = SystemParameters.Device.PortName;

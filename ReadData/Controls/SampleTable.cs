@@ -24,6 +24,9 @@ namespace ReadDataSoftware
         /// </summary>
         public event EventHandler ActiveGroupChanged;
 
+        /// <summary>
+        /// 初始化采集记录表。
+        /// </summary>
         public SampleTable()
         {
             InitializeComponent();

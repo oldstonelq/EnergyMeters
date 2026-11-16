@@ -17,16 +17,30 @@ namespace ReadDataSoftware
         /// </summary>
         public byte? SlaveAddress { get; }
 
+        /// <summary>
+        /// 用说明文字创建异常。
+        /// </summary>
+        /// <param name="message">异常说明</param>
         public ModbusException(string message)
             : base(message)
         {
         }
 
+        /// <summary>
+        /// 用说明文字与内部异常创建异常。
+        /// </summary>
+        /// <param name="message">异常说明</param>
+        /// <param name="innerException">引发本异常的内部异常</param>
         public ModbusException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
+        /// <summary>
+        /// 用从站返回的异常码创建异常。
+        /// </summary>
+        /// <param name="exceptionCode">Modbus 异常码</param>
+        /// <param name="slaveAddress">返回异常的从站地址</param>
         public ModbusException(byte exceptionCode, byte slaveAddress)
             : base(string.Format("从站 {0} 返回异常应答，异常码 0x{1:X2}（{2}）。",
                 slaveAddress, exceptionCode, DescribeExceptionCode(exceptionCode)))
