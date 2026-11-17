@@ -64,6 +64,9 @@
 - **记录表**（下方）：本次采集的逐帧记录，采集中自动滚到最新一行；表格最多保留最近
   5000 行，落盘仍是全部数据。
 
+设置窗体里的「数据存储路径」可直接输入，也可点右侧「浏览...」选目录；保存后重启生效，
+文件仍按表型放在该目录的子目录里。
+
 主窗体客户区 1280×740（含边框与标题栏约 1300×780），设置窗体 523×356。
 两者边框固定，不能用鼠标拖边调整大小；主窗体保留最大化按钮，1366×768 的工控机
 最大化后能完整显示，设置窗体为对话框样式、不可最大化。
@@ -81,6 +84,7 @@ StopBits=One
 Parity=None
 EnergyMetersType=ADL400
 SlaveAddress=177
+DataDirectory=D://MeterData
 ```
 
 | 键 | 取值 | 说明 |
@@ -92,6 +96,7 @@ SlaveAddress=177
 | `Parity` | `None` / `Odd` / `Even` / `Mark` / `Space` | 默认 `None` |
 | `EnergyMetersType` | `DJSF1352` / `AMC` / `ADL400` | 决定通道定义与寄存器地址 |
 | `SlaveAddress` | 1~247 | 留空或填 0 时用表型默认值 |
+| `DataDirectory` | 目录路径 | 数据文件根目录；留空表示程序目录下的 `Data` |
 
 解析全部走 `TryParse` 并带范围校验，ini 里有脏值不会导致启动崩溃，只会回落到默认值。
 
@@ -100,7 +105,7 @@ SlaveAddress=177
 
 ## 数据文件
 
-保存目录 `Data\<表型>\`，文件名取首末样本时间：
+保存目录默认为 `Data\<表型>\`，可在设置窗体里改根目录；文件名取首末样本时间：
 
 ```
 Data\ADL400\20261116142001至20261116143000.json
@@ -153,7 +158,7 @@ Data\ADL400\20261116142001至20261116143000.json
 ```
 MeterRecorder/
 ├─ Core/         表型枚举与转换、通道定义、样本、IEnergyMeter、工厂
-├─ Config/       AppPaths（目录）、DeviceConfig（ini 配置）
+├─ Config/       AppPaths（目录）、DeviceConfig（串口与表型）、StorageConfig（数据目录）
 ├─ Protocol/     ModbusRtuClient（组帧/超时/校验）、IModbusTransport 与串口实现、
 │                ModbusCrc、ModbusFrame、ModbusException
 ├─ Models/       三款表的寄存器地址与缩放
@@ -265,7 +270,7 @@ using (Adl400EnergyMeters meter = new Adl400EnergyMeters(new DeviceConfig(), tra
 - **一帧失败即中断**：串口读失败直接结束本次采集并提示，不做自动重试，避免错误数据入库。
 - **曲线共用一根 Y 轴**：电压、电流、功率量级差别大时，小量级的线会被压扁；
   改多轴或分图记为待办，见 `TODO.md` 第 15 项。
-- **数据目录跟随 exe**：换目录运行看不到旧数据，需要把 `Data\` 与 `System\system.ini` 一起搬。
+- **数据目录默认跟随 exe**：在设置窗体里可以改到别的盘，改完需重启；旧数据不会自动搬过去。
 - **表型切换需重启**：配置在启动时装配，改表型后要点「保存&应用」再重启。
 - **从站地址只能改 ini**：界面暂未提供该项输入。
 

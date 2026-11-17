@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace MeterRecorder
@@ -11,12 +12,17 @@ namespace MeterRecorder
         /// 按程序所在目录构造路径集合。
         /// </summary>
         /// <param name="startupPath">程序所在目录</param>
-        public AppPaths(string startupPath)
+        /// <param name="dataRoot">
+        /// 数据根目录。为 null 或空白时取程序目录下的 Data，与旧版本行为一致。
+        /// </param>
+        public AppPaths(string startupPath, string dataRoot = null)
         {
             StartupPath = startupPath;
             SystemDirectory = Path.Combine(startupPath, "System");
             SystemFile = Path.Combine(SystemDirectory, "system.ini");
-            DataDirectory = Path.Combine(startupPath, "Data");
+            DataDirectory = string.IsNullOrWhiteSpace(dataRoot)
+                ? Path.Combine(startupPath, "Data")
+                : dataRoot.Trim();
             LogDirectory = Path.Combine(startupPath, "Logs");
             LogFile = Path.Combine(LogDirectory, "log.txt");
         }
@@ -61,18 +67,12 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 确保程序运行所需的目录与配置文件存在。
+        /// 只确保配置目录与 ini 文件存在。程序启动时先读配置，再决定数据目录放哪，
+        /// 所以建数据目录的事交给 <see cref="EnsureCreated"/>。
         /// </summary>
-        public void EnsureCreated()
+        public void EnsureConfigFile()
         {
             Directory.CreateDirectory(SystemDirectory);
-            Directory.CreateDirectory(DataDirectory);
-            Directory.CreateDirectory(LogDirectory);
-            foreach (MeterType meterType in new[] { MeterType.Djsf1352, MeterType.Amc, MeterType.Adl400 })
-            {
-                Directory.CreateDirectory(GetDataDirectory(meterType));
-            }
-
             if (!File.Exists(SystemFile))
             {
                 // File.Create 返回的流必须释放，否则句柄会一直占用到 GC，
@@ -80,6 +80,20 @@ namespace MeterRecorder
                 using (File.Create(SystemFile))
                 {
                 }
+            }
+        }
+
+        /// <summary>
+        /// 确保程序运行所需的目录存在。数据目录可能来自配置，不存在时在这里创建。
+        /// </summary>
+        public void EnsureCreated()
+        {
+            EnsureConfigFile();
+            Directory.CreateDirectory(DataDirectory);
+            Directory.CreateDirectory(LogDirectory);
+            foreach (MeterType meterType in new[] { MeterType.Djsf1352, MeterType.Amc, MeterType.Adl400 })
+            {
+                Directory.CreateDirectory(GetDataDirectory(meterType));
             }
         }
     }

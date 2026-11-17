@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.IO.Ports;
 using System.Windows.Forms;
 
@@ -73,6 +74,69 @@ namespace MeterRecorder
         }
 
         /// <summary>
+        /// 选择数据保存目录。只把结果填进文本框，确定保存后才写 ini，取消则不影响现有配置。
+        /// </summary>
+        private void _browseButton_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "选择数据文件的保存目录";
+                dialog.ShowNewFolderButton = true;
+
+                string current = _dataPathText.Text.Trim();
+                if (current.Length > 0 && Directory.Exists(current))
+                {
+                    dialog.SelectedPath = current;
+                }
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                _dataPathText.Text = dialog.SelectedPath;
+            }
+        }
+
+        /// <summary>
+        /// 读取界面上的数据目录并校验：为空或无法创建时提示用户，返回 false。
+        /// 与默认目录相同时返回 null，表示仍跟随程序目录，搬动机器不用改配置。
+        /// </summary>
+        /// <param name="dataRoot">校验后的目录；null 表示使用默认目录</param>
+        /// <returns>校验通过返回 true</returns>
+        private bool TryReadDataDirectory(out string dataRoot)
+        {
+            dataRoot = null;
+            string text = _dataPathText.Text.Trim();
+            if (text.Length == 0)
+            {
+                MessageBox.Show("数据保存路径不能为空。", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            string full;
+            try
+            {
+                full = Path.GetFullPath(text);
+                Directory.CreateDirectory(full);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("数据保存路径不可用，异常原因为：", ex);
+                MessageBox.Show("数据保存路径不可用：" + ex.Message, "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            string defaultRoot = Path.GetFullPath(Path.Combine(Application.StartupPath, "Data"));
+            char separator = Path.DirectorySeparatorChar;
+            bool followsStartupPath = string.Equals(
+                full.TrimEnd(separator), defaultRoot.TrimEnd(separator), StringComparison.OrdinalIgnoreCase);
+            dataRoot = followsStartupPath ? null : full;
+            return true;
+        }
+
+        /// <summary>
         /// 把界面上的值写回 ini。写入失败时提示原因，内存中的配置保持不变。
         /// </summary>
         private void _saveButton_Click(object sender, EventArgs e)
@@ -107,9 +171,16 @@ namespace MeterRecorder
                 config.MeterType = meterType;
             }
 
+            string dataRoot;
+            if (!TryReadDataDirectory(out dataRoot))
+            {
+                return;
+            }
+
             try
             {
                 config.Save(SystemParameters.Paths.SystemFile);
+                new StorageConfig { DataDirectory = dataRoot }.Save(SystemParameters.Paths.SystemFile);
             }
             catch (Exception ex)
             {
@@ -118,7 +189,7 @@ namespace MeterRecorder
                 return;
             }
 
-            MessageBox.Show("保存成功，请重启软件生效");
+            MessageBox.Show("保存成功，请重启软件生效。\n数据文件按表型存放在该目录下的子目录中。");
         }
     }
 }

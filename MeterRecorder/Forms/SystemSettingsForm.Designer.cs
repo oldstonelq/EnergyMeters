@@ -40,6 +40,7 @@
             this._dataBitsCombo = new System.Windows.Forms.ComboBox();
             this._baudRateCombo = new System.Windows.Forms.ComboBox();
             this._dataPathText = new System.Windows.Forms.TextBox();
+            this._browseButton = new System.Windows.Forms.Button();
             this._dataPathLabel = new System.Windows.Forms.Label();
             this._saveButton = new System.Windows.Forms.Button();
             this._parityLabel = new System.Windows.Forms.Label();
@@ -62,6 +63,7 @@
             this._mainPanel.Controls.Add(this._dataBitsCombo);
             this._mainPanel.Controls.Add(this._baudRateCombo);
             this._mainPanel.Controls.Add(this._dataPathText);
+            this._mainPanel.Controls.Add(this._browseButton);
             this._mainPanel.Controls.Add(this._dataPathLabel);
             this._mainPanel.Controls.Add(this._saveButton);
             this._mainPanel.Controls.Add(this._parityLabel);
@@ -166,8 +168,18 @@
             // 
             this._dataPathText.Location = new System.Drawing.Point(129, 227);
             this._dataPathText.Name = "_dataPathText";
-            this._dataPathText.Size = new System.Drawing.Size(373, 21);
+            this._dataPathText.Size = new System.Drawing.Size(300, 21);
             this._dataPathText.TabIndex = 6;
+            // 
+            // _browseButton
+            // 
+            this._browseButton.Location = new System.Drawing.Point(433, 225);
+            this._browseButton.Name = "_browseButton";
+            this._browseButton.Size = new System.Drawing.Size(68, 25);
+            this._browseButton.TabIndex = 17;
+            this._browseButton.Text = "浏览...";
+            this._browseButton.UseVisualStyleBackColor = true;
+            this._browseButton.Click += new System.EventHandler(this._browseButton_Click);
             // 
             // _dataPathLabel
             // 
@@ -256,6 +268,7 @@
         private System.Windows.Forms.ComboBox _dataBitsCombo;
         private System.Windows.Forms.ComboBox _baudRateCombo;
         private System.Windows.Forms.TextBox _dataPathText;
+        private System.Windows.Forms.Button _browseButton;
         private System.Windows.Forms.Label _dataPathLabel;
         private System.Windows.Forms.ComboBox _portNameCombo;
         private System.Windows.Forms.Label _portNameLabel;

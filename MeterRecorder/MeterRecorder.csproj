@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Config\AppPaths.cs" />
     <Compile Include="Config\DeviceConfig.cs" />
+    <Compile Include="Config\StorageConfig.cs" />
     <Compile Include="Controls\ChannelCardPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>

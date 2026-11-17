@@ -27,9 +27,19 @@ namespace MeterRecorder
         /// </summary>
         public static void Load()
         {
-            Paths = new AppPaths(Application.StartupPath);
+            string startupPath = Application.StartupPath;
+
+            // 先按默认位置建好配置目录与 ini，才能读到数据目录要不要改。
+            AppPaths defaults = new AppPaths(startupPath);
+            defaults.EnsureConfigFile();
+
+            Device = DeviceConfig.Load(defaults.SystemFile);
+            StorageConfig storage = StorageConfig.Load(defaults.SystemFile);
+
+            // 数据目录来自配置；为空则仍是程序目录下的 Data。
+            Paths = new AppPaths(startupPath, storage.DataDirectory);
             Paths.EnsureCreated();
-            Device = DeviceConfig.Load(Paths.SystemFile);
+
             EnergyMeters = MeterFactory.Create(Device);
         }
     }
