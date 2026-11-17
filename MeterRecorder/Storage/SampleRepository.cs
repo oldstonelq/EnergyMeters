@@ -106,6 +106,10 @@ namespace MeterRecorder
             if (!MeterTypeExtensions.TryParseConfigValue(document.MeterType, out meterType))
             {
                 meterType = MeterType.Djsf1352;
+                // 型号无法识别时把文档里的取值也改成回落后的型号。否则会出现
+                // 「表型显示 ADL999、通道却是直流三项」这种自相矛盾的状态，
+                // 回放窗体按型号选默认曲线时还会再回落一次。
+                document.MeterType = meterType.ToConfigValue();
             }
             if (document.Channels == null || document.Channels.Count == 0)
             {
