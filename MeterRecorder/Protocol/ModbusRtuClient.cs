@@ -11,15 +11,11 @@ namespace MeterRecorder
     public sealed class ModbusRtuClient : IDisposable
     {
         /// <summary>
-        /// 读保持寄存器功能码。
-        /// </summary>
-        private const byte ReadHoldingRegistersFunctionCode = 0x03;
-        /// <summary>
         /// 单次 03H 请求允许的最大寄存器数量。
         /// </summary>
         private const ushort MaxRegistersPerRequest = 125;
         /// <summary>
-        /// 串口单次阻塞读的等待时长，用于让上层超时循环有机会检查总时限。
+        /// 单次阻塞读的等待时长，用于让上层超时循环有机会检查总时限。
         /// </summary>
         private const int PortReadSliceMilliseconds = 100;
         /// <summary>
@@ -28,16 +24,31 @@ namespace MeterRecorder
         private const int DefaultResponseTimeoutMilliseconds = 500;
 
         /// <summary>
-        /// 串口对象，构造时创建，Open 时才真正打开。
+        /// 报文传输通道。默认是串口实现，测试时可注入内存实现。
         /// </summary>
-        private readonly SerialPort _serialPort;
+        private readonly IModbusTransport _transport;
         /// <summary>
         /// 是否已释放，避免重复 Dispose。
         /// </summary>
         private bool _disposed;
 
         /// <summary>
-        /// 创建 Modbus 主站实例，串口尚未打开。
+        /// 用指定的传输通道创建 Modbus 主站。
+        /// </summary>
+        /// <param name="transport">报文传输通道</param>
+        public ModbusRtuClient(IModbusTransport transport)
+        {
+            if (transport == null)
+            {
+                throw new ArgumentNullException(nameof(transport));
+            }
+            _transport = transport;
+            _transport.ReadTimeout = PortReadSliceMilliseconds;
+            ResponseTimeoutMilliseconds = DefaultResponseTimeoutMilliseconds;
+        }
+
+        /// <summary>
+        /// 按串口参数创建 Modbus 主站，串口尚未打开。
         /// </summary>
         /// <param name="portName">串口名称，如 "COM1"</param>
         /// <param name="baudRate">波特率，如 9600</param>
@@ -45,21 +56,16 @@ namespace MeterRecorder
         /// <param name="stopBits">停止位</param>
         /// <param name="parity">校验位</param>
         public ModbusRtuClient(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+            : this(new SerialPortTransport(portName, baudRate, dataBits, stopBits, parity))
         {
-            _serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits)
-            {
-                ReadTimeout = PortReadSliceMilliseconds,
-                WriteTimeout = 1000
-            };
-            ResponseTimeoutMilliseconds = DefaultResponseTimeoutMilliseconds;
         }
 
         /// <summary>
-        /// 串口是否已打开。
+        /// 通道是否已打开。
         /// </summary>
         public bool IsOpen
         {
-            get { return _serialPort.IsOpen; }
+            get { return _transport.IsOpen; }
         }
 
         /// <summary>
@@ -68,25 +74,19 @@ namespace MeterRecorder
         public int ResponseTimeoutMilliseconds { get; set; }
 
         /// <summary>
-        /// 打开串口；已打开时不做任何处理。
+        /// 打开通道；已打开时不做任何处理。
         /// </summary>
         public void Open()
         {
-            if (!_serialPort.IsOpen)
-            {
-                _serialPort.Open();
-            }
+            _transport.Open();
         }
 
         /// <summary>
-        /// 关闭串口；已关闭时不做任何处理。
+        /// 关闭通道；已关闭时不做任何处理。
         /// </summary>
         public void Close()
         {
-            if (_serialPort.IsOpen)
-            {
-                _serialPort.Close();
-            }
+            _transport.Close();
         }
 
         /// <summary>
@@ -105,10 +105,10 @@ namespace MeterRecorder
                     string.Format("单次读取寄存器数量须在 1~{0} 之间，实际为 {1}。", MaxRegistersPerRequest, quantity));
             }
 
-            byte[] request = BuildReadHoldingRegistersRequest(slaveAddress, startAddress, quantity);
+            byte[] request = ModbusFrame.BuildReadRequest(slaveAddress, startAddress, quantity);
 
-            _serialPort.DiscardInBuffer();
-            _serialPort.Write(request, 0, request.Length);
+            _transport.DiscardInBuffer();
+            _transport.Write(request, 0, request.Length);
 
             byte[] header = new byte[3];
             ReadExactly(header, 0, header.Length, slaveAddress);
@@ -131,7 +131,7 @@ namespace MeterRecorder
                 throw new ModbusException(header[2], slaveAddress);
             }
 
-            if (header[1] != ReadHoldingRegistersFunctionCode)
+            if (header[1] != ModbusFrame.ReadHoldingRegistersFunctionCode)
             {
                 throw new ModbusException(string.Format(
                     "应答功能码不匹配：期望 0x03，收到 0x{0:X2}。", header[1]));
@@ -163,7 +163,7 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 释放串口资源。
+        /// 释放传输通道。
         /// </summary>
         public void Dispose()
         {
@@ -171,52 +171,8 @@ namespace MeterRecorder
             {
                 return;
             }
-            _serialPort.Dispose();
+            _transport.Dispose();
             _disposed = true;
-        }
-
-        /// <summary>
-        /// 组装 03H 请求帧：从站地址 + 功能码 + 起始地址 + 寄存器数 + CRC。
-        /// </summary>
-        private static byte[] BuildReadHoldingRegistersRequest(byte slaveAddress, ushort startAddress, ushort quantity)
-        {
-            byte[] request = new byte[8];
-            request[0] = slaveAddress;
-            request[1] = ReadHoldingRegistersFunctionCode;
-            request[2] = (byte)(startAddress >> 8);
-            request[3] = (byte)startAddress;
-            request[4] = (byte)(quantity >> 8);
-            request[5] = (byte)quantity;
-
-            ushort crc = CalculateCrc(request, 6);
-            request[6] = (byte)crc;
-            request[7] = (byte)(crc >> 8);
-            return request;
-        }
-
-        /// <summary>
-        /// 计算 CRC16/Modbus，返回值的低字节先发。
-        /// </summary>
-        private static ushort CalculateCrc(byte[] data, int length)
-        {
-            ushort crc = 0xFFFF;
-            for (int i = 0; i < length; i++)
-            {
-                crc ^= data[i];
-                for (int bit = 0; bit < 8; bit++)
-                {
-                    if ((crc & 0x0001) != 0)
-                    {
-                        crc >>= 1;
-                        crc ^= 0xA001;
-                    }
-                    else
-                    {
-                        crc >>= 1;
-                    }
-                }
-            }
-            return crc;
         }
 
         /// <summary>
@@ -224,13 +180,14 @@ namespace MeterRecorder
         /// </summary>
         private static void ValidateCrc(byte[] frame, int length)
         {
-            ushort expected = CalculateCrc(frame, length - 2);
-            ushort actual = (ushort)(frame[length - 2] | (frame[length - 1] << 8));
-            if (expected != actual)
+            if (ModbusCrc.Verify(frame, length))
             {
-                throw new ModbusException(string.Format(
-                    "应答帧 CRC 校验失败：计算值 0x{0:X4}，报文值 0x{1:X4}。", expected, actual));
+                return;
             }
+            ushort expected = ModbusCrc.Compute(frame, length - 2);
+            ushort actual = (ushort)(frame[length - 2] | (frame[length - 1] << 8));
+            throw new ModbusException(string.Format(
+                "应答帧 CRC 校验失败：计算值 0x{0:X4}，报文值 0x{1:X4}。", expected, actual));
         }
 
         /// <summary>
@@ -251,7 +208,7 @@ namespace MeterRecorder
 
                 try
                 {
-                    received += _serialPort.Read(buffer, offset + received, count - received);
+                    received += _transport.Read(buffer, offset + received, count - received);
                 }
                 catch (TimeoutException)
                 {

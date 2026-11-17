@@ -195,6 +195,7 @@ namespace MeterRecorder
                 string error;
                 if (!_sampleTable.ExportToCsv(dialog.FileName, out error))
                 {
+                    Logger.Log("回放窗体导出 CSV 失败：" + error);
                     MessageBox.Show("导出失败：" + error, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }

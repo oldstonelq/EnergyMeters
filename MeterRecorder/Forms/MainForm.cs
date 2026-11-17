@@ -15,9 +15,9 @@ namespace MeterRecorder
         /// </summary>
         private const int SampleIntervalMilliseconds = 1000;
         /// <summary>
-        /// 本次采集的样本，界面显示与落盘都读这一份。
+        /// 本次采集会话：样本集合、保存与清空都交给它。
         /// </summary>
-        private readonly List<MeterSample> _samples = new List<MeterSample>();
+        private RecordingSession _session;
         /// <summary>
         /// 当前表型的通道定义。
         /// </summary>
@@ -54,8 +54,9 @@ namespace MeterRecorder
         private void MainForm_Load(object sender, EventArgs e)
         {
             _channels = SystemParameters.EnergyMeters.Channels;
+            _session = new RecordingSession(SystemParameters.Device.MeterType, _channels);
             _cardPanel.BindChannels(_channels);
-            _sampleTable.Bind(_channels, () => _samples);
+            _sampleTable.Bind(_channels, () => _session.Samples);
             _sampleTable.ActiveGroupChanged += SampleTable_ActiveGroupChanged;
             _trendChart.BindSeries(_channels, GetDefaultChartIndexes());
 
@@ -100,7 +101,7 @@ namespace MeterRecorder
             }
             catch (Exception ex)
             {
-                LogError("关闭前停止采集失败，异常原因为：" + ex.Message + ex.StackTrace);
+                Logger.Log("关闭前停止采集失败，异常原因为：" + ex.Message + ex.StackTrace);
             }
             _sampler.Dispose();
             _allowClose = true;
@@ -120,7 +121,7 @@ namespace MeterRecorder
             }
             catch (Exception ex)
             {
-                LogError("打开串口失败，异常原因为：" + ex.Message + ex.StackTrace);
+                Logger.Log("打开串口失败，异常原因为：" + ex.Message + ex.StackTrace);
                 MessageBox.Show("设备无法连接，请检查串口是否打开或设备是否连接正常！");
                 return;
             }
@@ -146,12 +147,12 @@ namespace MeterRecorder
 
             try
             {
-                // 等采集线程真正退出，保证此前的样本都已落到 _samples 里。
+                // 等采集线程真正退出，保证此前的样本都已落到 _session 里。
                 await _sampler.StopAsync();
             }
             catch (Exception ex)
             {
-                LogError("停止读数时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
+                Logger.Log("停止读数时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
             }
 
             UpdateStatus();
@@ -163,7 +164,7 @@ namespace MeterRecorder
         /// </summary>
         private void _exportButton_Click(object sender, EventArgs e)
         {
-            if (_samples.Count == 0)
+            if (_session.Count == 0)
             {
                 MessageBox.Show("没有数据可导出", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -180,7 +181,7 @@ namespace MeterRecorder
                 string error;
                 if (!_sampleTable.ExportToCsv(dialog.FileName, out error))
                 {
-                    LogError("导出表格数据失败：" + error);
+                    Logger.Log("导出表格数据失败：" + error);
                     MessageBox.Show("导出失败：" + error, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -213,7 +214,7 @@ namespace MeterRecorder
                 }
                 catch (Exception ex)
                 {
-                    LogError("读取数据文件失败，异常原因为：" + ex.Message + ex.StackTrace);
+                    Logger.Log("读取数据文件失败，异常原因为：" + ex.Message + ex.StackTrace);
                     MessageBox.Show("读取失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -236,7 +237,7 @@ namespace MeterRecorder
         /// </summary>
         private void _clearButton_Click(object sender, EventArgs e)
         {
-            if (_samples.Count == 0)
+            if (_session.Count == 0)
             {
                 MessageBox.Show("没有数据可以清除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -289,7 +290,7 @@ namespace MeterRecorder
         /// </summary>
         private void OnSampleFailed(object sender, SamplingErrorEventArgs e)
         {
-            LogError("采集线程执行出现异常,异常原因为：" + e.Error.Message + e.Error.StackTrace);
+            Logger.Log("采集线程执行出现异常,异常原因为：" + e.Error.Message + e.Error.StackTrace);
             if (IsDisposed || !IsHandleCreated)
             {
                 return;
@@ -308,7 +309,7 @@ namespace MeterRecorder
         /// </summary>
         private void AppendSample(MeterSample sample)
         {
-            _samples.Add(sample);
+            _session.Add(sample);
             _cardPanel.UpdateValues(sample);
             _trendChart.Append(sample);
             _sampleTable.Append(sample);
@@ -335,7 +336,7 @@ namespace MeterRecorder
             Array.Copy(indexes, selected, count);
 
             _trendChart.BindSeries(_channels, selected);
-            _trendChart.Reload(_samples);
+            _trendChart.Reload(_session.Samples);
         }
 
         /// <summary>
@@ -351,23 +352,21 @@ namespace MeterRecorder
         /// </summary>
         private void SaveCollectedData()
         {
-            if (_samples.Count == 0)
+            if (_session.Count == 0)
             {
                 MessageBox.Show("没有数据可保存！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            int savedCount = _samples.Count;
+            int savedCount = _session.Count;
             string fileName;
             try
             {
-                MeterType meterType = SystemParameters.Device.MeterType;
-                fileName = Path.Combine(SystemParameters.Paths.GetDataDirectory(meterType), BuildDataFileName());
-                SampleRepository.Save(fileName, meterType, _channels, _samples);
+                fileName = _session.Save(SystemParameters.Paths.GetDataDirectory(SystemParameters.Device.MeterType));
             }
             catch (Exception ex)
             {
-                LogError("保存数据时出现异常，异常原因为：" + ex.Message + ex.StackTrace);
+                Logger.Log("保存数据时出现异常，异常原因为：", ex);
                 MessageBox.Show("数据保存失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -378,21 +377,11 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 用首末样本时间生成文件名，如 20261116142000至20261116143000.json。
-        /// </summary>
-        private string BuildDataFileName()
-        {
-            string startTime = _samples[0].Time.ToString("yyyyMMddHHmmss");
-            string endTime = _samples[_samples.Count - 1].Time.ToString("yyyyMMddHHmmss");
-            return startTime + "至" + endTime + ".json";
-        }
-
-        /// <summary>
         /// 清空本次采集的样本与界面显示。
         /// </summary>
         private void ResetView()
         {
-            _samples.Clear();
+            _session.Clear();
             _sampleTable.Clear();
             _trendChart.Clear();
             _cardPanel.ResetValues();
@@ -405,7 +394,7 @@ namespace MeterRecorder
         /// </summary>
         private void UpdateButtons()
         {
-            bool hasData = _samples.Count > 0;
+            bool hasData = _session.Count > 0;
             _startButton.Enabled = !_isWorking;
             _stopButton.Enabled = _isWorking;
             _exportButton.Enabled = hasData && !_isWorking;
@@ -423,31 +412,9 @@ namespace MeterRecorder
                 SystemParameters.Device.PortName,
                 SystemParameters.Device.MeterType.ToConfigValue(),
                 _isWorking ? "采集中" : "空闲",
-                _samples.Count);
+                _session.Count);
         }
 
-        /// <summary>
-        /// 错误日志
-        /// </summary>
-        public static void LogError(string message)
-        {
-            try
-            {
-                string logFolderPath = Path.GetDirectoryName(SystemParameters.Paths.LogFile);
-                if (!Directory.Exists(logFolderPath))
-                {
-                    Directory.CreateDirectory(logFolderPath);
-                }
-                using (StreamWriter writer = new StreamWriter(SystemParameters.Paths.LogFile, true))
-                {
-                    writer.WriteLine($"{DateTime.Now}: {message}");
-                }
-            }
-            catch (Exception)
-            {
-                // 日志写不进去时不要影响主流程。
-            }
-        }
         #endregion
     }
 }

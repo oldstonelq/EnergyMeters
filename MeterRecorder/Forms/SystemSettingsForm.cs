@@ -112,6 +112,7 @@ namespace MeterRecorder
             }
             catch (Exception ex)
             {
+                Logger.Log("保存配置失败，异常原因为：", ex);
                 MessageBox.Show("保存失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }

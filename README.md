@@ -158,9 +158,11 @@ MeterRecorder/
 ├─ Storage/      SampleRepository（JSON 读写、旧格式兼容）
 ├─ Controls/     ChannelCardPanel、SampleTable、TrendChart
 ├─ Forms/        MainForm、SystemSettingsForm、ReplayForm
-├─ Help/         ini 读写、CSV 导出
+├─ Help/         ini 读写、CSV 导出、日志
 └─ Properties/   程序集信息与资源
 ```
+
+`MeterRecorder.Tests/` 是同级的测试工程，用 xUnit 覆盖协议与表计解析，见下文「测试」。
 
 分层意图：`Core` / `Protocol` / `Models` 不依赖界面，`Services` 只负责采集，
 `Controls` 与 `Forms` 只负责渲染。新增一款表只需加一份通道定义加一个 `IEnergyMeters`
@@ -173,6 +175,27 @@ MeterRecorder/
 - 命令行：`msbuild MeterRecorder.sln /p:Configuration=Release`
 
 产物 `MeterRecorder.exe` 依赖同目录的 `Newtonsoft.Json.dll`，发布时两个文件一起拷。
+
+窗体的 `.resx` 里含有图标这类非字符串资源：Visual Studio 用旧格式生成，SDK 版 MSBuild
+（`dotnet build`）则需要 `System.Resources.Extensions`。工程已按 `MSBuildRuntimeType`
+条件挂上该引用，两种方式都能直接构建，不必手工加引用。
+
+## 测试
+
+`MeterRecorder.Tests` 用 xUnit，覆盖不需要真实硬件的部分：
+
+- CRC 计算与 03H 请求组帧（拿说明书示例帧比对）、坏帧检测；
+- 应答解析：正常帧、从站地址不匹配、CRC 错误、异常应答码；
+- 三款表的解析：DJSF1352 指数缩放与「FFFF 表示无效」、ADL400 32 位功率拼接与符号、AMC 小数位与功率符号位；
+- `RecordingSession` 的计数、文件命名、保存后可回读、清空。
+
+Visual Studio 里在「测试资源管理器」运行；命令行：
+
+```
+dotnet test MeterRecorder.Tests/MeterRecorder.Tests.csproj
+```
+
+测试通过 `IModbusTransport` 注入内存版通道，不需要串口，也不碰真实表计。
 
 ## 日志与常见提示
 

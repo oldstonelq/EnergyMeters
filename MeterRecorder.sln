@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35919.96 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeterRecorder", "MeterRecorder\MeterRecorder.csproj", "{34C34459-A65D-4BAA-8818-580E9006980D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeterRecorder.Tests", "MeterRecorder.Tests\MeterRecorder.Tests.csproj", "{7A171107-CC31-4EC8-982D-10652AC30029}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{34C34459-A65D-4BAA-8818-580E9006980D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34C34459-A65D-4BAA-8818-580E9006980D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34C34459-A65D-4BAA-8818-580E9006980D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A171107-CC31-4EC8-982D-10652AC30029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A171107-CC31-4EC8-982D-10652AC30029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A171107-CC31-4EC8-982D-10652AC30029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A171107-CC31-4EC8-982D-10652AC30029}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

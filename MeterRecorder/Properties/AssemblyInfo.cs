@@ -19,6 +19,9 @@ using System.Runtime.InteropServices;
 //请将此类型的 ComVisible 特性设置为 true。
 [assembly: ComVisible(false)]
 
+// 测试工程需要构造表类时注入假的传输通道，只开放给这一个程序集。
+[assembly: InternalsVisibleTo("MeterRecorder.Tests")]
+
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
 [assembly: Guid("34c34459-a65d-4baa-8818-580e9006980d")]
 

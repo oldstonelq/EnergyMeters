@@ -40,8 +40,18 @@ namespace MeterRecorder
         /// </summary>
         /// <param name="config">设备配置</param>
         public Djsf1352EnergyMeters(DeviceConfig config)
+            : this(config, new SerialPortTransport(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity))
         {
-            _client = new ModbusRtuClient(config.PortName, config.BaudRate, config.DataBits, config.StopBits, config.Parity);
+        }
+
+        /// <summary>
+        /// 用指定的传输通道创建实例，供测试注入假通道。
+        /// </summary>
+        /// <param name="config">设备配置</param>
+        /// <param name="transport">报文传输通道</param>
+        internal Djsf1352EnergyMeters(DeviceConfig config, IModbusTransport transport)
+        {
+            _client = new ModbusRtuClient(transport);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);
         }
 
