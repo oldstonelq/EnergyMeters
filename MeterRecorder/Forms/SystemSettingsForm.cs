@@ -137,6 +137,78 @@ namespace MeterRecorder
         }
 
         /// <summary>
+        /// 选择日志所在目录。文件名固定为 log.txt，只让用户挑目录，避免把日志写到别处后找不到。
+        /// </summary>
+        private void _browseLogButton_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "选择日志文件所在目录（文件名固定为 log.txt）";
+                dialog.ShowNewFolderButton = true;
+
+                string current = _logFileText.Text.Trim();
+                string currentDirectory = current.Length == 0 ? null : Path.GetDirectoryName(current);
+                if (!string.IsNullOrEmpty(currentDirectory) && Directory.Exists(currentDirectory))
+                {
+                    dialog.SelectedPath = currentDirectory;
+                }
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                _logFileText.Text = Path.Combine(dialog.SelectedPath, "log.txt");
+            }
+        }
+
+        /// <summary>
+        /// 读取界面上的日志路径并校验：为空、无法创建目录时提示用户，返回 false。
+        /// 与默认路径相同时返回 null，表示仍跟随程序目录。
+        /// </summary>
+        /// <param name="logFile">校验后的完整路径；null 表示使用默认路径</param>
+        /// <returns>校验通过返回 true</returns>
+        private bool TryReadLogFile(out string logFile)
+        {
+            logFile = null;
+            string text = _logFileText.Text.Trim();
+            if (text.Length == 0)
+            {
+                MessageBox.Show("日志路径不能为空。", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            string full;
+            try
+            {
+                full = Path.GetFullPath(text);
+                // 只填了目录时补上固定文件名，避免 Logger 往目录上追加。
+                if (Directory.Exists(full))
+                {
+                    full = Path.Combine(full, "log.txt");
+                }
+                string directory = Path.GetDirectoryName(full);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("日志文件路径不可用，异常原因为：", ex);
+                MessageBox.Show("日志文件路径不可用：" + ex.Message, "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            string defaultFile = Path.GetFullPath(
+                Path.Combine(Application.StartupPath, "Logs", "log.txt"));
+            bool followsStartupPath = string.Equals(full, defaultFile, StringComparison.OrdinalIgnoreCase);
+            logFile = followsStartupPath ? null : full;
+            return true;
+        }
+
+        /// <summary>
         /// 把界面上的值写回 ini。写入失败时提示原因，内存中的配置保持不变。
         /// </summary>
         private void _saveButton_Click(object sender, EventArgs e)
@@ -176,11 +248,17 @@ namespace MeterRecorder
             {
                 return;
             }
+            string logFile;
+            if (!TryReadLogFile(out logFile))
+            {
+                return;
+            }
 
             try
             {
                 config.Save(SystemParameters.Paths.SystemFile);
-                new StorageConfig { DataDirectory = dataRoot }.Save(SystemParameters.Paths.SystemFile);
+                new StorageConfig { DataDirectory = dataRoot, LogFile = logFile }
+                    .Save(SystemParameters.Paths.SystemFile);
             }
             catch (Exception ex)
             {

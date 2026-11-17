@@ -32,6 +32,7 @@
             this._energyMetersTypeCombo = new System.Windows.Forms.ComboBox();
             this._energyMetersTypeLabel = new System.Windows.Forms.Label();
             this._logFileText = new System.Windows.Forms.TextBox();
+            this._browseLogButton = new System.Windows.Forms.Button();
             this._logFileLabel = new System.Windows.Forms.Label();
             this._portNameCombo = new System.Windows.Forms.ComboBox();
             this._portNameLabel = new System.Windows.Forms.Label();
@@ -55,6 +56,7 @@
             this._mainPanel.Controls.Add(this._energyMetersTypeCombo);
             this._mainPanel.Controls.Add(this._energyMetersTypeLabel);
             this._mainPanel.Controls.Add(this._logFileText);
+            this._mainPanel.Controls.Add(this._browseLogButton);
             this._mainPanel.Controls.Add(this._logFileLabel);
             this._mainPanel.Controls.Add(this._portNameCombo);
             this._mainPanel.Controls.Add(this._portNameLabel);
@@ -98,8 +100,18 @@
             // 
             this._logFileText.Location = new System.Drawing.Point(129, 259);
             this._logFileText.Name = "_logFileText";
-            this._logFileText.Size = new System.Drawing.Size(373, 21);
+            this._logFileText.Size = new System.Drawing.Size(300, 21);
             this._logFileText.TabIndex = 14;
+            // 
+            // _browseLogButton
+            // 
+            this._browseLogButton.Location = new System.Drawing.Point(433, 257);
+            this._browseLogButton.Name = "_browseLogButton";
+            this._browseLogButton.Size = new System.Drawing.Size(68, 25);
+            this._browseLogButton.TabIndex = 18;
+            this._browseLogButton.Text = "浏览...";
+            this._browseLogButton.UseVisualStyleBackColor = true;
+            this._browseLogButton.Click += new System.EventHandler(this._browseLogButton_Click);
             // 
             // _logFileLabel
             // 
@@ -273,6 +285,7 @@
         private System.Windows.Forms.ComboBox _portNameCombo;
         private System.Windows.Forms.Label _portNameLabel;
         private System.Windows.Forms.TextBox _logFileText;
+        private System.Windows.Forms.Button _browseLogButton;
         private System.Windows.Forms.Label _logFileLabel;
         private System.Windows.Forms.Label _energyMetersTypeLabel;
         private System.Windows.Forms.ComboBox _energyMetersTypeCombo;

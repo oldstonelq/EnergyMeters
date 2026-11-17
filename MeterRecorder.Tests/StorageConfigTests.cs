@@ -6,13 +6,13 @@ using Xunit;
 namespace MeterRecorder.Tests
 {
     /// <summary>
-    /// 存储设置：数据目录记录在 ini 里，留空表示跟随程序目录。
+    /// 存储设置：数据目录与日志文件记录在 ini 里，留空表示跟随程序目录。
     /// 与串口配置共用 SystemSet 节，写其中一个不能把另一个的键冲掉。
     /// </summary>
     public class StorageConfigTests
     {
         /// <summary>
-        /// 没有该键时返回空目录，由 AppPaths 回落到程序目录下的 Data。
+        /// 没有这些键时两个属性都为空，由 AppPaths 回落到程序目录。
         /// </summary>
         [Fact]
         public void Load_MissingKey_ReturnsNull()
@@ -22,7 +22,10 @@ namespace MeterRecorder.Tests
                 string path = temp.File("system.ini");
                 File.WriteAllText(path, "[SystemSet]\r\nPortName=COM3\r\n");
 
-                Assert.Null(StorageConfig.Load(path).DataDirectory);
+                StorageConfig config = StorageConfig.Load(path);
+
+                Assert.Null(config.DataDirectory);
+                Assert.Null(config.LogFile);
             }
         }
 
@@ -36,10 +39,14 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
                 string directory = temp.File("custom data");
+                string logFile = temp.File(@"logs\meter.log");
                 File.WriteAllText(path,
-                    "[SystemSet]\r\nDataDirectory=  " + directory + "  \r\n");
+                    "[SystemSet]\r\nDataDirectory=  " + directory + "  \r\nLogFile=  " + logFile + "  \r\n");
 
-                Assert.Equal(directory, StorageConfig.Load(path).DataDirectory);
+                StorageConfig config = StorageConfig.Load(path);
+
+                Assert.Equal(directory, config.DataDirectory);
+                Assert.Equal(logFile, config.LogFile);
             }
         }
 
@@ -53,16 +60,19 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
                 string directory = temp.File("meter-data");
+                string logFile = Path.Combine(temp.File("logs"), "meter.log");
                 Directory.CreateDirectory(directory);
 
-                new StorageConfig { DataDirectory = directory }.Save(path);
+                new StorageConfig { DataDirectory = directory, LogFile = logFile }.Save(path);
 
-                Assert.Equal(directory, StorageConfig.Load(path).DataDirectory);
+                StorageConfig reloaded = StorageConfig.Load(path);
+                Assert.Equal(directory, reloaded.DataDirectory);
+                Assert.Equal(logFile, reloaded.LogFile);
             }
         }
 
         /// <summary>
-        /// 目录为空时写回空值：配置文件里保留这个键，但语义是「跟随程序目录」。
+        /// 两项都为空时写回空值：配置文件里保留这两个键，但语义是「跟随程序目录」。
         /// </summary>
         [Fact]
         public void Save_Empty_WritesBlankAndLoadsAsDefault()
@@ -71,10 +81,15 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
 
-                new StorageConfig { DataDirectory = "  " }.Save(path);
+                new StorageConfig { DataDirectory = "  ", LogFile = "  " }.Save(path);
 
-                Assert.Contains("DataDirectory=", File.ReadAllText(path));
-                Assert.Null(StorageConfig.Load(path).DataDirectory);
+                string ini = File.ReadAllText(path);
+                Assert.Contains("DataDirectory=", ini);
+                Assert.Contains("LogFile=", ini);
+
+                StorageConfig reloaded = StorageConfig.Load(path);
+                Assert.Null(reloaded.DataDirectory);
+                Assert.Null(reloaded.LogFile);
             }
         }
 
@@ -109,27 +124,31 @@ namespace MeterRecorder.Tests
                     SlaveAddress = 12
                 };
                 string directory = temp.File("data-root");
+                string logFile = Path.Combine(temp.File("logs"), "log.txt");
 
                 device.Save(path);
-                new StorageConfig { DataDirectory = directory }.Save(path);
+                new StorageConfig { DataDirectory = directory, LogFile = logFile }.Save(path);
 
                 DeviceConfig reloaded = DeviceConfig.Load(path);
                 Assert.Equal("COM7", reloaded.PortName);
                 Assert.Equal(19200, reloaded.BaudRate);
                 Assert.Equal(MeterType.Adl400, reloaded.MeterType);
                 Assert.Equal(12, reloaded.SlaveAddress);
-                Assert.Equal(directory, StorageConfig.Load(path).DataDirectory);
+
+                StorageConfig storage = StorageConfig.Load(path);
+                Assert.Equal(directory, storage.DataDirectory);
+                Assert.Equal(logFile, storage.LogFile);
             }
         }
     }
 
     /// <summary>
-    /// 路径装配：数据根目录可以来自配置，其余目录仍跟着程序目录。
+    /// 路径装配：数据根目录与日志文件都可以来自配置，其余目录仍跟着程序目录。
     /// </summary>
     public class AppPathsTests
     {
         /// <summary>
-        /// 没配置数据目录时用程序目录下的 Data，与旧版本一致。
+        /// 没配置时用程序目录下的 Data 与 Logs，与旧版本一致。
         /// </summary>
         [Fact]
         public void Constructor_Default_UsesStartupData()
@@ -163,6 +182,38 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
+        /// 指定日志文件后，日志目录从文件路径推导出来，不再固定为 Logs。
+        /// </summary>
+        [Fact]
+        public void Constructor_CustomLogFile_DerivesDirectory()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string logFile = Path.Combine(temp.File("var-log"), "meter.log");
+
+                AppPaths paths = new AppPaths(temp.Root, null, logFile);
+
+                Assert.Equal(logFile, paths.LogFile);
+                Assert.Equal(temp.File("var-log"), paths.LogDirectory);
+                Assert.Equal(Path.Combine(temp.Root, "Data"), paths.DataDirectory);
+            }
+        }
+
+        /// <summary>
+        /// 日志路径留空时回到程序目录下的 Logs\log.txt。
+        /// </summary>
+        [Fact]
+        public void Constructor_BlankLogFile_FallsBackToDefault()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                AppPaths paths = new AppPaths(temp.Root, null, "   ");
+
+                Assert.Equal(Path.Combine(temp.Root, "Logs", "log.txt"), paths.LogFile);
+            }
+        }
+
+        /// <summary>
         /// 配置里写了空白字符等同于没配置，不能把 Data 目录建在空白路径上。
         /// </summary>
         [Fact]
@@ -192,7 +243,7 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
-        /// 完整初始化时按表型把子目录一次建好，第一次启动就能直接落盘。
+        /// 完整初始化时按配置把数据与日志目录一次建好，第一次启动就能直接落盘。
         /// </summary>
         [Fact]
         public void EnsureCreated_CreatesAllMeterDirectories()
@@ -200,11 +251,13 @@ namespace MeterRecorder.Tests
             using (TempDirectory temp = new TempDirectory())
             {
                 string custom = temp.File("external-data");
-                AppPaths paths = new AppPaths(temp.Root, custom);
+                string logFile = Path.Combine(temp.File("custom-logs"), "log.txt");
+                AppPaths paths = new AppPaths(temp.Root, custom, logFile);
 
                 paths.EnsureCreated();
 
                 Assert.True(Directory.Exists(paths.LogDirectory));
+                Assert.True(Directory.Exists(Path.GetDirectoryName(logFile)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Djsf1352)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Amc)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Adl400)));

@@ -37,7 +37,7 @@ namespace MeterRecorder
             StorageConfig storage = StorageConfig.Load(defaults.SystemFile);
 
             // 数据目录来自配置；为空则仍是程序目录下的 Data。
-            Paths = new AppPaths(startupPath, storage.DataDirectory);
+            Paths = new AppPaths(startupPath, storage.DataDirectory, storage.LogFile);
             Paths.EnsureCreated();
 
             EnergyMeters = MeterFactory.Create(Device);

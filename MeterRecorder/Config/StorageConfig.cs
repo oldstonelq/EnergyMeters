@@ -19,10 +19,20 @@ namespace MeterRecorder
         private const string DataDirectoryKey = "DataDirectory";
 
         /// <summary>
+        /// 日志文件 Key，写入 ini 时用这个名字。
+        /// </summary>
+        private const string LogFileKey = "LogFile";
+
+        /// <summary>
         /// 数据根目录。为 null 或空白表示跟随程序目录下的 Data，
         /// 这样把整个文件夹拷到别的机器上仍然能用。
         /// </summary>
         public string DataDirectory { get; set; }
+
+        /// <summary>
+        /// 日志文件的完整路径，含文件名。为 null 或空白表示跟随程序目录下的 Logs\log.txt。
+        /// </summary>
+        public string LogFile { get; set; }
 
         /// <summary>
         /// 从 ini 读取存储设置。键缺失或为空时表示使用默认目录，不抛异常。
@@ -31,11 +41,19 @@ namespace MeterRecorder
         public static StorageConfig Load(string iniPath)
         {
             StorageConfig config = new StorageConfig();
-            string text = FileHelp.ReadIniKeys(SectionName, DataDirectoryKey, string.Empty, iniPath);
-            if (!string.IsNullOrWhiteSpace(text))
+
+            string directory = FileHelp.ReadIniKeys(SectionName, DataDirectoryKey, string.Empty, iniPath);
+            if (!string.IsNullOrWhiteSpace(directory))
             {
-                config.DataDirectory = text.Trim();
+                config.DataDirectory = directory.Trim();
             }
+
+            string logFile = FileHelp.ReadIniKeys(SectionName, LogFileKey, string.Empty, iniPath);
+            if (!string.IsNullOrWhiteSpace(logFile))
+            {
+                config.LogFile = logFile.Trim();
+            }
+
             return config;
         }
 
@@ -46,8 +64,11 @@ namespace MeterRecorder
         /// <exception cref="IOException">文件只读、被占用或路径无效</exception>
         public void Save(string iniPath)
         {
-            string value = string.IsNullOrWhiteSpace(DataDirectory) ? string.Empty : DataDirectory.Trim();
-            if (!FileHelp.WriteIniKeys(SectionName, DataDirectoryKey, value, iniPath))
+            string directory = string.IsNullOrWhiteSpace(DataDirectory) ? string.Empty : DataDirectory.Trim();
+            string logFile = string.IsNullOrWhiteSpace(LogFile) ? string.Empty : LogFile.Trim();
+            bool written = FileHelp.WriteIniKeys(SectionName, DataDirectoryKey, directory, iniPath);
+            written &= FileHelp.WriteIniKeys(SectionName, LogFileKey, logFile, iniPath);
+            if (!written)
             {
                 throw new IOException("写入配置文件失败：" + iniPath + "，请检查文件是否只读或被其他程序占用。");
             }

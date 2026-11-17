@@ -15,7 +15,10 @@ namespace MeterRecorder
         /// <param name="dataRoot">
         /// 数据根目录。为 null 或空白时取程序目录下的 Data，与旧版本行为一致。
         /// </param>
-        public AppPaths(string startupPath, string dataRoot = null)
+        /// <param name="logFile">
+        /// 日志文件完整路径。为 null 或空白时取程序目录下的 Logs\log.txt。
+        /// </param>
+        public AppPaths(string startupPath, string dataRoot = null, string logFile = null)
         {
             StartupPath = startupPath;
             SystemDirectory = Path.Combine(startupPath, "System");
@@ -23,8 +26,10 @@ namespace MeterRecorder
             DataDirectory = string.IsNullOrWhiteSpace(dataRoot)
                 ? Path.Combine(startupPath, "Data")
                 : dataRoot.Trim();
-            LogDirectory = Path.Combine(startupPath, "Logs");
-            LogFile = Path.Combine(LogDirectory, "log.txt");
+            LogFile = string.IsNullOrWhiteSpace(logFile)
+                ? Path.Combine(startupPath, "Logs", "log.txt")
+                : Path.GetFullPath(logFile.Trim());
+            LogDirectory = Path.GetDirectoryName(LogFile);
         }
 
         /// <summary>
