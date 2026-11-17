@@ -197,7 +197,7 @@ class ChannelDescriptor
 - `Program.Main` 在 `Application.Run` 外层补 try/catch，失败写日志并弹窗。
 - `SampleDocument` 增加 `[JsonIgnore] IsLegacyFormat`，回放窗体元信息提示「旧格式，表型按通道推断」。
 - 三款表时间戳改为可注入的 `Func<DateTime>`，默认系统时间。
-- csproj 补 `GenerateResourceUsePreserializedResources` 条件属性，命令行重编 resx 不再报 MSB3823。
+- 把窗体图标移出 resx（改从 exe 读取），删掉 `System.Resources.Extensions` 的条件引用，VS 与命令行构建一致。
 - 测试 19 个用例：新增固定时钟、旧格式标记、包装格式不带标记。
 
 ### 2026-11-17　P1 结构债（`76ceb52`）

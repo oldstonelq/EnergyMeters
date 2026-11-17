@@ -176,9 +176,9 @@ MeterRecorder/
 
 产物 `MeterRecorder.exe` 依赖同目录的 `Newtonsoft.Json.dll`，发布时两个文件一起拷。
 
-窗体的 `.resx` 里含有图标这类非字符串资源：Visual Studio 用旧格式生成，SDK 版 MSBuild
-（`dotnet build`）则需要 `System.Resources.Extensions`。工程已按 `MSBuildRuntimeType`
-条件挂上该引用，两种方式都能直接构建，不必手工加引用。
+图标以 exe 资源形式发布（工程里的 `ApplicationIcon`），窗体在构造时从 exe 读取；
+`.resx` 里不再存二进制对象。这样 Visual Studio 与 `dotnet build` 的构建行为完全一致，
+也不需要额外的 `System.Resources.Extensions` 引用。
 
 ## 测试
 

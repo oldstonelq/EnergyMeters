@@ -15,6 +15,7 @@ namespace MeterRecorder
         public SystemSettingsForm()
         {
             InitializeComponent();
+            this.Icon = FormIcon.Load();
         }
 
         /// <summary>

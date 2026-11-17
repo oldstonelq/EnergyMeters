@@ -23,7 +23,6 @@
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this._toolStrip = new System.Windows.Forms.ToolStrip();
             this._startButton = new System.Windows.Forms.ToolStripButton();
             this._stopButton = new System.Windows.Forms.ToolStripButton();
@@ -207,7 +206,6 @@
             this.ClientSize = new System.Drawing.Size(1280, 740);
             this.Controls.Add(this._outerSplit);
             this.Controls.Add(this._toolStrip);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1100, 700);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

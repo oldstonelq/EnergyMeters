@@ -50,20 +50,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
-  <!--
-    窗体的 .resx 里含有图标这类非字符串资源。SDK 版 MSBuild（dotnet build）生成资源时
-    要求运行时能加载 System.Resources.Extensions；Visual Studio 用的是旧格式，不需要它。
-    这里只在 SDK 版 MSBuild 下挂引用，官方命令行同样能编译与跑测试。
-  -->
-  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
-    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
-    <Reference Include="System.Resources.Extensions">
-      <HintPath>$(MSBuildSDKsPath)\..\System.Resources.Extensions.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\AppPaths.cs" />
     <Compile Include="Config\DeviceConfig.cs" />
@@ -94,6 +80,7 @@
     <Compile Include="Models\Adl400EnergyMeters.cs" />
     <Compile Include="Models\AmcEnergyMeters.cs" />
     <Compile Include="Help\FileHelp.cs" />
+    <Compile Include="Help\FormIcon.cs" />
     <Compile Include="Help\Logger.cs" />
     <Compile Include="Models\Djsf1352EnergyMeters.cs" />
     <Compile Include="Forms\MainForm.cs">

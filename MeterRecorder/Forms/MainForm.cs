@@ -45,6 +45,7 @@ namespace MeterRecorder
         public MainForm()
         {
             InitializeComponent();
+            this.Icon = FormIcon.Load();
         }
 
         #region 窗体加载与关闭

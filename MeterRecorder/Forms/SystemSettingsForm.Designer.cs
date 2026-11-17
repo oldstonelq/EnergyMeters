@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SystemSettingsForm));
             this.panel1 = new System.Windows.Forms.Panel();
             this.cmb_EnergyMetersType = new System.Windows.Forms.ComboBox();
             this.lab_EnergyMetersType = new System.Windows.Forms.Label();
@@ -231,7 +230,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 356);
             this.Controls.Add(this.panel1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SystemSettingsForm";
