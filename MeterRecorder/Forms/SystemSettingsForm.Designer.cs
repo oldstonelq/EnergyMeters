@@ -28,239 +28,239 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.cmb_EnergyMetersType = new System.Windows.Forms.ComboBox();
-            this.lab_EnergyMetersType = new System.Windows.Forms.Label();
-            this.txt_LogFile = new System.Windows.Forms.TextBox();
-            this.lab_LogFile = new System.Windows.Forms.Label();
-            this.cmb_PortName = new System.Windows.Forms.ComboBox();
-            this.lab_COM = new System.Windows.Forms.Label();
-            this.cmb_Parity = new System.Windows.Forms.ComboBox();
-            this.cmb_StopBits = new System.Windows.Forms.ComboBox();
-            this.cmb_DataBits = new System.Windows.Forms.ComboBox();
-            this.cmb_BaudRate = new System.Windows.Forms.ComboBox();
-            this.txt_DataFile = new System.Windows.Forms.TextBox();
-            this.lab_DataFile = new System.Windows.Forms.Label();
-            this.btn_Save = new System.Windows.Forms.Button();
-            this.lab_Parity = new System.Windows.Forms.Label();
-            this.lab_StopBits = new System.Windows.Forms.Label();
-            this.lab_DataBits = new System.Windows.Forms.Label();
-            this.lab_BaudRate = new System.Windows.Forms.Label();
-            this.panel1.SuspendLayout();
+            this._mainPanel = new System.Windows.Forms.Panel();
+            this._energyMetersTypeCombo = new System.Windows.Forms.ComboBox();
+            this._energyMetersTypeLabel = new System.Windows.Forms.Label();
+            this._logFileText = new System.Windows.Forms.TextBox();
+            this._logFileLabel = new System.Windows.Forms.Label();
+            this._portNameCombo = new System.Windows.Forms.ComboBox();
+            this._portNameLabel = new System.Windows.Forms.Label();
+            this._parityCombo = new System.Windows.Forms.ComboBox();
+            this._stopBitsCombo = new System.Windows.Forms.ComboBox();
+            this._dataBitsCombo = new System.Windows.Forms.ComboBox();
+            this._baudRateCombo = new System.Windows.Forms.ComboBox();
+            this._dataPathText = new System.Windows.Forms.TextBox();
+            this._dataPathLabel = new System.Windows.Forms.Label();
+            this._saveButton = new System.Windows.Forms.Button();
+            this._parityLabel = new System.Windows.Forms.Label();
+            this._stopBitsLabel = new System.Windows.Forms.Label();
+            this._dataBitsLabel = new System.Windows.Forms.Label();
+            this._baudRateLabel = new System.Windows.Forms.Label();
+            this._mainPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // panel1
+            // _mainPanel
             // 
-            this.panel1.Controls.Add(this.cmb_EnergyMetersType);
-            this.panel1.Controls.Add(this.lab_EnergyMetersType);
-            this.panel1.Controls.Add(this.txt_LogFile);
-            this.panel1.Controls.Add(this.lab_LogFile);
-            this.panel1.Controls.Add(this.cmb_PortName);
-            this.panel1.Controls.Add(this.lab_COM);
-            this.panel1.Controls.Add(this.cmb_Parity);
-            this.panel1.Controls.Add(this.cmb_StopBits);
-            this.panel1.Controls.Add(this.cmb_DataBits);
-            this.panel1.Controls.Add(this.cmb_BaudRate);
-            this.panel1.Controls.Add(this.txt_DataFile);
-            this.panel1.Controls.Add(this.lab_DataFile);
-            this.panel1.Controls.Add(this.btn_Save);
-            this.panel1.Controls.Add(this.lab_Parity);
-            this.panel1.Controls.Add(this.lab_StopBits);
-            this.panel1.Controls.Add(this.lab_DataBits);
-            this.panel1.Controls.Add(this.lab_BaudRate);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(523, 356);
-            this.panel1.TabIndex = 0;
+            this._mainPanel.Controls.Add(this._energyMetersTypeCombo);
+            this._mainPanel.Controls.Add(this._energyMetersTypeLabel);
+            this._mainPanel.Controls.Add(this._logFileText);
+            this._mainPanel.Controls.Add(this._logFileLabel);
+            this._mainPanel.Controls.Add(this._portNameCombo);
+            this._mainPanel.Controls.Add(this._portNameLabel);
+            this._mainPanel.Controls.Add(this._parityCombo);
+            this._mainPanel.Controls.Add(this._stopBitsCombo);
+            this._mainPanel.Controls.Add(this._dataBitsCombo);
+            this._mainPanel.Controls.Add(this._baudRateCombo);
+            this._mainPanel.Controls.Add(this._dataPathText);
+            this._mainPanel.Controls.Add(this._dataPathLabel);
+            this._mainPanel.Controls.Add(this._saveButton);
+            this._mainPanel.Controls.Add(this._parityLabel);
+            this._mainPanel.Controls.Add(this._stopBitsLabel);
+            this._mainPanel.Controls.Add(this._dataBitsLabel);
+            this._mainPanel.Controls.Add(this._baudRateLabel);
+            this._mainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._mainPanel.Location = new System.Drawing.Point(0, 0);
+            this._mainPanel.Name = "_mainPanel";
+            this._mainPanel.Size = new System.Drawing.Size(523, 356);
+            this._mainPanel.TabIndex = 0;
             // 
-            // cmb_EnergyMetersType
+            // _energyMetersTypeCombo
             // 
-            this.cmb_EnergyMetersType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_EnergyMetersType.FormattingEnabled = true;
-            this.cmb_EnergyMetersType.Location = new System.Drawing.Point(129, 27);
-            this.cmb_EnergyMetersType.Name = "cmb_EnergyMetersType";
-            this.cmb_EnergyMetersType.Size = new System.Drawing.Size(121, 20);
-            this.cmb_EnergyMetersType.TabIndex = 16;
+            this._energyMetersTypeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._energyMetersTypeCombo.FormattingEnabled = true;
+            this._energyMetersTypeCombo.Location = new System.Drawing.Point(129, 27);
+            this._energyMetersTypeCombo.Name = "_energyMetersTypeCombo";
+            this._energyMetersTypeCombo.Size = new System.Drawing.Size(121, 20);
+            this._energyMetersTypeCombo.TabIndex = 16;
             // 
-            // lab_EnergyMetersType
+            // _energyMetersTypeLabel
             // 
-            this.lab_EnergyMetersType.AutoSize = true;
-            this.lab_EnergyMetersType.Location = new System.Drawing.Point(41, 27);
-            this.lab_EnergyMetersType.Name = "lab_EnergyMetersType";
-            this.lab_EnergyMetersType.Size = new System.Drawing.Size(53, 12);
-            this.lab_EnergyMetersType.TabIndex = 15;
-            this.lab_EnergyMetersType.Text = "电表型号";
+            this._energyMetersTypeLabel.AutoSize = true;
+            this._energyMetersTypeLabel.Location = new System.Drawing.Point(41, 27);
+            this._energyMetersTypeLabel.Name = "_energyMetersTypeLabel";
+            this._energyMetersTypeLabel.Size = new System.Drawing.Size(53, 12);
+            this._energyMetersTypeLabel.TabIndex = 15;
+            this._energyMetersTypeLabel.Text = "电表型号";
             // 
-            // txt_LogFile
+            // _logFileText
             // 
-            this.txt_LogFile.Location = new System.Drawing.Point(129, 259);
-            this.txt_LogFile.Name = "txt_LogFile";
-            this.txt_LogFile.Size = new System.Drawing.Size(373, 21);
-            this.txt_LogFile.TabIndex = 14;
+            this._logFileText.Location = new System.Drawing.Point(129, 259);
+            this._logFileText.Name = "_logFileText";
+            this._logFileText.Size = new System.Drawing.Size(373, 21);
+            this._logFileText.TabIndex = 14;
             // 
-            // lab_LogFile
+            // _logFileLabel
             // 
-            this.lab_LogFile.AutoSize = true;
-            this.lab_LogFile.Location = new System.Drawing.Point(45, 259);
-            this.lab_LogFile.Name = "lab_LogFile";
-            this.lab_LogFile.Size = new System.Drawing.Size(53, 12);
-            this.lab_LogFile.TabIndex = 13;
-            this.lab_LogFile.Text = "日志路径";
+            this._logFileLabel.AutoSize = true;
+            this._logFileLabel.Location = new System.Drawing.Point(45, 259);
+            this._logFileLabel.Name = "_logFileLabel";
+            this._logFileLabel.Size = new System.Drawing.Size(53, 12);
+            this._logFileLabel.TabIndex = 13;
+            this._logFileLabel.Text = "日志路径";
             // 
-            // cmb_PortName
+            // _portNameCombo
             // 
-            this.cmb_PortName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_PortName.FormattingEnabled = true;
-            this.cmb_PortName.Location = new System.Drawing.Point(129, 187);
-            this.cmb_PortName.Name = "cmb_PortName";
-            this.cmb_PortName.Size = new System.Drawing.Size(121, 20);
-            this.cmb_PortName.TabIndex = 12;
+            this._portNameCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._portNameCombo.FormattingEnabled = true;
+            this._portNameCombo.Location = new System.Drawing.Point(129, 187);
+            this._portNameCombo.Name = "_portNameCombo";
+            this._portNameCombo.Size = new System.Drawing.Size(121, 20);
+            this._portNameCombo.TabIndex = 12;
             // 
-            // lab_COM
+            // _portNameLabel
             // 
-            this.lab_COM.AutoSize = true;
-            this.lab_COM.Location = new System.Drawing.Point(43, 187);
-            this.lab_COM.Name = "lab_COM";
-            this.lab_COM.Size = new System.Drawing.Size(41, 12);
-            this.lab_COM.TabIndex = 11;
-            this.lab_COM.Text = "串口号";
+            this._portNameLabel.AutoSize = true;
+            this._portNameLabel.Location = new System.Drawing.Point(43, 187);
+            this._portNameLabel.Name = "_portNameLabel";
+            this._portNameLabel.Size = new System.Drawing.Size(41, 12);
+            this._portNameLabel.TabIndex = 11;
+            this._portNameLabel.Text = "串口号";
             // 
-            // cmb_Parity
+            // _parityCombo
             // 
-            this.cmb_Parity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_Parity.FormattingEnabled = true;
-            this.cmb_Parity.Location = new System.Drawing.Point(129, 156);
-            this.cmb_Parity.Name = "cmb_Parity";
-            this.cmb_Parity.Size = new System.Drawing.Size(121, 20);
-            this.cmb_Parity.TabIndex = 10;
+            this._parityCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._parityCombo.FormattingEnabled = true;
+            this._parityCombo.Location = new System.Drawing.Point(129, 156);
+            this._parityCombo.Name = "_parityCombo";
+            this._parityCombo.Size = new System.Drawing.Size(121, 20);
+            this._parityCombo.TabIndex = 10;
             // 
-            // cmb_StopBits
+            // _stopBitsCombo
             // 
-            this.cmb_StopBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_StopBits.FormattingEnabled = true;
-            this.cmb_StopBits.Location = new System.Drawing.Point(129, 125);
-            this.cmb_StopBits.Name = "cmb_StopBits";
-            this.cmb_StopBits.Size = new System.Drawing.Size(121, 20);
-            this.cmb_StopBits.TabIndex = 9;
+            this._stopBitsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._stopBitsCombo.FormattingEnabled = true;
+            this._stopBitsCombo.Location = new System.Drawing.Point(129, 125);
+            this._stopBitsCombo.Name = "_stopBitsCombo";
+            this._stopBitsCombo.Size = new System.Drawing.Size(121, 20);
+            this._stopBitsCombo.TabIndex = 9;
             // 
-            // cmb_DataBits
+            // _dataBitsCombo
             // 
-            this.cmb_DataBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_DataBits.FormattingEnabled = true;
-            this.cmb_DataBits.Location = new System.Drawing.Point(129, 94);
-            this.cmb_DataBits.Name = "cmb_DataBits";
-            this.cmb_DataBits.Size = new System.Drawing.Size(121, 20);
-            this.cmb_DataBits.TabIndex = 8;
+            this._dataBitsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._dataBitsCombo.FormattingEnabled = true;
+            this._dataBitsCombo.Location = new System.Drawing.Point(129, 94);
+            this._dataBitsCombo.Name = "_dataBitsCombo";
+            this._dataBitsCombo.Size = new System.Drawing.Size(121, 20);
+            this._dataBitsCombo.TabIndex = 8;
             // 
-            // cmb_BaudRate
+            // _baudRateCombo
             // 
-            this.cmb_BaudRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmb_BaudRate.FormattingEnabled = true;
-            this.cmb_BaudRate.Location = new System.Drawing.Point(129, 63);
-            this.cmb_BaudRate.Name = "cmb_BaudRate";
-            this.cmb_BaudRate.Size = new System.Drawing.Size(121, 20);
-            this.cmb_BaudRate.TabIndex = 7;
+            this._baudRateCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._baudRateCombo.FormattingEnabled = true;
+            this._baudRateCombo.Location = new System.Drawing.Point(129, 63);
+            this._baudRateCombo.Name = "_baudRateCombo";
+            this._baudRateCombo.Size = new System.Drawing.Size(121, 20);
+            this._baudRateCombo.TabIndex = 7;
             // 
-            // txt_DataFile
+            // _dataPathText
             // 
-            this.txt_DataFile.Location = new System.Drawing.Point(129, 227);
-            this.txt_DataFile.Name = "txt_DataFile";
-            this.txt_DataFile.Size = new System.Drawing.Size(373, 21);
-            this.txt_DataFile.TabIndex = 6;
+            this._dataPathText.Location = new System.Drawing.Point(129, 227);
+            this._dataPathText.Name = "_dataPathText";
+            this._dataPathText.Size = new System.Drawing.Size(373, 21);
+            this._dataPathText.TabIndex = 6;
             // 
-            // lab_DataFile
+            // _dataPathLabel
             // 
-            this.lab_DataFile.AutoSize = true;
-            this.lab_DataFile.Location = new System.Drawing.Point(41, 227);
-            this.lab_DataFile.Name = "lab_DataFile";
-            this.lab_DataFile.Size = new System.Drawing.Size(77, 12);
-            this.lab_DataFile.TabIndex = 5;
-            this.lab_DataFile.Text = "数据存储路径";
+            this._dataPathLabel.AutoSize = true;
+            this._dataPathLabel.Location = new System.Drawing.Point(41, 227);
+            this._dataPathLabel.Name = "_dataPathLabel";
+            this._dataPathLabel.Size = new System.Drawing.Size(77, 12);
+            this._dataPathLabel.TabIndex = 5;
+            this._dataPathLabel.Text = "数据存储路径";
             // 
-            // btn_Save
+            // _saveButton
             // 
-            this.btn_Save.Location = new System.Drawing.Point(427, 321);
-            this.btn_Save.Name = "btn_Save";
-            this.btn_Save.Size = new System.Drawing.Size(75, 23);
-            this.btn_Save.TabIndex = 4;
-            this.btn_Save.Text = "保存&&应用";
-            this.btn_Save.UseVisualStyleBackColor = true;
-            this.btn_Save.Click += new System.EventHandler(this.btn_Save_Click);
+            this._saveButton.Location = new System.Drawing.Point(427, 321);
+            this._saveButton.Name = "_saveButton";
+            this._saveButton.Size = new System.Drawing.Size(75, 23);
+            this._saveButton.TabIndex = 4;
+            this._saveButton.Text = "保存&&应用";
+            this._saveButton.UseVisualStyleBackColor = true;
+            this._saveButton.Click += new System.EventHandler(this._saveButton_Click);
             // 
-            // lab_Parity
+            // _parityLabel
             // 
-            this.lab_Parity.AutoSize = true;
-            this.lab_Parity.Location = new System.Drawing.Point(39, 156);
-            this.lab_Parity.Name = "lab_Parity";
-            this.lab_Parity.Size = new System.Drawing.Size(65, 12);
-            this.lab_Parity.TabIndex = 3;
-            this.lab_Parity.Text = "奇偶效验位";
+            this._parityLabel.AutoSize = true;
+            this._parityLabel.Location = new System.Drawing.Point(39, 156);
+            this._parityLabel.Name = "_parityLabel";
+            this._parityLabel.Size = new System.Drawing.Size(65, 12);
+            this._parityLabel.TabIndex = 3;
+            this._parityLabel.Text = "奇偶校验位";
             // 
-            // lab_StopBits
+            // _stopBitsLabel
             // 
-            this.lab_StopBits.AutoSize = true;
-            this.lab_StopBits.Location = new System.Drawing.Point(39, 125);
-            this.lab_StopBits.Name = "lab_StopBits";
-            this.lab_StopBits.Size = new System.Drawing.Size(41, 12);
-            this.lab_StopBits.TabIndex = 2;
-            this.lab_StopBits.Text = "停止位";
+            this._stopBitsLabel.AutoSize = true;
+            this._stopBitsLabel.Location = new System.Drawing.Point(39, 125);
+            this._stopBitsLabel.Name = "_stopBitsLabel";
+            this._stopBitsLabel.Size = new System.Drawing.Size(41, 12);
+            this._stopBitsLabel.TabIndex = 2;
+            this._stopBitsLabel.Text = "停止位";
             // 
-            // lab_DataBits
+            // _dataBitsLabel
             // 
-            this.lab_DataBits.AutoSize = true;
-            this.lab_DataBits.Location = new System.Drawing.Point(39, 94);
-            this.lab_DataBits.Name = "lab_DataBits";
-            this.lab_DataBits.Size = new System.Drawing.Size(41, 12);
-            this.lab_DataBits.TabIndex = 1;
-            this.lab_DataBits.Text = "数据位";
+            this._dataBitsLabel.AutoSize = true;
+            this._dataBitsLabel.Location = new System.Drawing.Point(39, 94);
+            this._dataBitsLabel.Name = "_dataBitsLabel";
+            this._dataBitsLabel.Size = new System.Drawing.Size(41, 12);
+            this._dataBitsLabel.TabIndex = 1;
+            this._dataBitsLabel.Text = "数据位";
             // 
-            // lab_BaudRate
+            // _baudRateLabel
             // 
-            this.lab_BaudRate.AutoSize = true;
-            this.lab_BaudRate.Location = new System.Drawing.Point(39, 63);
-            this.lab_BaudRate.Name = "lab_BaudRate";
-            this.lab_BaudRate.Size = new System.Drawing.Size(41, 12);
-            this.lab_BaudRate.TabIndex = 0;
-            this.lab_BaudRate.Text = "波特率";
+            this._baudRateLabel.AutoSize = true;
+            this._baudRateLabel.Location = new System.Drawing.Point(39, 63);
+            this._baudRateLabel.Name = "_baudRateLabel";
+            this._baudRateLabel.Size = new System.Drawing.Size(41, 12);
+            this._baudRateLabel.TabIndex = 0;
+            this._baudRateLabel.Text = "波特率";
             // 
             // SystemSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 356);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this._mainPanel);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SystemSettingsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "系统设置";
             this.Load += new System.EventHandler(this.SystemSettingsForm_Load);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this._mainPanel.ResumeLayout(false);
+            this._mainPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button btn_Save;
-        private System.Windows.Forms.Label lab_Parity;
-        private System.Windows.Forms.Label lab_StopBits;
-        private System.Windows.Forms.Label lab_DataBits;
-        private System.Windows.Forms.Label lab_BaudRate;
-        private System.Windows.Forms.ComboBox cmb_Parity;
-        private System.Windows.Forms.ComboBox cmb_StopBits;
-        private System.Windows.Forms.ComboBox cmb_DataBits;
-        private System.Windows.Forms.ComboBox cmb_BaudRate;
-        private System.Windows.Forms.TextBox txt_DataFile;
-        private System.Windows.Forms.Label lab_DataFile;
-        private System.Windows.Forms.ComboBox cmb_PortName;
-        private System.Windows.Forms.Label lab_COM;
-        private System.Windows.Forms.TextBox txt_LogFile;
-        private System.Windows.Forms.Label lab_LogFile;
-        private System.Windows.Forms.Label lab_EnergyMetersType;
-        private System.Windows.Forms.ComboBox cmb_EnergyMetersType;
+        private System.Windows.Forms.Panel _mainPanel;
+        private System.Windows.Forms.Button _saveButton;
+        private System.Windows.Forms.Label _parityLabel;
+        private System.Windows.Forms.Label _stopBitsLabel;
+        private System.Windows.Forms.Label _dataBitsLabel;
+        private System.Windows.Forms.Label _baudRateLabel;
+        private System.Windows.Forms.ComboBox _parityCombo;
+        private System.Windows.Forms.ComboBox _stopBitsCombo;
+        private System.Windows.Forms.ComboBox _dataBitsCombo;
+        private System.Windows.Forms.ComboBox _baudRateCombo;
+        private System.Windows.Forms.TextBox _dataPathText;
+        private System.Windows.Forms.Label _dataPathLabel;
+        private System.Windows.Forms.ComboBox _portNameCombo;
+        private System.Windows.Forms.Label _portNameLabel;
+        private System.Windows.Forms.TextBox _logFileText;
+        private System.Windows.Forms.Label _logFileLabel;
+        private System.Windows.Forms.Label _energyMetersTypeLabel;
+        private System.Windows.Forms.ComboBox _energyMetersTypeCombo;
     }
 }
