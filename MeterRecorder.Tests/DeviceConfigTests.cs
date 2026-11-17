@@ -92,6 +92,25 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
+        /// Enum.TryParse 对数字字符串一律返回 true：Parity=9、StopBits=7 会得到枚举里
+        /// 根本没有的取值。这类值必须在读取时就回落，不能等到打开串口才炸。
+        /// </summary>
+        [Fact]
+        public void Load_NumericEnumOutOfRange_FallsBackToDefaults()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("system.ini");
+                WriteIni(path, "Parity=9", "StopBits=7");
+
+                DeviceConfig config = DeviceConfig.Load(path);
+
+                Assert.Equal(Parity.None, config.Parity);
+                Assert.Equal(StopBits.One, config.StopBits);
+            }
+        }
+
+        /// <summary>
         /// 从站地址 0 表示未配置，应与「缺省」一样回落到表型内置值，而不是真的发往 0 号。
         /// </summary>
         [Fact]

@@ -28,6 +28,27 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
+        /// 表型取值越界时必须报错：早先用 default 兜成直流表，程序照常启动，
+        /// 却按三个通道去记录三相表，数据错了也看不出来。
+        /// </summary>
+        [Fact]
+        public void Create_UnknownMeterType_Throws()
+        {
+            DeviceConfig config = new DeviceConfig { MeterType = (MeterType)99 };
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => MeterFactory.Create(config));
+        }
+
+        /// <summary>
+        /// 未提供配置属于装配错误，应在创建时就说清楚。
+        /// </summary>
+        [Fact]
+        public void Create_NullConfig_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => MeterFactory.Create(null));
+        }
+
+        /// <summary>
         /// 从站地址取自配置；未配置时才用表型内置的默认值（ADL400 是 177）。
         /// 这里通过「预置了哪个从站的应答」间接验证，用错地址会直接抛异常。
         /// </summary>

@@ -147,7 +147,7 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 读取枚举值。解析失败时返回默认值，不抛异常。
+        /// 读取枚举值。解析失败或取值不在枚举定义内时返回默认值，不抛异常。
         /// </summary>
         /// <param name="iniPath">ini 文件路径</param>
         /// <param name="key">键名</param>
@@ -158,7 +158,9 @@ namespace MeterRecorder
             // 这类非法值，解析失败时保留默认值即可，避免启动时直接抛异常。
             string text = FileHelp.ReadIniKeys(SectionName, key, string.Empty, iniPath);
             TEnum parsed;
-            if (Enum.TryParse(text, out parsed))
+            // Enum.TryParse 对数字字符串一律返回 true，Parity=9 会得到枚举里根本没有的取值，
+            // 直到打开串口才炸。这里再用 IsDefined 拦一道，只接受真正定义过的值。
+            if (Enum.TryParse(text, out parsed) && Enum.IsDefined(typeof(TEnum), parsed))
             {
                 return parsed;
             }

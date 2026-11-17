@@ -266,6 +266,33 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
+        /// 寄存器值超过 32767 时必须保持正数。早先转成 short 会翻成负数
+        /// （380 V 系统若用 2 位小数，38160 会读成 -273.76），
+        /// 再叠加符号位就成了正负完全颠倒。
+        /// </summary>
+        [Fact]
+        public void Read_RegisterAboveInt16Range_StaysPositive()
+        {
+            FakeModbusTransport transport = new FakeModbusTransport()
+                .Expect(1, 0x0023, 2, 0x0202, 0x0200)
+                .Expect(1, 0x0025, 6, 22040, 21980, 22010, 38160, 38120, 38140)
+                .Expect(1, 0x002B, 3, 946, 951, 938)
+                .Expect(1, 0x002E, 8, 3720, 3720, 3720, 3720, 3720, 3720, 3720, 3720)
+                .Expect(1, 0x0024, 1, 0x0000);
+
+            using (AmcEnergyMeters meter = new AmcEnergyMeters(new DeviceConfig(), transport))
+            {
+                meter.Open();
+                MeterSample sample = meter.Read();
+
+                Assert.Equal(220.4, sample.GetValue(0), 3);
+                Assert.Equal(381.6, sample.GetValue(3), 3);
+                Assert.Equal(9.46, sample.GetValue(6), 3);
+                Assert.Equal(37.2, sample.GetValue(9), 3);
+            }
+        }
+
+        /// <summary>
         /// 符号字节按位对应功率项：第 0 位是 A 相有功、第 7 位是总无功。
         /// 同时用另一组小数位（电压 3、电流 2、功率 2），覆盖 Scale 的不同分支。
         /// </summary>

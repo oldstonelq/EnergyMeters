@@ -177,11 +177,14 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 按说明书换算：实际值 = 通讯值 x 10^(小数点位数-4)，通讯值为有符号 16 位。
+        /// 按说明书换算：实际值 = 通讯值 x 10^(小数点位数-4)。
+        /// 通讯值按无符号处理：正负由功率符号位寄存器给出，寄存器里存的是幅值。
+        /// 早先这里转成 short，超过 32767 的读数会翻成负数（例如 2 位小数的
+        /// 380 V 读成 -273.76），再叠加符号位就正负颠倒了。
         /// </summary>
         private static double Scale(ushort rawValue, int decimalPoint)
         {
-            return (short)rawValue * Math.Pow(10, decimalPoint - 4);
+            return rawValue * Math.Pow(10, decimalPoint - 4);
         }
     }
 }
