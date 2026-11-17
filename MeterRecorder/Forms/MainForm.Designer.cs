@@ -65,14 +65,14 @@
             this._toolStrip.Location = new System.Drawing.Point(0, 0);
             this._toolStrip.Name = "_toolStrip";
             this._toolStrip.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
-            this._toolStrip.Size = new System.Drawing.Size(1280, 31);
+            this._toolStrip.Size = new System.Drawing.Size(1280, 28);
             this._toolStrip.TabIndex = 0;
             // 
             // _startButton
             // 
             this._startButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._startButton.Name = "_startButton";
-            this._startButton.Size = new System.Drawing.Size(36, 24);
+            this._startButton.Size = new System.Drawing.Size(36, 21);
             this._startButton.Text = "开始";
             this._startButton.Click += new System.EventHandler(this._startButton_Click);
             // 
@@ -81,20 +81,20 @@
             this._stopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._stopButton.Enabled = false;
             this._stopButton.Name = "_stopButton";
-            this._stopButton.Size = new System.Drawing.Size(36, 24);
+            this._stopButton.Size = new System.Drawing.Size(36, 21);
             this._stopButton.Text = "停止";
             this._stopButton.Click += new System.EventHandler(this._stopButton_Click);
             // 
             // _separator1
             // 
             this._separator1.Name = "_separator1";
-            this._separator1.Size = new System.Drawing.Size(6, 27);
+            this._separator1.Size = new System.Drawing.Size(6, 24);
             // 
             // _exportButton
             // 
             this._exportButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._exportButton.Name = "_exportButton";
-            this._exportButton.Size = new System.Drawing.Size(64, 24);
+            this._exportButton.Size = new System.Drawing.Size(63, 21);
             this._exportButton.Text = "导出 CSV";
             this._exportButton.Click += new System.EventHandler(this._exportButton_Click);
             // 
@@ -102,7 +102,7 @@
             // 
             this._replayButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._replayButton.Name = "_replayButton";
-            this._replayButton.Size = new System.Drawing.Size(64, 24);
+            this._replayButton.Size = new System.Drawing.Size(60, 21);
             this._replayButton.Text = "打开回放";
             this._replayButton.Click += new System.EventHandler(this._replayButton_Click);
             // 
@@ -110,20 +110,20 @@
             // 
             this._clearButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._clearButton.Name = "_clearButton";
-            this._clearButton.Size = new System.Drawing.Size(36, 24);
+            this._clearButton.Size = new System.Drawing.Size(36, 21);
             this._clearButton.Text = "清空";
             this._clearButton.Click += new System.EventHandler(this._clearButton_Click);
             // 
             // _separator2
             // 
             this._separator2.Name = "_separator2";
-            this._separator2.Size = new System.Drawing.Size(6, 27);
+            this._separator2.Size = new System.Drawing.Size(6, 24);
             // 
             // _settingsButton
             // 
             this._settingsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this._settingsButton.Name = "_settingsButton";
-            this._settingsButton.Size = new System.Drawing.Size(36, 24);
+            this._settingsButton.Size = new System.Drawing.Size(36, 21);
             this._settingsButton.Text = "设置";
             this._settingsButton.Click += new System.EventHandler(this._settingsButton_Click);
             // 
@@ -131,13 +131,13 @@
             // 
             this._statusLabel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this._statusLabel.Name = "_statusLabel";
-            this._statusLabel.Size = new System.Drawing.Size(44, 24);
+            this._statusLabel.Size = new System.Drawing.Size(32, 21);
             this._statusLabel.Text = "空闲";
             // 
             // _outerSplit
             // 
             this._outerSplit.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._outerSplit.Location = new System.Drawing.Point(0, 31);
+            this._outerSplit.Location = new System.Drawing.Point(0, 28);
             this._outerSplit.Name = "_outerSplit";
             this._outerSplit.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -150,8 +150,8 @@
             // 
             this._outerSplit.Panel2.Controls.Add(this._sampleTable);
             this._outerSplit.Panel2MinSize = 120;
-            this._outerSplit.Size = new System.Drawing.Size(1280, 709);
-            this._outerSplit.SplitterDistance = 420;
+            this._outerSplit.Size = new System.Drawing.Size(1280, 712);
+            this._outerSplit.SplitterDistance = 421;
             this._outerSplit.SplitterWidth = 6;
             this._outerSplit.TabIndex = 1;
             // 
@@ -170,7 +170,7 @@
             // 
             this._innerSplit.Panel2.Controls.Add(this._trendChart);
             this._innerSplit.Panel2MinSize = 280;
-            this._innerSplit.Size = new System.Drawing.Size(1280, 420);
+            this._innerSplit.Size = new System.Drawing.Size(1280, 421);
             this._innerSplit.SplitterDistance = 620;
             this._innerSplit.SplitterWidth = 6;
             this._innerSplit.TabIndex = 0;
@@ -180,23 +180,25 @@
             this._cardPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this._cardPanel.Location = new System.Drawing.Point(0, 0);
             this._cardPanel.Name = "_cardPanel";
-            this._cardPanel.Size = new System.Drawing.Size(620, 420);
+            this._cardPanel.Size = new System.Drawing.Size(620, 421);
             this._cardPanel.TabIndex = 0;
             // 
             // _trendChart
             // 
             this._trendChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this._trendChart.Location = new System.Drawing.Point(0, 0);
+            this._trendChart.MaxPoints = 1000;
             this._trendChart.Name = "_trendChart";
-            this._trendChart.Size = new System.Drawing.Size(654, 420);
+            this._trendChart.Size = new System.Drawing.Size(654, 421);
             this._trendChart.TabIndex = 0;
             // 
             // _sampleTable
             // 
             this._sampleTable.Dock = System.Windows.Forms.DockStyle.Fill;
             this._sampleTable.Location = new System.Drawing.Point(0, 0);
+            this._sampleTable.MaxRows = 5000;
             this._sampleTable.Name = "_sampleTable";
-            this._sampleTable.Size = new System.Drawing.Size(1280, 283);
+            this._sampleTable.Size = new System.Drawing.Size(1280, 285);
             this._sampleTable.TabIndex = 0;
             // 
             // MainForm
@@ -207,7 +209,6 @@
             this.Controls.Add(this._outerSplit);
             this.Controls.Add(this._toolStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "电能表读数记录";
@@ -225,6 +226,7 @@
             this._innerSplit.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
