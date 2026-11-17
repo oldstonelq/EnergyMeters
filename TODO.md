@@ -60,6 +60,14 @@
 
 验证：`dotnet build` 0 警告 0 错误；临时工程跑了 12 项断言 —— 三款表默认曲线下标（`0,1,2` / `0,6,12` / `0,6,12`）、缺失 Key 跳过、表格绑定 6000 条后只剩 5000 行且首行正确、再追加后首行继续前移、采集器停止只关端口、释放时才调用表对象的 `Dispose`。窗体本身没能在临时宿主里启动（SDK 版 MSBuild 产出的资源需要特定资源程序集，宿主版本对不上），关窗行为要到 VS 里点一次确认。
 
+### 2026-11-17　P1 结构债（`76ceb52`）
+
+- **第 21 项**：新增 `Services/RecordingSession.cs`，持有样本、生成文件名并保存；主窗体的 `_samples`、`BuildDataFileName` 与落盘细节都搬进 session，界面只做转发与刷新。
+- **第 22 项**：新增 `Help/Logger.cs`，统一追加写 `Logs\log.txt`（多线程加锁，写失败静默）；删除 `MainForm.LogError`，回放窗体与设置窗体也改为调用它。
+- **第 23 项**：新增 `IModbusTransport` 与 `SerialPortTransport`；`ModbusRtuClient` 只依赖接口，并保留按串口参数构造的重载；CRC 与 03H 组帧抽成 `ModbusCrc`、`ModbusFrame`；三款表增加接收通道的内部构造函数，配合 `InternalsVisibleTo("MeterRecorder.Tests")`。
+- 新增 `MeterRecorder.Tests`（xUnit），16 个用例全部通过：CRC 示例帧、03H 组帧、异常应答码、从站地址不匹配、CRC 错误、DJSF1352 指数缩放与无效值、ADL400 32 位拼接与负号、AMC 小数位与功率符号、会话命名与回读。
+- 工程按 `MSBuildRuntimeType` 条件引用 `System.Resources.Extensions`，命令行与 VS 都能直接构建，不必再手工挂临时引用。
+
 ---
 
 ## P0 结构性
@@ -280,14 +288,12 @@ class ChannelDescriptor
 
 ## 建议的实施顺序
 
-第 1~13 项、第 16~20 项与第 24 项已完成。剩下的按下表推进：
+第 1~13 项、第 16~24 项已完成。剩下的按下表推进：
 
 | 顺序 | 项 | 说明 |
 |---|---|---|
-| 1 | 23 | 抽传输接口 + 测试工程，之后再动协议才有底 |
-| 2 | 21 → 22 | `RecordingSession` 与 `Logger`，建议合并成一次改 `MainForm` |
-| 3 | 25 → 26 → 27 | 随手清 |
-| 4 | 14 → 15 | 需要真表或重做曲线布局，单独排期 |
+| 1 | 25 → 26 → 27 | 都是小改动，随手清 |
+| 2 | 14 → 15 | 需要真表或重做曲线布局，单独排期 |
 
 ## 明确不做
 
@@ -326,7 +332,7 @@ class ChannelDescriptor
 2026-11-16 改名与文档收尾之后重新通读代码。分层已经立住：`Core` / `Protocol` / `Models` 不引用
 控件，表型差异只剩 `MeterChannels` 一处，采集循环也搬出了窗体。以下 12 项是这轮发现的
 问题，按「会咬人的缺陷 → 结构债 → 小问题」排列，编号接在第 15 项之后。
-其中第 16~20 项与第 24 项已于 `b4cf891` 修复，剩下的见「建议的实施顺序」。
+其中第 16~20 项与第 24 项已于 `b4cf891` 修复，第 21~23 项已于 `76ceb52` 完成，剩下的见「建议的实施顺序」。
 
 ### [x] 16. 界面仍按通道下标选曲线
 
@@ -380,7 +386,7 @@ class ChannelDescriptor
 
 ## 二次评审的结构债（P1）
 
-### [ ] 21. 抽出 RecordingSession
+### [x] 21. 抽出 RecordingSession
 
 - **现状**：样本集合与落盘逻辑都在 `MainForm`：`_samples`、`SaveCollectedData`（`:327`）、`ResetView`（`:368`）、`BuildDataFileName`；回放窗体则用 `SampleDocument`。
 - **影响**：采集编排离不开窗体，无法在无界面宿主里验证；两边没有共同的「一次记录」概念，将来加统计、加导出还得继续往窗体里塞。
@@ -388,7 +394,9 @@ class ChannelDescriptor
 - **验收**：`MainForm.cs` 降到 250 行以内；session 能在控制台宿主里跑通 Add + Save。
 - **风险**：中。会同时碰界面与存储两侧，建议放在第 16~20 项之后再动。
 
-### [ ] 22. 日志从窗体剥离
+**完成情况**：新增 `RecordingSession`，主窗体的样本集合、文件命名与落盘都交由它；界面只剩转发与刷新。
+
+### [x] 22. 日志从窗体剥离
 
 - **现状**：`MainForm.LogError`（`MainForm.cs:407`）是 `public static`；`ReplayForm` 与 `SystemSettingsForm` 出错只弹窗，不写日志。
 - **影响**：回放与设置的问题无法回溯；日志格式与路径逻辑长在窗体里。
@@ -396,13 +404,17 @@ class ChannelDescriptor
 - **验收**：`grep "LogError"` 不再指向 `MainForm`；回放窗体导出失败也留下日志。
 - **风险**：低。
 
-### [ ] 23. 抽 IModbusTransport 并补测试工程
+**完成情况**：新增 `Logger`，三个窗体统一调用；`MainForm.LogError` 已删除。
+
+### [x] 23. 抽 IModbusTransport 并补测试工程
 
 - **现状**：`ModbusRtuClient` 内部直接 `new SerialPort`；CRC、组帧、32 位拼接、符号位、旧格式 JSON 都是纯逻辑，却没有自动验证手段。
 - **影响**：改协议或新增表型只能靠真机回归，出错时靠现场现象倒推。
 - **动作**：抽 `IModbusTransport`（Read / Write / DiscardInBuffer），串口实现保留；CRC 与帧解析提成可测的静态方法；新建 net48 测试工程，覆盖 CRC 示例帧、异常应答、ADL400 高字在前与符号位、AMC 小数点缩放、旧数组 JSON。
 - **验收**：测试不需要串口即可全绿。
 - **风险**：中。先加接口与测试、再迁移调用方，可分两次提交。
+
+**完成情况**：新增 `IModbusTransport` / `SerialPortTransport`，CRC 与组帧独立成静态类；新增 `MeterRecorder.Tests`（16 个用例全通过）。
 
 ## 二次评审的小问题（P2）
 
