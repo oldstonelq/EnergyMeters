@@ -195,6 +195,15 @@ class ChannelDescriptor
 
 按时间倒序。每条的提交号可直接 `git show` 查看细节。
 
+### 2026-11-17　命名与注释收尾（`6368d99` `0a2226d` `3f52bb9`）
+
+- 设置窗体控件从 VS 模板的 `btn_Save` / `lab_COM` / `panel1` 统一为 `_saveButton` /
+  `_portNameLabel` / `_mainPanel`，与另两个窗体一致；标签「奇偶效验位」改为「奇偶校验位」。
+- 补 8 个带初始化器的字段、2 个 p/Invoke 声明、若干私有辅助方法，以及 60 余处 `<param>`。
+  约定：事件处理器的 `sender` / `e` 与测试的 `[InlineData]` 参数不写参数说明。
+- `IEnergyMeters` → `IEnergyMeter`；`Public/` → `App/`；`MeterTypeExtensions` 拆到独立文件。
+- 全项目扫描：命名违规 0 处，缺注释 0 处；构建 0 警告，124 个用例通过。
+
 ### 2026-11-17　测试补齐与三处健壮性修正
 
 - 用例从 19 个扩到 120 个：通道解析、表型装配、ini 读写、样本文件新旧格式、
