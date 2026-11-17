@@ -6,8 +6,16 @@ using Xunit;
 
 namespace MeterRecorder.Tests
 {
+    /// <summary>
+    /// 数据文件读取：区分新版包装格式与旧版裸数组格式，
+    /// 后者没有表型字段，需要标出来让界面提示。
+    /// </summary>
     public class SampleRepositoryTests
     {
+        /// <summary>
+        /// 旧版是不带包装的数组、没有表型字段，加载后按通道推断为三相，
+        /// 并置上旧格式标记供回放窗体提示。
+        /// </summary>
         [Fact]
         public void Load_LegacyArray_MarksDocumentAndInfersChannels()
         {
@@ -38,6 +46,9 @@ namespace MeterRecorder.Tests
             }
         }
 
+        /// <summary>
+        /// 新版文件自带表型与通道定义，加载后不应被误标成旧格式。
+        /// </summary>
         [Fact]
         public void Load_WrappedDocument_IsNotMarkedAsLegacy()
         {

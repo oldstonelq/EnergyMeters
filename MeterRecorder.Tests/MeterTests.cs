@@ -4,8 +4,15 @@ using Xunit;
 
 namespace MeterRecorder.Tests
 {
+    /// <summary>
+    /// 直流单路表：三个通道都按指数寄存器还原，验证缩放与无效值约定。
+    /// </summary>
     public class Djsf1352MeterTests
     {
+        /// <summary>
+        /// 三个通道的指数都取 2，按「通讯值 x 10^(指数-3)」还原：
+        /// 482 得 48.2、125 得 12.5、60 得 6.0。指数取错会让整表读数差一个数量级。
+        /// </summary>
         [Fact]
         public void Read_AppliesExponentScaling()
         {
@@ -25,6 +32,10 @@ namespace MeterRecorder.Tests
             }
         }
 
+        /// <summary>
+        /// 指数寄存器与数值寄存器同为 FFFF 表示该通道无效，约定记 -1，
+        /// 避免把 65535 当成真实读数写进数据文件。
+        /// </summary>
         [Fact]
         public void Read_EmptyRegisterPair_ReturnsMinusOne()
         {
@@ -39,6 +50,10 @@ namespace MeterRecorder.Tests
             }
         }
 
+        /// <summary>
+        /// 注入固定时钟后样本时间应取自注入值而不是 DateTime.Now，
+        /// 否则跨零点与系统时间跳变无法在测试里复现。
+        /// </summary>
         [Fact]
         public void Read_UsesInjectedClock()
         {
@@ -56,8 +71,16 @@ namespace MeterRecorder.Tests
         }
     }
 
+    /// <summary>
+    /// 三相表 ADL400：一次读取里同时覆盖相电压、线电压、电流三种缩放，
+    /// 以及功率项的高字在前 32 位拼接与符号位。
+    /// </summary>
     public class Adl400MeterTests
     {
+        /// <summary>
+        /// 相电压与线电压除 10、电流除 100、功率除 1000；B 相有功预置为负值，
+        /// 用来确认 32 位拼接时符号位没有被当成数值位。
+        /// </summary>
         [Fact]
         public void Read_CombinesThirtyTwoBitPowerWithSign()
         {
@@ -85,6 +108,12 @@ namespace MeterRecorder.Tests
             }
         }
 
+        /// <summary>
+        /// 把一个有符号数按高字在前写进两个寄存器，模拟表计的 32 位功率格式。
+        /// </summary>
+        /// <param name="registers">功率区寄存器数组</param>
+        /// <param name="itemIndex">第几项功率，每项占两个寄存器</param>
+        /// <param name="value">要填入的有符号数值</param>
         private static void WritePower(ushort[] registers, int itemIndex, int value)
         {
             uint raw = unchecked((uint)value);
@@ -93,8 +122,16 @@ namespace MeterRecorder.Tests
         }
     }
 
+    /// <summary>
+    /// 三相表 AMC：开表时先读两组小数位寄存器，读取时据此缩放，
+    /// 功率符号字节决定各项的正负。
+    /// </summary>
     public class AmcMeterTests
     {
+        /// <summary>
+        /// 小数位取 3 时按「通讯值 x 10^(3-4)」还原；符号字节第 0 位置 1 使 A 相有功取负、
+        /// B 相保持正，确认符号位按项对应而不是整段一起翻转。
+        /// </summary>
         [Fact]
         public void Open_ReadsDecimalPoints_AndPowerSignsApply()
         {
