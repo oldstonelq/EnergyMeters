@@ -189,13 +189,43 @@ MeterRecorder/
 - 三款表的解析：DJSF1352 指数缩放与「FFFF 表示无效」、ADL400 32 位功率拼接与符号、AMC 小数位与功率符号位；
 - `RecordingSession` 的计数、文件命名、保存后可回读、清空。
 
-Visual Studio 里在「测试资源管理器」运行；命令行：
+### 在 Visual Studio 里
+
+1. 打开 `MeterRecorder.sln`，首次会还原 xUnit 相关包（需联网；也可右键解决方案 →「还原 NuGet 包」）；
+2. 菜单 **测试 → 测试资源管理器**（`Ctrl+E, T`），点「全部运行」；
+3. 只跑一个：在测试资源管理器里按名称筛选，或在代码里右键方法 →「运行测试」/「调试测试」，后者可打断点。
+
+### 命令行
 
 ```
 dotnet test MeterRecorder.Tests/MeterRecorder.Tests.csproj
+dotnet test MeterRecorder.Tests/MeterRecorder.Tests.csproj --filter FullyQualifiedName~ModbusCrcTests
+dotnet test MeterRecorder.Tests/MeterRecorder.Tests.csproj --filter FullyQualifiedName~Read_CombinesThirtyTwoBitPowerWithSign
 ```
 
-测试通过 `IModbusTransport` 注入内存版通道，不需要串口，也不碰真实表计。
+命令行需要 .NET SDK；在 Visual Studio 里跑不需要。
+
+### 写新测试
+
+测试文件加在 `MeterRecorder.Tests` 下即可，SDK 工程会自动包含。表计类测试先用
+`FakeModbusTransport` 预置应答，再构造表对象：
+
+```csharp
+FakeModbusTransport transport = new FakeModbusTransport()
+    .Expect(177, 0x0061, 3, 2204, 2198, 2201)   // 从站 177、起始 0x61、读 3 个寄存器
+    .Expect(177, 0x0078, 3, 3816, 3812, 3814);
+
+using (Adl400EnergyMeters meter = new Adl400EnergyMeters(new DeviceConfig(), transport))
+{
+    Assert.Equal(220.4, meter.Read().GetValue(0), 3);
+}
+```
+
+`Read()` 会发的每个请求都要预置，缺一个会抛「测试没有为该请求准备应答」。
+浮点断言用 `Assert.Equal(期望, 实际, 3)`；需要固定时间戳时，给表类的 internal 构造函数
+第三个参数传 `() => 固定时间`（测试程序集有 `InternalsVisibleTo`）。
+
+测试通过 `IModbusTransport` 注入内存通道，不需要串口，也不碰真实表计。
 
 ## 日志与常见提示
 
