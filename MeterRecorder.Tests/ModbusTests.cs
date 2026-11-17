@@ -1,3 +1,5 @@
+using System;
+using System.IO.Ports;
 using MeterRecorder;
 using Xunit;
 
@@ -46,6 +48,38 @@ namespace MeterRecorder.Tests
             frame[3] ^= 0xFF;
 
             Assert.False(ModbusCrc.Verify(frame, frame.Length));
+        }
+
+        /// <summary>
+        /// 入参为空或长度越界时应立刻报错：这类错误来自调用方，
+        /// 静默算出一个错的校验值会让整条链路都读错。
+        /// </summary>
+        [Fact]
+        public void Compute_InvalidArguments_Throw()
+        {
+            Assert.Throws<ArgumentNullException>(() => ModbusCrc.Compute(null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => ModbusCrc.Compute(new byte[2], 3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => ModbusCrc.Compute(new byte[2], -1));
+        }
+
+        /// <summary>
+        /// 缓冲区末尾没有两个空位时不能写 CRC，否则会越界破坏相邻数据。
+        /// </summary>
+        [Fact]
+        public void WriteTo_BufferTooSmall_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => ModbusCrc.WriteTo(null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => ModbusCrc.WriteTo(new byte[2], 1));
+        }
+
+        /// <summary>
+        /// 帧长不足 3 字节时无法容纳地址、功能码与校验，直接判为校验不通过。
+        /// </summary>
+        [Fact]
+        public void Verify_TooShortFrame_ReturnsFalse()
+        {
+            Assert.False(ModbusCrc.Verify(null, 4));
+            Assert.False(ModbusCrc.Verify(new byte[2], 2));
         }
     }
 
@@ -127,6 +161,204 @@ namespace MeterRecorder.Tests
 
                 Assert.Contains("CRC", error.Message);
             }
+        }
+
+        /// <summary>
+        /// 数量为 0 或超过 125 属于调用方错误，应在发报文之前就拒绝，
+        /// 而不是组出非法帧去等超时。
+        /// </summary>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(126)]
+        public void ReadHoldingRegisters_InvalidQuantity_Throws(int quantity)
+        {
+            FakeModbusTransport transport = new FakeModbusTransport();
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(
+                    () => client.ReadHoldingRegisters(1, 0x0064, (ushort)quantity));
+                Assert.Empty(transport.Requests);
+            }
+        }
+
+        /// <summary>
+        /// 应答功能码不是 03H（例如从站回了 04H）时必须拒绝，
+        /// 否则会把输入寄存器的数据当成保持寄存器写进样本。
+        /// </summary>
+        [Fact]
+        public void ReadHoldingRegisters_FunctionCodeMismatch_Throws()
+        {
+            byte[] frame = { 1, 0x04, 2, 0, 10, 0, 0 };
+            ModbusCrc.WriteTo(frame, 5);
+
+            FakeModbusTransport transport = new FakeModbusTransport().ExpectRaw(1, 0x0064, 1, frame);
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                ModbusException error = Assert.Throws<ModbusException>(
+                    () => client.ReadHoldingRegisters(1, 0x0064, 1));
+
+                Assert.Contains("功能码不匹配", error.Message);
+            }
+        }
+
+        /// <summary>
+        /// 从站声明的字节数与请求数量不符时必须拒绝：数量对不上说明帧已经错位，
+        /// 再按声明长度解析只会得到错位的寄存器值。
+        /// </summary>
+        [Fact]
+        public void ReadHoldingRegisters_ByteCountMismatch_Throws()
+        {
+            byte[] frame = { 1, 0x03, 4, 0, 10, 0, 11, 0, 0 };
+            ModbusCrc.WriteTo(frame, 7);
+
+            FakeModbusTransport transport = new FakeModbusTransport().ExpectRaw(1, 0x0064, 1, frame);
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                ModbusException error = Assert.Throws<ModbusException>(
+                    () => client.ReadHoldingRegisters(1, 0x0064, 1));
+
+                Assert.Contains("数据长度不符", error.Message);
+            }
+        }
+
+        /// <summary>
+        /// 串口一帧数据会分多次到达，客户端必须循环读满再解析。
+        /// 这里让通道每次只给 1 个字节，验证拼帧逻辑。
+        /// </summary>
+        [Fact]
+        public void ReadHoldingRegisters_FragmentedResponse_IsAssembled()
+        {
+            FakeModbusTransport transport = new FakeModbusTransport()
+                .Expect(1, 0x0064, 2, 0x000A, 0x000B);
+            transport.MaxChunkSize = 1;
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                Assert.Equal(new ushort[] { 10, 11 }, client.ReadHoldingRegisters(1, 0x0064, 2));
+            }
+        }
+
+        /// <summary>
+        /// 从站不应答时应在总时限后抛超时异常，而不是无限等待把界面卡死。
+        /// </summary>
+        [Fact]
+        public void ReadHoldingRegisters_NoResponse_ThrowsTimeout()
+        {
+            FakeModbusTransport transport = new FakeModbusTransport()
+                .ExpectRaw(1, 0x0064, 1, new byte[0]);
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                client.ResponseTimeoutMilliseconds = 20;
+
+                ModbusException error = Assert.Throws<ModbusException>(
+                    () => client.ReadHoldingRegisters(1, 0x0064, 1));
+
+                Assert.Contains("超时", error.Message);
+            }
+        }
+
+        /// <summary>
+        /// 未提供通道属于装配错误，应在构造时就报出来。
+        /// </summary>
+        [Fact]
+        public void Constructor_NullTransport_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new ModbusRtuClient((IModbusTransport)null));
+        }
+
+        /// <summary>
+        /// 重复释放不应重复调用通道的 Dispose：串口二次释放会抛异常。
+        /// </summary>
+        [Fact]
+        public void Dispose_IsIdempotent()
+        {
+            FakeModbusTransport transport = new FakeModbusTransport();
+            ModbusRtuClient client = new ModbusRtuClient(transport);
+
+            client.Dispose();
+            client.Dispose();
+
+            Assert.True(transport.IsDisposed);
+        }
+
+        /// <summary>
+        /// 打开与关闭要传递到通道上，界面靠它显示串口状态。
+        /// </summary>
+        /// <summary>
+        /// 按串口参数构造时只是建对象，不应真的打开串口，
+        /// 否则没接表的机器上第一次启动就会失败。
+        /// </summary>
+        [Fact]
+        public void Constructor_WithPortSettings_LeavesPortClosed()
+        {
+            using (ModbusRtuClient client = new ModbusRtuClient("COM1", 9600, 8, StopBits.One, Parity.None))
+            {
+                Assert.False(client.IsOpen);
+            }
+        }
+
+        [Fact]
+        public void OpenAndClose_ReflectTransportState()
+        {
+            FakeModbusTransport transport = new FakeModbusTransport();
+
+            using (ModbusRtuClient client = new ModbusRtuClient(transport))
+            {
+                Assert.False(client.IsOpen);
+
+                client.Open();
+                Assert.True(client.IsOpen);
+
+                client.Close();
+                Assert.False(client.IsOpen);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Modbus 异常：异常码要翻译成用户能看懂的说明，并保留原始码与从站地址，
+    /// 便于现场排查是「地址错了」还是「设备忙」。
+    /// </summary>
+    public class ModbusExceptionTests
+    {
+        /// <summary>
+        /// 六个标准异常码与未定义码都要有对应说明。
+        /// </summary>
+        [Theory]
+        [InlineData(0x01, "非法功能码")]
+        [InlineData(0x02, "非法数据地址")]
+        [InlineData(0x03, "非法数据值")]
+        [InlineData(0x04, "从站设备故障")]
+        [InlineData(0x05, "应答超时")]
+        [InlineData(0x06, "从站设备忙")]
+        [InlineData(0x7F, "未定义的异常码")]
+        public void Constructor_ExceptionCode_DescribesCode(byte code, string expected)
+        {
+            ModbusException error = new ModbusException(code, 5);
+
+            Assert.Contains(expected, error.Message);
+            Assert.Equal((byte?)code, error.ExceptionCode);
+            Assert.Equal((byte?)5, error.SlaveAddress);
+        }
+
+        /// <summary>
+        /// 本地错误（超时、CRC 失败）应保留内部异常与原始说明，异常码为空。
+        /// </summary>
+        [Fact]
+        public void Constructor_WithInnerException_KeepsInnerAndCode()
+        {
+            InvalidOperationException inner = new InvalidOperationException("端口已关闭");
+
+            ModbusException error = new ModbusException("读取失败", inner);
+
+            Assert.Same(inner, error.InnerException);
+            Assert.Equal("读取失败", error.Message);
+            Assert.Null(error.ExceptionCode);
         }
     }
 }

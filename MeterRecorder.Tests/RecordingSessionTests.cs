@@ -101,9 +101,89 @@ namespace MeterRecorder.Tests
         /// <summary>
         /// 构造一份三相会话，通道定义取自 ADL400，样本值域与真实读数一致。
         /// </summary>
+        /// <summary>
+        /// 采集回调偶尔会给出 null（例如上一帧失败后继续），会话应忽略它，
+        /// 不能让它进入集合、把后面的保存与表格都带坏。
+        /// </summary>
+        [Fact]
+        public void Add_NullSample_IsIgnored()
+        {
+            RecordingSession session = NewSession();
+
+            session.Add(null);
+            session.Add(NewSample(new DateTime(2026, 11, 17, 9, 0, 0)));
+
+            Assert.Equal(1, session.Count);
+        }
+
+        /// <summary>
+        /// 数据目录为空时属于调用方错误，应在写盘前报出来。
+        /// </summary>
+        [Fact]
+        public void Save_EmptyDirectory_Throws()
+        {
+            RecordingSession session = NewSession();
+            session.Add(NewSample(DateTime.Now));
+
+            Assert.Throws<ArgumentException>(() => session.Save(string.Empty));
+        }
+
+        /// <summary>
+        /// 首次运行时数据目录还不存在，保存应自行创建而不是失败。
+        /// </summary>
+        [Fact]
+        public void Save_CreatesMissingDirectory()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                RecordingSession session = NewSession();
+                session.Add(NewSample(new DateTime(2026, 11, 17, 9, 0, 0)));
+
+                string filePath = session.Save(temp.File(@"nested\data"));
+
+                Assert.True(File.Exists(filePath));
+            }
+        }
+
+        /// <summary>
+        /// 直流表只有三个通道，落盘后通道键与数值都应完整保留：
+        /// 回放时按 Key 找曲线，键丢了就画不出线。
+        /// </summary>
+        [Fact]
+        public void Save_DcSession_RoundTripsThreeChannels()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                RecordingSession session = NewSession(MeterType.Djsf1352);
+                session.Add(NewDcSample(new DateTime(2026, 11, 17, 9, 0, 0)));
+                session.Add(NewDcSample(new DateTime(2026, 11, 17, 9, 0, 1)));
+
+                SampleDocument document = SampleRepository.Load(session.Save(temp.Root));
+
+                Assert.Equal("DJSF1352", document.MeterType);
+                Assert.Equal(3, document.Channels.Count);
+                Assert.Equal("voltage", document.Channels[0].Key);
+                Assert.Equal("current", document.Channels[1].Key);
+                Assert.Equal("power", document.Channels[2].Key);
+                Assert.Equal(2, document.Samples.Count);
+                Assert.Equal(48.2, document.Samples[0].GetValue(0), 3);
+                Assert.Equal(6.0, document.Samples[1].GetValue(2), 3);
+            }
+        }
+
         private static RecordingSession NewSession()
         {
-            return new RecordingSession(MeterType.Adl400, MeterChannels.GetChannels(MeterType.Adl400));
+            return NewSession(MeterType.Adl400);
+        }
+
+        private static RecordingSession NewSession(MeterType meterType)
+        {
+            return new RecordingSession(meterType, MeterChannels.GetChannels(meterType));
+        }
+
+        private static MeterSample NewDcSample(DateTime time)
+        {
+            return new MeterSample(time, new[] { 48.2, 12.5, 6.0 });
         }
 
         /// <summary>

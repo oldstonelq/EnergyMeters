@@ -42,6 +42,17 @@ namespace MeterRecorder.Tests
         public int ReadTimeout { get; set; }
 
         /// <summary>
+        /// 单次 Read 最多返回的字节数。设为 1 可模拟串口把一帧拆成多次到达，
+        /// 用来验证客户端会循环读满整帧而不是读一次就解析。
+        /// </summary>
+        public int MaxChunkSize { get; set; }
+
+        /// <summary>
+        /// 是否已释放，供 Dispose 相关断言使用。
+        /// </summary>
+        public bool IsDisposed { get; private set; }
+
+        /// <summary>
         /// 依次收到的请求，便于断言读取顺序。
         /// </summary>
         public List<string> Requests { get; } = new List<string>();
@@ -150,6 +161,10 @@ namespace MeterRecorder.Tests
                 throw new TimeoutException("没有更多待读数据");
             }
             int length = Math.Min(count, _pendingLength - _pendingOffset);
+            if (MaxChunkSize > 0 && length > MaxChunkSize)
+            {
+                length = MaxChunkSize;
+            }
             Array.Copy(_pending, _pendingOffset, buffer, offset, length);
             _pendingOffset += length;
             return length;
@@ -160,6 +175,7 @@ namespace MeterRecorder.Tests
         /// </summary>
         public void Dispose()
         {
+            IsDisposed = true;
             _pending = new byte[0];
             _pendingLength = 0;
         }
