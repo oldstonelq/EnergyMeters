@@ -109,6 +109,10 @@ namespace MeterRecorder.Tests
                 MeterChannels.GetChannels(MeterType.Adl400), null));
         }
 
+                /// <summary>
+        /// 断言通道键非空且互不重复。
+        /// </summary>
+        /// <param name="channels">待检查的通道定义</param>
         private static void AssertUniqueKeys(IReadOnlyList<ChannelDescriptor> channels)
         {
             HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
@@ -119,6 +123,10 @@ namespace MeterRecorder.Tests
             }
         }
 
+                /// <summary>
+        /// 取出通道键数组，便于与期望值整体比较。
+        /// </summary>
+        /// <param name="channels">通道定义</param>
         private static string[] Keys(IReadOnlyList<ChannelDescriptor> channels)
         {
             string[] keys = new string[channels.Count];

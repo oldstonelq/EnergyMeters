@@ -12,8 +12,27 @@ namespace MeterRecorder
     /// </summary>
     public class FileHelp
     {
+        /// <summary>
+        /// 写入 ini 的一项；节点或文件不存在时由系统接口负责创建。
+        /// </summary>
+        /// <param name="section">节点名</param>
+        /// <param name="key">键名</param>
+        /// <param name="val">键值</param>
+        /// <param name="filePath">ini 文件路径</param>
+        /// <returns>写入成功返回非零值</returns>
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
+
+        /// <summary>
+        /// 读取 ini 的一项。键不存在时返回默认值，由调用方决定如何回落。
+        /// </summary>
+        /// <param name="section">节点名</param>
+        /// <param name="key">键名</param>
+        /// <param name="defaultValue">键不存在时的返回值</param>
+        /// <param name="retVal">接收缓冲</param>
+        /// <param name="size">缓冲长度</param>
+        /// <param name="filePath">ini 文件路径</param>
+        /// <returns>实际读取到的字符数</returns>
         [DllImport("kernel32")]
         private static extern int GetPrivateProfileString(string section, string key, string defaultValue, StringBuilder retVal, int size, string filePath);
 

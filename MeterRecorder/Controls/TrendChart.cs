@@ -19,6 +19,9 @@ namespace MeterRecorder
         /// </summary>
         public const int MaxSeries = 3;
 
+                /// <summary>
+        /// 曲线配色，通道多于三种时循环取用。
+        /// </summary>
         private static readonly Color[] s_seriesColors = { Color.Red, Color.Blue, Color.Green };
 
         /// <summary>
@@ -102,6 +105,7 @@ namespace MeterRecorder
         /// <summary>
         /// 追加一帧数据。
         /// </summary>
+        /// <param name="sample">新采样结果，为每条曲线各追一个点</param>
         public void Append(MeterSample sample)
         {
             if (sample == null || _seriesNames.Length == 0)
@@ -117,6 +121,7 @@ namespace MeterRecorder
         /// <summary>
         /// 用一批样本重绘曲线。逐点追加后再统一调整坐标，避免每次都重算范围。
         /// </summary>
+        /// <param name="samples">要重新灌入的样本，按时间顺序</param>
         public void Reload(IReadOnlyList<MeterSample> samples)
         {
             Clear();
@@ -148,6 +153,7 @@ namespace MeterRecorder
         /// <summary>
         /// 把一帧数据追加到各曲线，并裁剪超出上限的点。
         /// </summary>
+        /// <param name="sample">新采样结果</param>
         private void AddPoints(MeterSample sample)
         {
             for (int i = 0; i < _seriesNames.Length; i++)

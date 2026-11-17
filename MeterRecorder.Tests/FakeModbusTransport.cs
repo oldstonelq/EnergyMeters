@@ -219,6 +219,14 @@ namespace MeterRecorder.Tests
         /// 把从站、起始地址与数量拼成字典键。三个要素都参与，
         /// 同一从站读取相邻区段时不会互相覆盖。
         /// </summary>
+        /// <summary>
+        /// 把从站、起始地址与数量拼成字典键。三个要素都参与，
+        /// 同一从站读取相邻区段时不会互相覆盖。
+        /// </summary>
+        /// <param name="slave">从站地址</param>
+        /// <param name="start">起始寄存器地址</param>
+        /// <param name="quantity">寄存器数量</param>
+        /// <returns>形如 1:100:2 的键</returns>
         private static string Key(byte slave, ushort start, ushort quantity)
         {
             return slave + ":" + start + ":" + quantity;

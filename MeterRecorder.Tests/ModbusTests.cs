@@ -302,6 +302,9 @@ namespace MeterRecorder.Tests
             }
         }
 
+        /// <summary>
+        /// 打开与关闭要传递到通道上，界面靠它显示串口状态。
+        /// </summary>
         [Fact]
         public void OpenAndClose_ReflectTransportState()
         {

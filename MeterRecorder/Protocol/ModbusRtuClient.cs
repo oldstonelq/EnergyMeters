@@ -178,6 +178,8 @@ namespace MeterRecorder
         /// <summary>
         /// 校验整帧尾部的 CRC。
         /// </summary>
+        /// <param name="frame">完整应答帧</param>
+        /// <param name="length">参与校验的字节数</param>
         private static void ValidateCrc(byte[] frame, int length)
         {
             if (ModbusCrc.Verify(frame, length))
@@ -193,6 +195,10 @@ namespace MeterRecorder
         /// <summary>
         /// 读满指定字节数，超过总时限则抛出超时异常。
         /// </summary>
+        /// <param name="buffer">接收缓冲区</param>
+        /// <param name="offset">写入起始位置</param>
+        /// <param name="count">需要读满的字节数</param>
+        /// <param name="slaveAddress">从站地址，仅用于超时提示</param>
         private void ReadExactly(byte[] buffer, int offset, int count, byte slaveAddress)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();

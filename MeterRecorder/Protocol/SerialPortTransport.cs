@@ -12,6 +12,9 @@ namespace MeterRecorder
         /// </summary>
         private const int DefaultReadTimeoutMilliseconds = 100;
 
+                /// <summary>
+        /// 串口对象，构造时创建，Open 时才真正打开。
+        /// </summary>
         private readonly SerialPort _serialPort;
 
         /// <summary>
@@ -81,6 +84,9 @@ namespace MeterRecorder
         /// <summary>
         /// 发送字节。
         /// </summary>
+        /// <param name="buffer">待发送的报文</param>
+        /// <param name="offset">起始位置</param>
+        /// <param name="count">字节数</param>
         public void Write(byte[] buffer, int offset, int count)
         {
             _serialPort.Write(buffer, offset, count);
@@ -89,6 +95,9 @@ namespace MeterRecorder
         /// <summary>
         /// 读取字节，单次读超时时抛出 <see cref="System.TimeoutException"/>。
         /// </summary>
+        /// <param name="buffer">接收缓冲区</param>
+        /// <param name="offset">写入起始位置</param>
+        /// <param name="count">本次最多读取的字节数</param>
         public int Read(byte[] buffer, int offset, int count)
         {
             return _serialPort.Read(buffer, offset, count);

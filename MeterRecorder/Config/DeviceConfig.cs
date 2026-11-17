@@ -77,6 +77,7 @@ namespace MeterRecorder
         /// <summary>
         /// 从 ini 读取配置。任何一项非法都回落到默认值，不抛异常。
         /// </summary>
+        /// <param name="iniPath">ini 文件路径；文件不存在时返回默认配置</param>
         public static DeviceConfig Load(string iniPath)
         {
             DeviceConfig config = new DeviceConfig();
@@ -109,6 +110,7 @@ namespace MeterRecorder
         /// <summary>
         /// 写回 ini。任一项写入失败都会抛出异常，避免配置文件只写了一半却提示成功。
         /// </summary>
+        /// <param name="iniPath">ini 文件路径；目录不存在或文件只读时抛 IOException</param>
         /// <exception cref="IOException">文件只读、被占用或路径无效</exception>
         public void Save(string iniPath)
         {

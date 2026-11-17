@@ -223,6 +223,12 @@ namespace MeterRecorder.Tests
             }
         }
 
+                /// <summary>
+        /// 把一个有符号数按高字在前写进两个寄存器，模拟表计的 32 位功率格式。
+        /// </summary>
+        /// <param name="registers">功率区寄存器数组</param>
+        /// <param name="itemIndex">第几项功率，每项占两个寄存器</param>
+        /// <param name="value">要填入的有符号数值</param>
         private static void WritePower(ushort[] registers, int itemIndex, int value)
         {
             uint raw = unchecked((uint)value);

@@ -108,6 +108,7 @@ namespace MeterRecorder
         /// <summary>
         /// 追加一行。
         /// </summary>
+        /// <param name="sample">新采样结果，按当前分组写入对应列</param>
         public void Append(MeterSample sample)
         {
             if (sample == null || _columnChannelIndexes.Length == 0)
@@ -160,6 +161,8 @@ namespace MeterRecorder
         /// <summary>
         /// 导出当前表格到 CSV。
         /// </summary>
+        /// <param name="filePath">目标 CSV 路径</param>
+        /// <param name="error">失败原因；成功时为空字符串</param>
         public bool ExportToCsv(string filePath, out string error)
         {
             return FileHelp.ExportCsv(_grid, filePath, out error);

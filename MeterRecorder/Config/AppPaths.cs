@@ -54,6 +54,7 @@ namespace MeterRecorder
         /// <summary>
         /// 取指定表型的数据目录，如 Data\ADL400。
         /// </summary>
+        /// <param name="meterType">表型，决定子目录名，如 ADL400</param>
         public string GetDataDirectory(MeterType meterType)
         {
             return Path.Combine(DataDirectory, meterType.ToConfigValue());

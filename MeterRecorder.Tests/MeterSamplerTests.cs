@@ -196,9 +196,18 @@ namespace MeterRecorder.Tests
         /// </summary>
         private sealed class FakeMeter : IEnergyMeters
         {
-            private int _opened;
-            private int _closed;
-            private int _disposed;
+                    /// <summary>
+        /// Open 被调用的次数。
+        /// </summary>
+        private int _opened;
+                    /// <summary>
+        /// Close 被调用的次数。
+        /// </summary>
+        private int _closed;
+                    /// <summary>
+        /// Dispose 被调用的次数。
+        /// </summary>
+        private int _disposed;
 
             /// <summary>
             /// 打开端口的次数。

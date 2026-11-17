@@ -143,6 +143,8 @@ namespace MeterRecorder
         /// <summary>
         /// 将高字在前的两个寄存器拼接为 32 位有符号整型。
         /// </summary>
+        /// <param name="highWord">高 16 位</param>
+        /// <param name="lowWord">低 16 位</param>
         private static int ToInt32(ushort highWord, ushort lowWord)
         {
             return (int)(((uint)highWord << 16) | lowWord);

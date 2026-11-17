@@ -117,6 +117,7 @@ namespace MeterRecorder
         /// <summary>
         /// 读取「有效值 + 指数」构成的双寄存器项并换算为实际值。
         /// </summary>
+        /// <param name="address">寄存器起始地址</param>
         private double ReadScaledValue(ushort address)
         {
             ushort[] registers = _client.ReadHoldingRegisters(_slaveAddress, address, 2);

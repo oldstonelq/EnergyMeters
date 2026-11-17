@@ -171,16 +171,27 @@ namespace MeterRecorder.Tests
             }
         }
 
+                /// <summary>
+        /// 默认构造一份三相会话。
+        /// </summary>
         private static RecordingSession NewSession()
         {
             return NewSession(MeterType.Adl400);
         }
 
+                /// <summary>
+        /// 按指定表型构造会话，通道定义随之切换。
+        /// </summary>
+        /// <param name="meterType">表型</param>
         private static RecordingSession NewSession(MeterType meterType)
         {
             return new RecordingSession(meterType, MeterChannels.GetChannels(meterType));
         }
 
+                /// <summary>
+        /// 造一帧直流表的三通道样本。
+        /// </summary>
+        /// <param name="time">样本时间</param>
         private static MeterSample NewDcSample(DateTime time)
         {
             return new MeterSample(time, new[] { 48.2, 12.5, 6.0 });

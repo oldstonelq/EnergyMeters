@@ -63,6 +63,7 @@ namespace MeterRecorder
         /// <summary>
         /// 按通道精度格式化数值。
         /// </summary>
+        /// <param name="value">通道读数</param>
         public string Format(double value)
         {
             return value.ToString("F" + Decimals);

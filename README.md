@@ -152,13 +152,15 @@ Data\ADL400\20261116142001至20261116143000.json
 MeterRecorder/
 ├─ Core/         表型枚举、通道定义、样本、IEnergyMeters、工厂
 ├─ Config/       AppPaths（目录）、DeviceConfig（ini 配置）
-├─ Protocol/     ModbusRtuClient（组帧/超时/CRC 校验）、ModbusException
+├─ Protocol/     ModbusRtuClient（组帧/超时/校验）、IModbusTransport 与串口实现、
+│                ModbusCrc、ModbusFrame、ModbusException
 ├─ Models/       三款表的寄存器地址与缩放
-├─ Services/     MeterSampler（采集循环、取消、端口生命周期）
+├─ Services/     MeterSampler（采集循环、取消、端口生命周期）、RecordingSession
 ├─ Storage/      SampleRepository（JSON 读写、旧格式兼容）
 ├─ Controls/     ChannelCardPanel、SampleTable、TrendChart
 ├─ Forms/        MainForm、SystemSettingsForm、ReplayForm
-├─ Help/         ini 读写、CSV 导出、日志
+├─ Help/         ini 读写、CSV 导出、Logger、FormIcon
+├─ Public/       SystemParameters（组合根：配置、路径与当前表实例）
 └─ Properties/   程序集信息与资源
 ```
 
@@ -167,6 +169,16 @@ MeterRecorder/
 分层意图：`Core` / `Protocol` / `Models` 不依赖界面，`Services` 只负责采集，
 `Controls` 与 `Forms` 只负责渲染。新增一款表只需加一份通道定义加一个 `IEnergyMeters`
 实现，窗体代码不用改。
+
+### 命名与注释约定
+
+- 类型、方法、属性、事件用 `PascalCase`；参数与局部变量用 `camelCase`。
+- 私有实例字段 `_camelCase`，私有静态字段 `s_camelCase`，常量 `PascalCase`。
+- 窗体控件用 `_` 前缀加控件类型后缀（`_saveButton`、`_parityCombo`），
+  与 `Designer.cs` 里的字段同名，三个窗体保持一致。
+- 所有成员都写 XML 注释，说明「为什么这么做」而不是复述签名；有参数的方法写 `<param>`。
+- 两处例外：事件处理器的 `sender` / `e` 不写参数说明；测试方法的参数由
+  `[InlineData]` 直接给出，也不重复写。
 
 ## 构建
 

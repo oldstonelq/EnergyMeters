@@ -41,6 +41,7 @@ namespace MeterRecorder
         /// <summary>
         /// 按通道定义重建卡片。
         /// </summary>
+        /// <param name="channels">通道定义，按 Group 连续排列，分组一换就另起一段</param>
         public void BindChannels(IReadOnlyList<ChannelDescriptor> channels)
         {
             if (channels == null)
@@ -90,6 +91,7 @@ namespace MeterRecorder
         /// <summary>
         /// 刷新卡片上的读数。
         /// </summary>
+        /// <param name="sample">新采样结果，按通道下标取值</param>
         public void UpdateValues(MeterSample sample)
         {
             if (_channels == null || sample == null)
@@ -116,6 +118,7 @@ namespace MeterRecorder
         /// <summary>
         /// 统计分组数。通道按分组连续排列，分组一换就另起一段。
         /// </summary>
+        /// <param name="channels">通道定义</param>
         private static int CountGroups(IReadOnlyList<ChannelDescriptor> channels)
         {
             if (channels.Count == 0)
@@ -136,6 +139,8 @@ namespace MeterRecorder
         /// <summary>
         /// 在第 <paramref name="rowIndex"/> 行放分组标题、下一行放卡片容器，返回卡片容器供后续填充。
         /// </summary>
+        /// <param name="groupName">分组名称，作为该段的小标题</param>
+        /// <param name="rowIndex">标题所在行；卡片容器放在下一行</param>
         private FlowLayoutPanel AddGroupRow(string groupName, int rowIndex)
         {
             Label caption = new Label
@@ -162,6 +167,8 @@ namespace MeterRecorder
         /// <summary>
         /// 生成单张卡片。
         /// </summary>
+        /// <param name="channel">通道定义，决定标题、单位与小数位</param>
+        /// <param name="channelIndex">通道下标，刷新读数时用来定位卡片</param>
         private Control CreateCard(ChannelDescriptor channel, int channelIndex)
         {
             Panel card = new Panel

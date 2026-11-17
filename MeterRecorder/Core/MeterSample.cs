@@ -33,6 +33,7 @@ namespace MeterRecorder
         /// <summary>
         /// 按通道下标取值；下标越界时返回 0，避免界面因数据不全而抛异常。
         /// </summary>
+        /// <param name="channelIndex">通道下标</param>
         public double GetValue(int channelIndex)
         {
             if (Values == null || channelIndex < 0 || channelIndex >= Values.Length)

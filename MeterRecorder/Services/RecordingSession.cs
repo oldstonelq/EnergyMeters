@@ -10,8 +10,17 @@ namespace MeterRecorder
     /// </summary>
     public sealed class RecordingSession
     {
+                /// <summary>
+        /// 本次采集的样本，按时间顺序追加。
+        /// </summary>
         private readonly List<MeterSample> _samples = new List<MeterSample>();
+                /// <summary>
+        /// 表型，写入数据文件的表头。
+        /// </summary>
         private readonly MeterType _meterType;
+                /// <summary>
+        /// 通道定义，写入数据文件的表头，回放时据此还原列。
+        /// </summary>
         private readonly IReadOnlyList<ChannelDescriptor> _channels;
 
         /// <summary>

@@ -75,6 +75,7 @@ namespace MeterRecorder
         /// <summary>
         /// 从文件读取样本，兼容早期不带通道信息的数组格式。
         /// </summary>
+        /// <param name="filePath">数据文件路径</param>
         /// <returns>解析失败时返回 null</returns>
         public static SampleDocument Load(string filePath)
         {
@@ -124,6 +125,7 @@ namespace MeterRecorder
         /// 旧文件没有记录表型，按首个元素的字段判断是三相还是直流；AMC 与 ADL400 的
         /// 通道定义相同，统一按三相处理不影响结果。
         /// </summary>
+        /// <param name="json">旧版数组格式的完整文本</param>
         private static SampleDocument LoadLegacyArray(string json)
         {
             JArray array = JArray.Parse(json);

@@ -212,6 +212,11 @@ namespace MeterRecorder.Tests
             Assert.Equal(19200, copy.BaudRate);
         }
 
+                /// <summary>
+        /// 写一个只含 SystemSet 节点的 ini，每行一个 key=value。
+        /// </summary>
+        /// <param name="path">ini 文件路径</param>
+        /// <param name="entries">节点内的键值对</param>
         private static void WriteIni(string path, params string[] entries)
         {
             File.WriteAllText(path, "[SystemSet]\r\n" + string.Join("\r\n", entries) + "\r\n");

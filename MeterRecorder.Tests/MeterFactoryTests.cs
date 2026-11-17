@@ -70,6 +70,10 @@ namespace MeterRecorder.Tests
             }
         }
 
+                /// <summary>
+        /// 按实例的实际类型反推表型枚举，避免断言写成「工厂返回了自己传的那个值」。
+        /// </summary>
+        /// <param name="meter">工厂创建出的表对象</param>
         private static MeterType DetectType(IEnergyMeters meter)
         {
             if (meter is Djsf1352EnergyMeters)

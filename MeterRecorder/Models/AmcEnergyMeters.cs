@@ -182,6 +182,8 @@ namespace MeterRecorder
         /// 早先这里转成 short，超过 32767 的读数会翻成负数（例如 2 位小数的
         /// 380 V 读成 -273.76），再叠加符号位就正负颠倒了。
         /// </summary>
+        /// <param name="rawValue">寄存器原值，按幅值解释</param>
+        /// <param name="decimalPoint">该通道的小数点位数</param>
         private static double Scale(ushort rawValue, int decimalPoint)
         {
             return rawValue * Math.Pow(10, decimalPoint - 4);

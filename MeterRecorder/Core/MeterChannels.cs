@@ -56,6 +56,7 @@ namespace MeterRecorder
         /// <summary>
         /// 取指定表型的通道定义。
         /// </summary>
+        /// <param name="meterType">表型</param>
         public static IReadOnlyList<ChannelDescriptor> GetChannels(MeterType meterType)
         {
             return meterType == MeterType.Djsf1352 ? SinglePhase : ThreePhase;
@@ -65,6 +66,7 @@ namespace MeterRecorder
         /// 取指定表型的默认曲线通道 Key。界面按 Key 解析下标，
         /// 不再假设「第 7 个是 A 相电流」这类位置关系。
         /// </summary>
+        /// <param name="meterType">表型</param>
         public static IReadOnlyList<string> GetDefaultChartKeys(MeterType meterType)
         {
             return meterType == MeterType.Djsf1352 ? s_singlePhaseChartKeys : s_threePhaseChartKeys;
@@ -73,6 +75,8 @@ namespace MeterRecorder
         /// <summary>
         /// 把通道 Key 解析成通道下标。找不到的 Key 跳过，返回顺序与入参一致。
         /// </summary>
+        /// <param name="channels">通道定义</param>
+        /// <param name="keys">按期望顺序排列的通道键</param>
         public static int[] ResolveChannelIndexes(IReadOnlyList<ChannelDescriptor> channels, IReadOnlyList<string> keys)
         {
             List<int> indexes = new List<int>();
@@ -97,6 +101,8 @@ namespace MeterRecorder
         /// <summary>
         /// 取指定表型的默认曲线通道下标。
         /// </summary>
+        /// <param name="channels">通道定义</param>
+        /// <param name="meterType">表型，决定默认画哪三个通道</param>
         public static int[] GetDefaultChartIndexes(IReadOnlyList<ChannelDescriptor> channels, MeterType meterType)
         {
             return ResolveChannelIndexes(channels, GetDefaultChartKeys(meterType));

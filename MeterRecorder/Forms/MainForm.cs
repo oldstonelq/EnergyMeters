@@ -308,6 +308,10 @@ namespace MeterRecorder
         /// <summary>
         /// 把一帧样本同时追加到卡片区、曲线与记录表。
         /// </summary>
+        /// <summary>
+        /// 把一帧样本同时追加到卡片区、曲线与记录表。
+        /// </summary>
+        /// <param name="sample">新采样结果</param>
         private void AppendSample(MeterSample sample)
         {
             _session.Add(sample);

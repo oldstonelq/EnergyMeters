@@ -126,6 +126,7 @@ namespace MeterRecorder
         /// <summary>
         /// 只保留前 <see cref="TrendChart.MaxSeries"/> 个通道。
         /// </summary>
+        /// <param name="indexes">按优先级排好的通道下标</param>
         private static int[] TrimToLimit(int[] indexes)
         {
             if (indexes.Length <= TrendChart.MaxSeries)
