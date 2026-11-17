@@ -49,6 +49,17 @@
 
 验证方式：临时工程生成 300 条三相样本并落盘，加载后渲染窗体核对（元信息、17 项勾选、三条曲线、分组表格、按钮位置）。临时工程已删除。
 
+### 2026-11-17　二次评审 P0 修复（`b4cf891`）
+
+- **第 16 项**：`MeterChannels` 新增 `GetDefaultChartKeys` / `ResolveChannelIndexes` / `GetDefaultChartIndexes`，按 `ua`、`ia`、`pTotal` 这类 Key 解析下标；`MainForm` 与 `ReplayForm` 不再出现 `{ 0, 6, 12 }`。`SampleTable` 里的 `channels.Count > 8` 改为具名常量 `AllGroupColumnLimit` —— 阈值本身仍然需要，但不再是匿名魔数。
+- **第 17 项**：`FormClosing` 改为 `async void`：先 `e.Cancel = true`，`await StopAsync()`，再 `Close()`；新增 `_stopBeforeClose` 处理连点两次关闭。**没有**改用 `BeginInvoke` 处理样本，因为曲线与表格的追加顺序仍要同步保证，根因是界面线程阻塞等待。
+- **第 18 项**：`Program` 用静态字段 `s_instanceMutex` 持有互斥体，`Application.Run` 结束后 `ReleaseMutex` 与 `Dispose`；原来那处直接退出的调用改成 `return`。
+- **第 19 项**：`SampleTable.MaxRows` 默认 5000，`Append` 后裁剪首行；`Reload` 只补最后 `MaxRows` 行，避免先塞满再逐行删。
+- **第 20 项**：`IEnergyMeters : IDisposable`，三个表类实现并释放 `_client`；`MeterSampler.Dispose` 里调用，兜底等待从 3 秒降到 500 ms。
+- **第 24 项**：曲线数量上限统一为 `TrendChart.MaxSeries`，两个窗体不再各定义一份。
+
+验证：`dotnet build` 0 警告 0 错误；临时工程跑了 12 项断言 —— 三款表默认曲线下标（`0,1,2` / `0,6,12` / `0,6,12`）、缺失 Key 跳过、表格绑定 6000 条后只剩 5000 行且首行正确、再追加后首行继续前移、采集器停止只关端口、释放时才调用表对象的 `Dispose`。窗体本身没能在临时宿主里启动（SDK 版 MSBuild 产出的资源需要特定资源程序集，宿主版本对不上），关窗行为要到 VS 里点一次确认。
+
 ---
 
 ## P0 结构性
@@ -269,18 +280,14 @@ class ChannelDescriptor
 
 ## 建议的实施顺序
 
-第 1~13 项已完成。第 16~27 项按下面顺序推进，前三组都不动界面布局、可当场验证：
+第 1~13 项、第 16~20 项与第 24 项已完成。剩下的按下表推进：
 
 | 顺序 | 项 | 说明 |
 |---|---|---|
-| 1 | 18 → 17 → 16 | 单实例、关窗卡顿、通道下标：改动小、风险低，先清掉 |
-| 2 | 20 → 19 | 资源释放与表格上限，彼此独立 |
-| 3 | 23 | 抽传输接口 + 测试工程，之后再动协议才有底 |
-| 4 | 21 → 22 | `RecordingSession` 与 `Logger`，建议合并成一次改 `MainForm` |
-| 5 | 24 → 25 → 26 → 27 | 随手清 |
-| 6 | 14 → 15 | 需要真表或重做曲线布局，单独排期 |
-
-> 16 与 24 有重叠（都涉及曲线策略），若先做 16，把 24 的常量一并收进 `MeterChannels` 即可。
+| 1 | 23 | 抽传输接口 + 测试工程，之后再动协议才有底 |
+| 2 | 21 → 22 | `RecordingSession` 与 `Logger`，建议合并成一次改 `MainForm` |
+| 3 | 25 → 26 → 27 | 随手清 |
+| 4 | 14 → 15 | 需要真表或重做曲线布局，单独排期 |
 
 ## 明确不做
 
@@ -317,10 +324,11 @@ class ChannelDescriptor
 ## 二次评审的缺陷（P0）
 
 2026-11-16 改名与文档收尾之后重新通读代码。分层已经立住：`Core` / `Protocol` / `Models` 不引用
-控件，表型差异只剩 `MeterChannels` 一处，采集循环也搬出了窗体。以下 12 项是这轮仍然存在的
+控件，表型差异只剩 `MeterChannels` 一处，采集循环也搬出了窗体。以下 12 项是这轮发现的
 问题，按「会咬人的缺陷 → 结构债 → 小问题」排列，编号接在第 15 项之后。
+其中第 16~20 项与第 24 项已于 `b4cf891` 修复，剩下的见「建议的实施顺序」。
 
-### [ ] 16. 界面仍按通道下标选曲线
+### [x] 16. 界面仍按通道下标选曲线
 
 - **现状**：`MainForm.GetDefaultChartIndexes`（`MainForm.cs:315`）用 `_channels.Count == 3` 与硬编码下标 `{ 0, 6, 12 }`；`ReplayForm.GetDefaultChannelIndexes`（`ReplayForm.cs:107`）另写了一份 `<= 3` / `> 12` 的判断；`SampleTable.Bind`（`SampleTable.cs:66`）还有一处 `channels.Count > 8`。
 - **影响**：通道模型只做了一半 —— 数据层不认表型了，界面层还在认下标。新增第四款表时（通道数不是 3 或 17），`BindSeries` 里 `channels[6]` 直接抛 `IndexOutOfRangeException`；通道顺序一调整就画错线。
@@ -328,7 +336,9 @@ class ChannelDescriptor
 - **验收**：窗体与控件里不再出现 `new[] { 0, 6, 12 }` 与 `Count == 3`；构造一个 5 通道的假表能正常出图。
 - **风险**：低，纯查询替换。
 
-### [ ] 17. 采集期间关闭窗口会卡 3 秒
+**完成情况**：`MeterChannels` 提供默认曲线 Key 与解析方法，两个窗体都改为按 Key 取下标；进度顺带完成第 24 项。
+
+### [x] 17. 采集期间关闭窗口会卡 3 秒
 
 - **现状**：`MainForm.FormClosing` 同步调用 `_sampler.Dispose()`（`MainForm.cs:77`），`Dispose` 里 `loop.Wait(3 秒)`（`MeterSampler.cs:182`）；而采集线程的 `OnSampleReady` 用的是同步 `Invoke`（`MainForm.cs:250`）。
 - **影响**：UI 线程等采集线程退出、采集线程等 UI 处理 Invoke，两边互等到超时，采集期间关窗口最长卡 3 秒；等待时间越长越像卡死。
@@ -336,7 +346,9 @@ class ChannelDescriptor
 - **验收**：采集时点窗口 X，1 秒内关闭，日志里没有超时记录。
 - **风险**：低。改成异步后，关闭途中到达的最后一两帧会被丢弃，需确认可接受。
 
-### [ ] 18. 单实例互斥可能被 GC 回收
+**完成情况**：关窗改为「取消本次关闭 → 异步停止采集 → 再关闭」，连点两次只取消不打断。样本追加仍用同步 `Invoke`，因为顺序需要保证。
+
+### [x] 18. 单实例互斥可能被 GC 回收
 
 - **现状**：`Program.cs:24` 的 `Mutex` 是局部变量，之后没有引用，也没有 `GC.KeepAlive`。
 - **影响**：Release 下 JIT 可能把它判定为已死，GC 回收时命名互斥体句柄关闭，第二个实例就能启动 —— 两个进程抢同一个串口。
@@ -344,7 +356,9 @@ class ChannelDescriptor
 - **验收**：Release 编译后连开两次，第二个仍提示「程序已在运行中」。
 - **风险**：低。
 
-### [ ] 19. 记录表行数无上限
+**完成情况**：互斥体改由静态字段持有，退出时释放并 Dispose。
+
+### [x] 19. 记录表行数无上限
 
 - **现状**：`SampleTable.Append` 只 `Rows.Add`（`SampleTable.cs:117`），没有任何裁剪；曲线有 `MaxPoints = 1000`。
 - **影响**：1 秒一帧，8 小时约 2.9 万行 × 17 列，滚动、切分组、重填都会明显变慢，内存持续增长；与曲线 1000 点的上限也不一致。
@@ -352,13 +366,17 @@ class ChannelDescriptor
 - **验收**：连续采集 1 小时以上，切分组与滚动无明显卡顿。
 - **风险**：低。
 
-### [ ] 20. 串口对象从不 Dispose
+**完成情况**：`MaxRows` 默认 5000，`Append` 后裁首行；`Reload` 只补最后 5000 行。
+
+### [x] 20. 串口对象从不 Dispose
 
 - **现状**：`ModbusRtuClient` 实现了 `Dispose`（`ModbusRtuClient.cs:168`），但全项目没有调用点；`IEnergyMeters` 没有继承 `IDisposable`，`MeterSampler.Dispose` 只调 `Close()`。
 - **影响**：`Close` 只关端口，`Dispose` 才释放 SerialPort 的内核对象与内部事件循环；反复开始/停止可能累积句柄。
 - **动作**：`IEnergyMeters : IDisposable`，三个表类实现为释放 `_client`；采样器释放时一并调用。
 - **验收**：反复开始/停止 20 次，任务管理器里句柄数不持续增长。
 - **风险**：低。
+
+**完成情况**：`IEnergyMeters` 继承 `IDisposable`，采样器释放时调用；兜底等待降到 500 ms。
 
 ## 二次评审的结构债（P1）
 
@@ -388,12 +406,14 @@ class ChannelDescriptor
 
 ## 二次评审的小问题（P2）
 
-### [ ] 24. 合并重复的曲线策略
+### [x] 24. 合并重复的曲线策略
 
 - **现状**：`MaxChartSeries = 3`（`MainForm.cs:20`）与 `MaxSeries = 3`（`ReplayForm.cs:17`）各定义一次；默认通道选择有两套实现（`== 3` 与 `<= 3` / `> 12`）。
 - **动作**：抽成共享策略（放进 `MeterChannels` 或独立的 `ChartPolicy`），随第 16 项一起改。
 - **验收**：`3` 这个上限只出现一次。
 - **风险**：低。
+
+**完成情况**：上限统一到 `TrendChart.MaxSeries`，随第 16 项一起改完。
 
 ### [ ] 25. 启动装配加兜底
 
