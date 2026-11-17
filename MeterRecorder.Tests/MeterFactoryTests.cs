@@ -20,7 +20,7 @@ namespace MeterRecorder.Tests
         {
             DeviceConfig config = new DeviceConfig { MeterType = meterType };
 
-            using (IEnergyMeters meter = MeterFactory.Create(config))
+            using (IEnergyMeter meter = MeterFactory.Create(config))
             {
                 Assert.Equal(meterType, DetectType(meter));
                 Assert.Equal(expectedChannels, meter.Channels.Count);
@@ -74,7 +74,7 @@ namespace MeterRecorder.Tests
         /// 按实例的实际类型反推表型枚举，避免断言写成「工厂返回了自己传的那个值」。
         /// </summary>
         /// <param name="meter">工厂创建出的表对象</param>
-        private static MeterType DetectType(IEnergyMeters meter)
+        private static MeterType DetectType(IEnergyMeter meter)
         {
             if (meter is Djsf1352EnergyMeters)
             {

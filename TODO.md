@@ -73,7 +73,7 @@
 | 17 | 采集时关窗卡 3 秒 | 异步停止后再关闭 | `b4cf891` |
 | 18 | 单实例互斥被回收 | 静态字段持有，退出时释放 | `b4cf891` |
 | 19 | 记录表行数无上限 | `MaxRows` 默认 5000 | `b4cf891` |
-| 20 | 串口从不 Dispose | `IEnergyMeters : IDisposable` | `b4cf891` |
+| 20 | 串口从不 Dispose | `IEnergyMeter : IDisposable` | `b4cf891` |
 | 21 | 抽 `RecordingSession` | 样本、命名与落盘归它 | `76ceb52` |
 | 22 | 日志从窗体剥离 | `Logger` 统一写 `Logs\log.txt` | `76ceb52` |
 | 23 | 传输接口 + 测试工程 | `IModbusTransport`，用例扩到 120 个 | `76ceb52` `6a06717` |
@@ -228,7 +228,7 @@ class ChannelDescriptor
 - 默认曲线通道改为按 `Key` 解析，删掉 `{ 0, 6, 12 }` 与 `Count == 3`。
 - 关窗改为「取消本次关闭 → 异步停止采集 → 再关闭」，连点两次不打断停止流程。
 - 单实例互斥体改由静态字段持有，退出时释放。
-- 记录表加 5000 行上限；`IEnergyMeters` 继承 `IDisposable`，串口随采样器释放。
+- 记录表加 5000 行上限；`IEnergyMeter` 继承 `IDisposable`，串口随采样器释放。
 
 ### 2026-11-16　命名、注释与项目改名（`d216f2a` `4abb02d` `1978fd2` `a60091f` `9afecd6` `e54ed89`）
 

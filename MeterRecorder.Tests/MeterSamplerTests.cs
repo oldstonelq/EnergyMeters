@@ -194,7 +194,7 @@ namespace MeterRecorder.Tests
         /// <summary>
         /// 内存版电表：可以指定 Read 抛异常，便于验证失败中断路径。
         /// </summary>
-        private sealed class FakeMeter : IEnergyMeters
+        private sealed class FakeMeter : IEnergyMeter
         {
                     /// <summary>
         /// Open 被调用的次数。

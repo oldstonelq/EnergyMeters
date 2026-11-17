@@ -72,11 +72,12 @@
       <DependentUpon>TrendChart.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\ChannelDescriptor.cs" />
-    <Compile Include="Core\IEnergyMeters.cs" />
+    <Compile Include="Core\IEnergyMeter.cs" />
     <Compile Include="Core\MeterChannels.cs" />
     <Compile Include="Core\MeterFactory.cs" />
     <Compile Include="Core\MeterSample.cs" />
     <Compile Include="Core\MeterType.cs" />
+    <Compile Include="Core\MeterTypeExtensions.cs" />
     <Compile Include="Models\Adl400EnergyMeters.cs" />
     <Compile Include="Models\AmcEnergyMeters.cs" />
     <Compile Include="Help\FileHelp.cs" />
@@ -97,7 +98,7 @@
     <Compile Include="Protocol\ModbusRtuClient.cs" />
     <Compile Include="Protocol\SerialPortTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Public\SystemParameters.cs" />
+    <Compile Include="App\SystemParameters.cs" />
     <Compile Include="Services\MeterSampler.cs" />
     <Compile Include="Services\RecordingSession.cs" />
     <Compile Include="Storage\SampleRepository.cs" />

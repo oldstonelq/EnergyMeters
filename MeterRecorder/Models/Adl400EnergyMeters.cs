@@ -8,7 +8,7 @@ namespace MeterRecorder
     /// 读取二次侧数据：电压保留 1 位小数，电流保留 2 位小数，
     /// 功率为 32 位有符号整型、保留 3 位小数，单位 kW/kvar。
     /// </summary>
-    public sealed class Adl400EnergyMeters : IEnergyMeters
+    public sealed class Adl400EnergyMeters : IEnergyMeter
     {
         /// <summary>
         /// 协议默认从站地址。Modbus 地址范围 1~254。

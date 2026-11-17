@@ -13,7 +13,7 @@ namespace MeterRecorder
         /// <param name="config">设备配置</param>
         /// <exception cref="ArgumentNullException">配置为 null</exception>
         /// <exception cref="ArgumentOutOfRangeException">配置里的表型不是已知的三种之一</exception>
-        public static IEnergyMeters Create(DeviceConfig config)
+        public static IEnergyMeter Create(DeviceConfig config)
         {
             if (config == null)
             {

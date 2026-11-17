@@ -8,7 +8,7 @@ namespace MeterRecorder
     /// 读取一次侧数据，读数规则：实际值 = 通讯值 x 10^(小数点位数-4)，
     /// 小数点位数分别由 DPT(电压)、DCT(电流)、DPQ(功率) 决定。
     /// </summary>
-    public sealed class AmcEnergyMeters : IEnergyMeters
+    public sealed class AmcEnergyMeters : IEnergyMeter
     {
         /// <summary>
         /// 协议默认从站地址。AMC 出厂默认 1。

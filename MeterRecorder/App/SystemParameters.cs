@@ -20,7 +20,7 @@ namespace MeterRecorder
         /// <summary>
         /// 当前电表实例。
         /// </summary>
-        public static IEnergyMeters EnergyMeters { get; private set; }
+        public static IEnergyMeter EnergyMeters { get; private set; }
 
         /// <summary>
         /// 初始化系统参数并创建电表实例。

@@ -7,7 +7,7 @@ namespace MeterRecorder
     /// DJSF1352-RN 导轨式直流电能表。
     /// 读数规则：实际值 = 有效值 x 10^(指数-3)，有效值与指数均为有符号 16 位。
     /// </summary>
-    public sealed class Djsf1352EnergyMeters : IEnergyMeters
+    public sealed class Djsf1352EnergyMeters : IEnergyMeter
     {
         /// <summary>
         /// 协议默认从站地址。V2.5 起选配双路时第二路地址顺延。

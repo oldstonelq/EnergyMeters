@@ -53,7 +53,7 @@ namespace MeterRecorder
         /// <summary>
         /// 被采集的电表。
         /// </summary>
-        private readonly IEnergyMeters _meter;
+        private readonly IEnergyMeter _meter;
         /// <summary>
         /// 当前采集循环的取消源，未采集时为 null。
         /// </summary>
@@ -75,7 +75,7 @@ namespace MeterRecorder
         /// 为指定电表创建采集服务。
         /// </summary>
         /// <param name="meter">要采集的电表</param>
-        public MeterSampler(IEnergyMeters meter)
+        public MeterSampler(IEnergyMeter meter)
         {
             if (meter == null)
             {
