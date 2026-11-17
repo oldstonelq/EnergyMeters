@@ -206,7 +206,8 @@
             this.ClientSize = new System.Drawing.Size(1280, 740);
             this.Controls.Add(this._outerSplit);
             this.Controls.Add(this._toolStrip);
-            this.MinimumSize = new System.Drawing.Size(1100, 700);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "电能表读数记录";
