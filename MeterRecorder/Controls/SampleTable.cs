@@ -17,6 +17,12 @@ namespace MeterRecorder
         private const string AllGroups = "全部";
 
         /// <summary>
+        /// 「全部」一屏最多显示多少列。超过就默认只看第一个分组，
+        /// 否则十几列挤在一屏根本读不清。
+        /// </summary>
+        private const int AllGroupColumnLimit = 8;
+
+        /// <summary>
         /// 当前绑定的通道定义。
         /// </summary>
         private IReadOnlyList<ChannelDescriptor> _channels;
@@ -63,7 +69,7 @@ namespace MeterRecorder
             // 通道多时默认只看第一个分组，否则十几列挤在一屏里根本读不清；
             // 通道少的表（直流三项）直接看「全部」。
             List<string> groups = CollectGroups();
-            _activeGroup = channels.Count > 8 && groups.Count > 1 ? groups[1] : AllGroups;
+            _activeGroup = channels.Count > AllGroupColumnLimit && groups.Count > 1 ? groups[1] : AllGroups;
 
             BuildGroupBar();
             RebuildColumns();
@@ -84,7 +90,9 @@ namespace MeterRecorder
                     IReadOnlyList<MeterSample> samples = _samplesProvider();
                     if (samples != null)
                     {
-                        for (int i = 0; i < samples.Count; i++)
+                        // 只补最后 MaxRows 行，避免先塞满再逐行裁剪。
+                        int start = Math.Max(0, samples.Count - MaxRows);
+                        for (int i = start; i < samples.Count; i++)
                         {
                             Append(samples[i]);
                         }
@@ -115,6 +123,18 @@ namespace MeterRecorder
                 cells[i + 1] = _channels[channelIndex].Format(sample.GetValue(channelIndex));
             }
             _grid.Rows.Add(cells);
+            TrimRows();
+        }
+
+        /// <summary>
+        /// 超过行数上限时删掉最早的行。
+        /// </summary>
+        private void TrimRows()
+        {
+            while (_grid.Rows.Count > MaxRows)
+            {
+                _grid.Rows.RemoveAt(0);
+            }
         }
 
         /// <summary>
@@ -144,6 +164,12 @@ namespace MeterRecorder
         {
             return FileHelp.ExportCsv(_grid, filePath, out error);
         }
+
+        /// <summary>
+        /// 表格最多保留的行数，超出后删掉最早的行。落盘用的是采集会话里的完整数据，
+        /// 这里只限制显示，避免长时间采集把滚动与切组拖慢。
+        /// </summary>
+        public int MaxRows { get; set; } = 5000;
 
         /// <summary>
         /// 当前显示的行数。

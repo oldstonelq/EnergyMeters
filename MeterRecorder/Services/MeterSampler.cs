@@ -179,13 +179,16 @@ namespace MeterRecorder
             {
                 try
                 {
-                    loop.Wait(TimeSpan.FromSeconds(3));
+                    // 主窗体关闭前会先异步停止采集，这里只是兜底。等待过久会把界面卡住，
+                    // 500 ms 足够让一次读操作收尾。
+                    loop.Wait(TimeSpan.FromMilliseconds(500));
                 }
                 catch (Exception)
                 {
                 }
             }
             CloseQuietly();
+            _meter.Dispose();
             if (cancellation != null)
             {
                 cancellation.Dispose();

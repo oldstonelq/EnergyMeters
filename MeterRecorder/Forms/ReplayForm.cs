@@ -12,11 +12,6 @@ namespace MeterRecorder
     public partial class ReplayForm : Form
     {
         /// <summary>
-        /// 曲线上最多的通道数量
-        /// </summary>
-        private const int MaxSeries = 3;
-
-        /// <summary>
         /// 文件内容，通道定义与样本都取自它。
         /// </summary>
         private readonly SampleDocument _document;
@@ -102,25 +97,41 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 默认勾选：通道少就全选，三相表取 A 相电压、A 相电流与总有功。
+        /// 默认勾选：优先用文件表型的默认曲线通道，解析不出来时退回前三个通道。
         /// </summary>
         private int[] GetDefaultChannelIndexes()
         {
-            int count = _document.Channels.Count;
-            if (count <= MaxSeries)
+            MeterType meterType;
+            if (MeterTypeExtensions.TryParseConfigValue(_document.MeterType, out meterType))
             {
-                int[] all = new int[count];
-                for (int i = 0; i < count; i++)
+                int[] indexes = MeterChannels.GetDefaultChartIndexes(_document.Channels, meterType);
+                if (indexes.Length > 0)
                 {
-                    all[i] = i;
+                    return TrimToLimit(indexes);
                 }
-                return all;
             }
-            if (count > 12)
+
+            int count = Math.Min(TrendChart.MaxSeries, _document.Channels.Count);
+            int[] fallback = new int[count];
+            for (int i = 0; i < count; i++)
             {
-                return new[] { 0, 6, 12 };
+                fallback[i] = i;
             }
-            return new[] { 0, 1, 2 };
+            return fallback;
+        }
+
+        /// <summary>
+        /// 只保留前 <see cref="TrendChart.MaxSeries"/> 个通道。
+        /// </summary>
+        private static int[] TrimToLimit(int[] indexes)
+        {
+            if (indexes.Length <= TrendChart.MaxSeries)
+            {
+                return indexes;
+            }
+            int[] trimmed = new int[TrendChart.MaxSeries];
+            Array.Copy(indexes, trimmed, trimmed.Length);
+            return trimmed;
         }
 
         /// <summary>
@@ -147,7 +158,7 @@ namespace MeterRecorder
             }
 
             // 超过上限就拒绝这次勾选，保持已有选择不变。
-            if (e.NewValue == CheckState.Checked && _channelList.CheckedItems.Count >= MaxSeries)
+            if (e.NewValue == CheckState.Checked && _channelList.CheckedItems.Count >= TrendChart.MaxSeries)
             {
                 e.NewValue = CheckState.Unchecked;
                 return;

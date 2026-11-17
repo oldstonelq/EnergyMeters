@@ -15,11 +15,6 @@ namespace MeterRecorder
         /// </summary>
         private const int SampleIntervalMilliseconds = 1000;
         /// <summary>
-        /// 曲线上最多的通道数量
-        /// </summary>
-        private const int MaxChartSeries = 3;
-
-        /// <summary>
         /// 本次采集的样本，界面显示与落盘都读这一份。
         /// </summary>
         private readonly List<MeterSample> _samples = new List<MeterSample>();
@@ -35,6 +30,14 @@ namespace MeterRecorder
         /// 是否正在采集，用于控制按钮与状态栏。
         /// </summary>
         private bool _isWorking;
+        /// <summary>
+        /// 是否已放行关闭。停止完采集准备 Close 时置位，供第二次 FormClosing 放行。
+        /// </summary>
+        private bool _allowClose;
+        /// <summary>
+        /// 是否正在为关闭而停止采集。用户连点两次关闭时，第二次只取消这次关闭，不打断停止流程。
+        /// </summary>
+        private bool _stopBeforeClose;
 
         /// <summary>
         /// 初始化主窗体。
@@ -68,14 +71,40 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 关闭前释放采集服务，避免后台线程继续读串口。
+        /// 关闭前停止采集并释放服务。采集线程可能正卡在 Invoke 上等界面线程，
+        /// 所以先取消这次关闭、异步等线程退出，再真正关闭，避免两边互等到超时。
         /// </summary>
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        private async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (_sampler != null)
+            if (_sampler == null)
+            {
+                return;
+            }
+            if (_allowClose || !_sampler.IsRunning)
             {
                 _sampler.Dispose();
+                return;
             }
+            if (_stopBeforeClose)
+            {
+                // 已经在为关闭而停止采集，忽略这次重复的关闭请求。
+                e.Cancel = true;
+                return;
+            }
+
+            e.Cancel = true;
+            _stopBeforeClose = true;
+            try
+            {
+                await _sampler.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                LogError("关闭前停止采集失败，异常原因为：" + ex.Message + ex.StackTrace);
+            }
+            _sampler.Dispose();
+            _allowClose = true;
+            Close();
         }
         #endregion
 
@@ -301,7 +330,7 @@ namespace MeterRecorder
                 return;
             }
 
-            int count = Math.Min(MaxChartSeries, indexes.Length);
+            int count = Math.Min(TrendChart.MaxSeries, indexes.Length);
             int[] selected = new int[count];
             Array.Copy(indexes, selected, count);
 
@@ -310,15 +339,11 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 默认上图通道：直流表画全部三项，三相表画 A 相电压、A 相电流与总有功。
+        /// 默认上图通道：由通道定义里的 Key 决定，不再依赖通道在数组里的位置。
         /// </summary>
         private int[] GetDefaultChartIndexes()
         {
-            if (_channels.Count == 3)
-            {
-                return new[] { 0, 1, 2 };
-            }
-            return new[] { 0, 6, 12 };
+            return MeterChannels.GetDefaultChartIndexes(_channels, SystemParameters.Device.MeterType);
         }
 
         /// <summary>

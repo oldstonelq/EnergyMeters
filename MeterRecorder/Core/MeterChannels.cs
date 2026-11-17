@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace MeterRecorder
@@ -43,11 +44,62 @@ namespace MeterRecorder
         };
 
         /// <summary>
+        /// 直流表的默认曲线通道：三项都画。
+        /// </summary>
+        private static readonly string[] s_singlePhaseChartKeys = { "voltage", "current", "power" };
+
+        /// <summary>
+        /// 三相表的默认曲线通道：A 相电压、A 相电流与总有功。
+        /// </summary>
+        private static readonly string[] s_threePhaseChartKeys = { "ua", "ia", "pTotal" };
+
+        /// <summary>
         /// 取指定表型的通道定义。
         /// </summary>
         public static IReadOnlyList<ChannelDescriptor> GetChannels(MeterType meterType)
         {
             return meterType == MeterType.Djsf1352 ? SinglePhase : ThreePhase;
+        }
+
+        /// <summary>
+        /// 取指定表型的默认曲线通道 Key。界面按 Key 解析下标，
+        /// 不再假设「第 7 个是 A 相电流」这类位置关系。
+        /// </summary>
+        public static IReadOnlyList<string> GetDefaultChartKeys(MeterType meterType)
+        {
+            return meterType == MeterType.Djsf1352 ? s_singlePhaseChartKeys : s_threePhaseChartKeys;
+        }
+
+        /// <summary>
+        /// 把通道 Key 解析成通道下标。找不到的 Key 跳过，返回顺序与入参一致。
+        /// </summary>
+        public static int[] ResolveChannelIndexes(IReadOnlyList<ChannelDescriptor> channels, IReadOnlyList<string> keys)
+        {
+            List<int> indexes = new List<int>();
+            if (channels == null || keys == null)
+            {
+                return indexes.ToArray();
+            }
+            for (int k = 0; k < keys.Count; k++)
+            {
+                for (int i = 0; i < channels.Count; i++)
+                {
+                    if (string.Equals(channels[i].Key, keys[k], StringComparison.Ordinal))
+                    {
+                        indexes.Add(i);
+                        break;
+                    }
+                }
+            }
+            return indexes.ToArray();
+        }
+
+        /// <summary>
+        /// 取指定表型的默认曲线通道下标。
+        /// </summary>
+        public static int[] GetDefaultChartIndexes(IReadOnlyList<ChannelDescriptor> channels, MeterType meterType)
+        {
+            return ResolveChannelIndexes(channels, GetDefaultChartKeys(meterType));
         }
     }
 }

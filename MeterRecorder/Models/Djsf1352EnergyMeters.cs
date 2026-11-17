@@ -78,6 +78,14 @@ namespace MeterRecorder
         }
 
         /// <summary>
+        /// 关闭端口并释放串口资源。
+        /// </summary>
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
+
+        /// <summary>
         /// 采集一次，返回电压、电流、功率三个值
         /// </summary>
         public MeterSample Read()

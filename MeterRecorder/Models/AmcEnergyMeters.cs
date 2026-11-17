@@ -100,6 +100,14 @@ namespace MeterRecorder
         }
 
         /// <summary>
+        /// 关闭端口并释放串口资源。
+        /// </summary>
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
+
+        /// <summary>
         /// 采集一次，按通道顺序返回 17 个值
         /// </summary>
         public MeterSample Read()

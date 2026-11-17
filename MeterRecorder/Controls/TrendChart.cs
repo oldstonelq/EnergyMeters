@@ -14,6 +14,11 @@ namespace MeterRecorder
         /// <summary>
         /// 曲线配色，通道多于三种时循环取用。
         /// </summary>
+        /// <summary>
+        /// 同时上图的曲线数量上限。主窗体与回放窗体共用这一个值。
+        /// </summary>
+        public const int MaxSeries = 3;
+
         private static readonly Color[] s_seriesColors = { Color.Red, Color.Blue, Color.Green };
 
         /// <summary>

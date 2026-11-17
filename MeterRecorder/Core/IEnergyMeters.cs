@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace MeterRecorder
@@ -6,7 +7,7 @@ namespace MeterRecorder
     /// 电能表统一读取接口。一个实现对应一款表，读数以「通道 + 值」的形式返回，
     /// 调用方不需要知道具体型号与寄存器布局。
     /// </summary>
-    public interface IEnergyMeters
+    public interface IEnergyMeters : IDisposable
     {
         /// <summary>
         /// 该表型提供的通道定义，顺序与 <see cref="MeterSample.Values"/> 一致。
