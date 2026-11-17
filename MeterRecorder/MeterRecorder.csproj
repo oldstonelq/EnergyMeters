@@ -55,6 +55,9 @@
     要求运行时能加载 System.Resources.Extensions；Visual Studio 用的是旧格式，不需要它。
     这里只在 SDK 版 MSBuild 下挂引用，官方命令行同样能编译与跑测试。
   -->
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
     <Reference Include="System.Resources.Extensions">
       <HintPath>$(MSBuildSDKsPath)\..\System.Resources.Extensions.dll</HintPath>

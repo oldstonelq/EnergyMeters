@@ -60,18 +60,21 @@ namespace MeterRecorder
         private string BuildInfoText()
         {
             string meterType = string.IsNullOrEmpty(_document.MeterType) ? "未标注表型" : _document.MeterType;
+            // 旧文件没有表型标记，解析时按通道推断，这里如实告诉用户。
+            string legacyNote = _document.IsLegacyFormat ? " · 旧格式，表型按通道推断" : string.Empty;
             int count = _document.Samples.Count;
             if (count == 0)
             {
-                return string.Format("表型 {0} · 0 条", meterType);
+                return string.Format("表型 {0} · 0 条{1}", meterType, legacyNote);
             }
 
             DateTime first = _document.Samples[0].Time;
             DateTime last = _document.Samples[count - 1].Time;
-            return string.Format("表型 {0} · {1} 条 · {2} ~ {3}",
+            return string.Format("表型 {0} · {1} 条 · {2} ~ {3}{4}",
                 meterType, count,
                 first.ToString("yyyy-MM-dd HH:mm:ss"),
-                last.ToString("HH:mm:ss"));
+                last.ToString("HH:mm:ss"),
+                legacyNote);
         }
 
         /// <summary>

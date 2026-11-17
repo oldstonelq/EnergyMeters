@@ -47,6 +47,10 @@ namespace MeterRecorder
         /// 从站地址，未配置时取本表型的内置默认值。
         /// </summary>
         private readonly byte _slaveAddress;
+        /// <summary>
+        /// 采样时间的来源，默认系统时间。测试可以注入固定值。
+        /// </summary>
+        private readonly Func<DateTime> _clock;
 
         /// <summary>
         /// 构造函数
@@ -62,10 +66,11 @@ namespace MeterRecorder
         /// </summary>
         /// <param name="config">设备配置</param>
         /// <param name="transport">报文传输通道</param>
-        internal Adl400EnergyMeters(DeviceConfig config, IModbusTransport transport)
+        internal Adl400EnergyMeters(DeviceConfig config, IModbusTransport transport, Func<DateTime> clock = null)
         {
             _client = new ModbusRtuClient(transport);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);
+            _clock = clock ?? (() => DateTime.Now);
         }
 
         /// <summary>
@@ -132,7 +137,7 @@ namespace MeterRecorder
                 values[9 + i] = rawValue / 1000.0;
             }
 
-            return new MeterSample(DateTime.Now, values);
+            return new MeterSample(_clock(), values);
         }
 
         /// <summary>

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -38,6 +36,12 @@ namespace MeterRecorder
             {
                 SystemParameters.Load();
                 Application.Run(new MainForm());
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("程序启动或运行期间出现未处理异常：", ex);
+                MessageBox.Show("程序遇到未处理的错误，已写入日志：\n" + ex.Message,
+                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

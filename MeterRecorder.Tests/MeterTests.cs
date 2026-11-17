@@ -1,3 +1,4 @@
+using System;
 using MeterRecorder;
 using Xunit;
 
@@ -35,6 +36,22 @@ namespace MeterRecorder.Tests
             using (Djsf1352EnergyMeters meter = new Djsf1352EnergyMeters(new DeviceConfig(), transport))
             {
                 Assert.Equal(-1, meter.Read().GetValue(0), 3);
+            }
+        }
+
+        [Fact]
+        public void Read_UsesInjectedClock()
+        {
+            DateTime stamp = new DateTime(2026, 11, 17, 10, 0, 0);
+            FakeModbusTransport transport = new FakeModbusTransport()
+                .Expect(1, 0, 2, 482, 2)
+                .Expect(1, 2, 2, 125, 2)
+                .Expect(1, 8, 2, 60, 2);
+
+            using (Djsf1352EnergyMeters meter =
+                new Djsf1352EnergyMeters(new DeviceConfig(), transport, () => stamp))
+            {
+                Assert.Equal(stamp, meter.Read().Time);
             }
         }
     }

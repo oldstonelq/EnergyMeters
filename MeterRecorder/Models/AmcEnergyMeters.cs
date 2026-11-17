@@ -44,6 +44,10 @@ namespace MeterRecorder
         /// </summary>
         private readonly byte _slaveAddress;
         /// <summary>
+        /// 采样时间的来源，默认系统时间。测试可以注入固定值。
+        /// </summary>
+        private readonly Func<DateTime> _clock;
+        /// <summary>
         /// 电压小数点位数(DPT)
         /// </summary>
         private int _voltageDecimalPoint;
@@ -70,10 +74,11 @@ namespace MeterRecorder
         /// </summary>
         /// <param name="config">设备配置</param>
         /// <param name="transport">报文传输通道</param>
-        internal AmcEnergyMeters(DeviceConfig config, IModbusTransport transport)
+        internal AmcEnergyMeters(DeviceConfig config, IModbusTransport transport, Func<DateTime> clock = null)
         {
             _client = new ModbusRtuClient(transport);
             _slaveAddress = (byte)(config.SlaveAddress ?? DefaultSlaveAddress);
+            _clock = clock ?? (() => DateTime.Now);
         }
 
         /// <summary>
@@ -148,7 +153,7 @@ namespace MeterRecorder
                 values[9 + i] = value;
             }
 
-            return new MeterSample(DateTime.Now, values);
+            return new MeterSample(_clock(), values);
         }
 
         /// <summary>

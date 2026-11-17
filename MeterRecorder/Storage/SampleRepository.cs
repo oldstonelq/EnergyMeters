@@ -30,6 +30,12 @@ namespace MeterRecorder
         /// 样本集合。
         /// </summary>
         public List<MeterSample> Samples { get; set; }
+
+        /// <summary>
+        /// 是否为早期不带包装头的数组格式。只在读取旧文件时置位，不写入新文件。
+        /// </summary>
+        [JsonIgnore]
+        public bool IsLegacyFormat { get; set; }
     }
 
     /// <summary>
@@ -147,7 +153,8 @@ namespace MeterRecorder
                 MeterType = meterType.ToConfigValue(),
                 Version = CurrentVersion,
                 Channels = new List<ChannelDescriptor>(MeterChannels.GetChannels(meterType)),
-                Samples = samples
+                Samples = samples,
+                IsLegacyFormat = true
             };
         }
 
