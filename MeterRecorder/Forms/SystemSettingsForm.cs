@@ -66,9 +66,9 @@ namespace MeterRecorder
             _dataPathText.Text = string.IsNullOrWhiteSpace(storage.DataDirectory)
                 ? SystemParameters.Paths.DataDirectory
                 : storage.DataDirectory;
-            _logFileText.Text = string.IsNullOrWhiteSpace(storage.LogFile)
-                ? SystemParameters.Paths.LogFile
-                : storage.LogFile;
+            _logDirectoryText.Text = string.IsNullOrWhiteSpace(storage.LogDirectory)
+                ? SystemParameters.Paths.LogDirectory
+                : storage.LogDirectory;
         }
 
         /// <summary>
@@ -141,43 +141,42 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 选择日志所在目录。文件名固定为 log.txt，只让用户挑目录，避免把日志写到别处后找不到。
+        /// 选择日志目录。日志文件名由程序按日期生成，用户只选目录。
         /// </summary>
         private void _browseLogButton_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "选择日志文件所在目录（文件名固定为 log.txt）";
+                dialog.Description = "选择日志目录（文件名按日期自动生成，如 2026-11-18.log）";
                 dialog.ShowNewFolderButton = true;
 
-                string current = _logFileText.Text.Trim();
-                string currentDirectory = current.Length == 0 ? null : Path.GetDirectoryName(current);
-                if (!string.IsNullOrEmpty(currentDirectory) && Directory.Exists(currentDirectory))
+                string current = _logDirectoryText.Text.Trim();
+                if (current.Length > 0 && Directory.Exists(current))
                 {
-                    dialog.SelectedPath = currentDirectory;
+                    dialog.SelectedPath = current;
                 }
 
                 if (dialog.ShowDialog(this) != DialogResult.OK)
                 {
                     return;
                 }
-                _logFileText.Text = Path.Combine(dialog.SelectedPath, "log.txt");
+                _logDirectoryText.Text = dialog.SelectedPath;
             }
         }
 
         /// <summary>
-        /// 读取界面上的日志路径并校验：为空、无法创建目录时提示用户，返回 false。
-        /// 与默认路径相同时返回 null，表示仍跟随程序目录。
+        /// 读取界面上的日志目录并校验：为空或无法创建时提示用户，返回 false。
+        /// 与默认目录相同时返回 null，表示仍跟随程序目录。
         /// </summary>
-        /// <param name="logFile">校验后的完整路径；null 表示使用默认路径</param>
+        /// <param name="logDirectory">校验后的目录；null 表示使用默认目录</param>
         /// <returns>校验通过返回 true</returns>
-        private bool TryReadLogFile(out string logFile)
+        private bool TryReadLogDirectory(out string logDirectory)
         {
-            logFile = null;
-            string text = _logFileText.Text.Trim();
+            logDirectory = null;
+            string text = _logDirectoryText.Text.Trim();
             if (text.Length == 0)
             {
-                MessageBox.Show("日志路径不能为空。", "提示",
+                MessageBox.Show("日志目录不能为空。", "提示",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -185,25 +184,19 @@ namespace MeterRecorder
             string full;
             try
             {
-                // 以分隔符结尾或指向已存在的目录时补上 log.txt，
-                // 否则 Logger 会往目录路径追加，异常被吞掉后一条日志都没有。
-                full = StoragePath.NormalizeLogFile(text);
-                string directory = Path.GetDirectoryName(full);
-                if (!string.IsNullOrEmpty(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
+                full = StoragePath.NormalizeDirectory(text);
+                Directory.CreateDirectory(full);
             }
             catch (Exception ex)
             {
-                Logger.Log("日志文件路径不可用，异常原因为：", ex);
-                MessageBox.Show("日志文件路径不可用：" + ex.Message, "错误",
+                Logger.Log("日志目录不可用，异常原因为：", ex);
+                MessageBox.Show("日志目录不可用：" + ex.Message, "错误",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
-            string defaultFile = Path.Combine(Application.StartupPath, "Logs", StoragePath.DefaultLogFileName);
-            logFile = StoragePath.AreSame(full, defaultFile) ? null : full;
+            string defaultDirectory = Path.Combine(Application.StartupPath, "Logs");
+            logDirectory = StoragePath.AreSame(full, defaultDirectory) ? null : full;
             return true;
         }
 
@@ -247,8 +240,8 @@ namespace MeterRecorder
             {
                 return;
             }
-            string logFile;
-            if (!TryReadLogFile(out logFile))
+            string logDirectory;
+            if (!TryReadLogDirectory(out logDirectory))
             {
                 return;
             }
@@ -256,7 +249,7 @@ namespace MeterRecorder
             try
             {
                 config.Save(SystemParameters.Paths.SystemFile);
-                new StorageConfig { DataDirectory = dataRoot, LogFile = logFile }
+                new StorageConfig { DataDirectory = dataRoot, LogDirectory = logDirectory }
                     .Save(SystemParameters.Paths.SystemFile);
             }
             catch (Exception ex)

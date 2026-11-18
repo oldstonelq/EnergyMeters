@@ -6,8 +6,8 @@ using Xunit;
 namespace MeterRecorder.Tests
 {
     /// <summary>
-    /// 路径规范化：设置窗体与启动装配共用这套规则，重点是「以分隔符结尾的日志路径」
-    /// 要补上文件名，否则日志会写到一个目录路径上、异常被吞掉后一条都留不下。
+    /// 路径规范化与比较：设置窗体与启动装配共用这套规则，
+    /// 避免「界面上按一种写法保存、启动时按另一种解释」。
     /// </summary>
     public class StoragePathTests
     {
@@ -32,60 +32,6 @@ namespace MeterRecorder.Tests
                 string directory = temp.File("data");
 
                 Assert.Equal(directory, StoragePath.NormalizeDirectory("  " + directory + "  "));
-            }
-        }
-
-        /// <summary>
-        /// 日志路径为空时同样返回 null。
-        /// </summary>
-        [Fact]
-        public void NormalizeLogFile_Blank_ReturnsNull()
-        {
-            Assert.Null(StoragePath.NormalizeLogFile(null));
-            Assert.Null(StoragePath.NormalizeLogFile("  "));
-        }
-
-        /// <summary>
-        /// 以分隔符结尾说明给的是目录（哪怕目录还不存在），要补上默认文件名。
-        /// </summary>
-        [Fact]
-        public void NormalizeLogFile_TrailingSeparator_AppendsFileName()
-        {
-            using (TempDirectory temp = new TempDirectory())
-            {
-                string directory = temp.File("not-created") + Path.DirectorySeparatorChar;
-
-                Assert.Equal(Path.Combine(temp.File("not-created"), "log.txt"),
-                    StoragePath.NormalizeLogFile(directory));
-            }
-        }
-
-        /// <summary>
-        /// 已存在的目录同样补文件名，不依赖用户是否写了结尾分隔符。
-        /// </summary>
-        [Fact]
-        public void NormalizeLogFile_ExistingDirectory_AppendsFileName()
-        {
-            using (TempDirectory temp = new TempDirectory())
-            {
-                string directory = temp.File("logs");
-                Directory.CreateDirectory(directory);
-
-                Assert.Equal(Path.Combine(directory, "log.txt"), StoragePath.NormalizeLogFile(directory));
-            }
-        }
-
-        /// <summary>
-        /// 已经带文件名的路径保持原样，允许用户自定义日志文件名。
-        /// </summary>
-        [Fact]
-        public void NormalizeLogFile_FilePath_KeepsName()
-        {
-            using (TempDirectory temp = new TempDirectory())
-            {
-                string file = Path.Combine(temp.File("logs"), "meter.log");
-
-                Assert.Equal(file, StoragePath.NormalizeLogFile(file));
             }
         }
 

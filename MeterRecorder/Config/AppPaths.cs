@@ -15,10 +15,11 @@ namespace MeterRecorder
         /// <param name="dataRoot">
         /// 数据根目录。为 null 或空白时取程序目录下的 Data，与旧版本行为一致。
         /// </param>
-        /// <param name="logFile">
-        /// 日志文件完整路径。为 null 或空白时取程序目录下的 Logs\log.txt。
+        /// <param name="logDirectory">
+        /// 日志目录。为 null 或空白时取程序目录下的 Logs。日志文件按天生成，
+        /// 文件名由 <see cref="GetLogFile"/> 决定。
         /// </param>
-        public AppPaths(string startupPath, string dataRoot = null, string logFile = null)
+        public AppPaths(string startupPath, string dataRoot = null, string logDirectory = null)
         {
             StartupPath = startupPath;
             SystemDirectory = Path.Combine(startupPath, "System");
@@ -26,10 +27,9 @@ namespace MeterRecorder
             DataDirectory = string.IsNullOrWhiteSpace(dataRoot)
                 ? Path.Combine(startupPath, "Data")
                 : dataRoot.Trim();
-            LogFile = string.IsNullOrWhiteSpace(logFile)
-                ? Path.Combine(startupPath, "Logs", "log.txt")
-                : Path.GetFullPath(logFile.Trim());
-            LogDirectory = Path.GetDirectoryName(LogFile);
+            LogDirectory = string.IsNullOrWhiteSpace(logDirectory)
+                ? Path.Combine(startupPath, "Logs")
+                : Path.GetFullPath(logDirectory.Trim());
         }
 
         /// <summary>
@@ -58,9 +58,13 @@ namespace MeterRecorder
         public string LogDirectory { get; }
 
         /// <summary>
-        /// 日志文件路径。
+        /// 取指定日期的日志文件，如 Logs\2026-11-18.log。按天分文件，写入时不覆盖历史。
         /// </summary>
-        public string LogFile { get; }
+        /// <param name="date">日志日期</param>
+        public string GetLogFile(DateTime date)
+        {
+            return Path.Combine(LogDirectory, date.ToString("yyyy-MM-dd") + ".log");
+        }
 
         /// <summary>
         /// 取指定表型的数据目录，如 Data\ADL400。

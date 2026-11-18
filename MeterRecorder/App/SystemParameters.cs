@@ -46,6 +46,10 @@ namespace MeterRecorder
             string warning;
             Paths = ResolvePaths(startupPath, storage, out warning);
             StartupWarning = warning;
+
+            // 旧版本把日志写进固定的 log.txt，升级后并入按天文件，目录里不会新旧混放。
+            Logger.MigrateLegacyLogFile(Paths.LogDirectory);
+
             if (!string.IsNullOrEmpty(warning))
             {
                 Logger.Log(warning);
@@ -69,7 +73,7 @@ namespace MeterRecorder
             AppPaths configured = new AppPaths(
                 startupPath,
                 storage == null ? null : storage.DataDirectory,
-                storage == null ? null : storage.LogFile);
+                storage == null ? null : storage.LogDirectory);
             try
             {
                 configured.EnsureCreated();

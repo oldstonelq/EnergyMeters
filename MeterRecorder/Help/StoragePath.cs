@@ -10,11 +10,6 @@ namespace MeterRecorder
     public static class StoragePath
     {
         /// <summary>
-        /// 日志文件的默认文件名。选目录时固定用它，出问题时不用猜日志叫什么。
-        /// </summary>
-        public const string DefaultLogFileName = "log.txt";
-
-        /// <summary>
         /// 规范化数据目录：去掉首尾空白并转成完整路径，空白输入返回 null。
         /// </summary>
         /// <param name="text">用户输入或 ini 里的路径</param>
@@ -26,28 +21,6 @@ namespace MeterRecorder
                 return null;
             }
             return Path.GetFullPath(text.Trim());
-        }
-
-        /// <summary>
-        /// 规范化日志文件路径：空白输入返回 null；给的是目录（以分隔符结尾，或该目录已存在）
-        /// 时补上固定文件名，避免 Logger 往一个目录路径上追加、异常被吞掉后日志全丢。
-        /// </summary>
-        /// <param name="text">用户输入或 ini 里的路径</param>
-        /// <param name="fileName">目录形式时补上的文件名</param>
-        /// <returns>完整的日志文件路径；输入为空白时返回 null</returns>
-        public static string NormalizeLogFile(string text, string fileName = DefaultLogFileName)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return null;
-            }
-
-            string full = Path.GetFullPath(text.Trim());
-            if (IsDirectoryLike(full))
-            {
-                full = Path.Combine(full, fileName);
-            }
-            return full;
         }
 
         /// <summary>
@@ -68,21 +41,6 @@ namespace MeterRecorder
                 left.Trim().TrimEnd(separator),
                 right.Trim().TrimEnd(separator),
                 StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// 判断完整路径是否只指到目录：已经存在的目录，或以分隔符结尾的路径。
-        /// </summary>
-        private static bool IsDirectoryLike(string fullPath)
-        {
-            if (Directory.Exists(fullPath))
-            {
-                return true;
-            }
-
-            char separator = Path.DirectorySeparatorChar;
-            return fullPath.EndsWith(separator.ToString(), StringComparison.Ordinal)
-                || fullPath.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal);
         }
     }
 }

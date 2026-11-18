@@ -5,8 +5,8 @@ using System.Text;
 namespace MeterRecorder
 {
     /// <summary>
-    /// 简易日志。统一追加写入 <see cref="AppPaths.LogFile"/>，写不进去时静默忽略，
-    /// 避免日志本身影响采集与保存。
+    /// 简易日志。按天写入 <see cref="AppPaths.LogDirectory"/> 下的 yyyy-MM-dd.log，
+    /// 同一天内追加、不覆盖历史；写不进去时静默忽略，避免日志本身影响采集与保存。
     /// </summary>
     public static class Logger
     {
@@ -16,10 +16,9 @@ namespace MeterRecorder
         private static readonly object s_writeLock = new object();
 
         /// <summary>
-        /// 单个日志文件的大小上限。超过后改名为 log.txt.1，当前文件重新开始，
-        /// 避免长期运行时文件无限增长、出问题不好翻。
+        /// 旧版本使用的固定文件名。升级时把它并入按天文件，目录里不会新旧命名混放。
         /// </summary>
-        internal const long MaxLogBytes = 1024 * 1024;
+        internal const string LegacyLogFileName = "log.txt";
 
         /// <summary>
         /// 记录一条消息。
@@ -27,15 +26,14 @@ namespace MeterRecorder
         /// <param name="message">消息内容</param>
         public static void Log(string message)
         {
-            string filePath = ResolveFilePath();
-            if (string.IsNullOrEmpty(filePath))
+            string directory = ResolveDirectory();
+            if (string.IsNullOrEmpty(directory))
             {
                 return;
             }
             try
             {
-                string directory = Path.GetDirectoryName(filePath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -43,42 +41,12 @@ namespace MeterRecorder
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), message, Environment.NewLine);
                 lock (s_writeLock)
                 {
-                    RotateIfTooLarge(filePath, MaxLogBytes);
-                    File.AppendAllText(filePath, line, Encoding.UTF8);
+                    File.AppendAllText(BuildFilePath(directory, DateTime.Now), line, Encoding.UTF8);
                 }
             }
             catch (Exception)
             {
                 // 磁盘满、文件被占用时不再上抛：日志失败不应中断主流程。
-            }
-        }
-
-        /// <summary>
-        /// 日志超过阈值时改名为「原文件名.1」，上一次的归档会被覆盖。
-        /// 轮转失败不影响本次写入，继续追加到原文件即可。
-        /// </summary>
-        /// <param name="filePath">当前日志文件</param>
-        /// <param name="maxBytes">大小上限</param>
-        internal static void RotateIfTooLarge(string filePath, long maxBytes)
-        {
-            try
-            {
-                FileInfo info = new FileInfo(filePath);
-                if (!info.Exists || info.Length < maxBytes)
-                {
-                    return;
-                }
-
-                string archivePath = filePath + ".1";
-                if (File.Exists(archivePath))
-                {
-                    File.Delete(archivePath);
-                }
-                File.Move(filePath, archivePath);
-            }
-            catch (Exception)
-            {
-                // 文件被占用时轮转不了，继续写原文件，不能因此丢日志。
             }
         }
 
@@ -98,17 +66,67 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 取日志文件路径。组合根尚未初始化时退回程序目录，
+        /// 取指定日期对应的日志文件，如 Logs\2026-11-18.log。
+        /// </summary>
+        /// <param name="directory">日志目录</param>
+        /// <param name="date">日志日期</param>
+        internal static string BuildFilePath(string directory, DateTime date)
+        {
+            return Path.Combine(directory, date.ToString("yyyy-MM-dd") + ".log");
+        }
+
+        /// <summary>
+        /// 把旧版本的 log.txt 并入按天文件，返回迁移后的路径；没有旧文件时返回 null。
+        /// 按旧文件的最后修改时间归属日期；目标文件已存在时追加内容而不是覆盖。
+        /// </summary>
+        /// <param name="directory">日志目录</param>
+        internal static string MigrateLegacyLogFile(string directory)
+        {
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                return null;
+            }
+
+            string legacyPath = Path.Combine(directory, LegacyLogFileName);
+            if (!File.Exists(legacyPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                string targetPath = BuildFilePath(directory, File.GetLastWriteTime(legacyPath));
+                if (File.Exists(targetPath))
+                {
+                    // 目标已有当天的日志，追加进去而不是覆盖。
+                    File.AppendAllText(targetPath, File.ReadAllText(legacyPath), Encoding.UTF8);
+                    File.Delete(legacyPath);
+                }
+                else
+                {
+                    File.Move(legacyPath, targetPath);
+                }
+                return targetPath;
+            }
+            catch (Exception)
+            {
+                // 迁移失败就保持原样：下次启动会再试，不影响正常写日志。
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 取日志目录。组合根尚未初始化时退回程序目录，
         /// 否则「启动装配阶段出错」这类最需要日志的场景反而什么都记不下来。
         /// </summary>
-        private static string ResolveFilePath()
+        private static string ResolveDirectory()
         {
             AppPaths paths = SystemParameters.Paths;
             if (paths != null)
             {
-                return paths.LogFile;
+                return paths.LogDirectory;
             }
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "log.txt");
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
         }
     }
 }

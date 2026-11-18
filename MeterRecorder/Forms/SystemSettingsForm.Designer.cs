@@ -31,9 +31,9 @@
             this._mainPanel = new System.Windows.Forms.Panel();
             this._energyMetersTypeCombo = new System.Windows.Forms.ComboBox();
             this._energyMetersTypeLabel = new System.Windows.Forms.Label();
-            this._logFileText = new System.Windows.Forms.TextBox();
+            this._logDirectoryText = new System.Windows.Forms.TextBox();
             this._browseLogButton = new System.Windows.Forms.Button();
-            this._logFileLabel = new System.Windows.Forms.Label();
+            this._logDirectoryLabel = new System.Windows.Forms.Label();
             this._portNameCombo = new System.Windows.Forms.ComboBox();
             this._portNameLabel = new System.Windows.Forms.Label();
             this._parityCombo = new System.Windows.Forms.ComboBox();
@@ -55,9 +55,9 @@
             // 
             this._mainPanel.Controls.Add(this._energyMetersTypeCombo);
             this._mainPanel.Controls.Add(this._energyMetersTypeLabel);
-            this._mainPanel.Controls.Add(this._logFileText);
+            this._mainPanel.Controls.Add(this._logDirectoryText);
             this._mainPanel.Controls.Add(this._browseLogButton);
-            this._mainPanel.Controls.Add(this._logFileLabel);
+            this._mainPanel.Controls.Add(this._logDirectoryLabel);
             this._mainPanel.Controls.Add(this._portNameCombo);
             this._mainPanel.Controls.Add(this._portNameLabel);
             this._mainPanel.Controls.Add(this._parityCombo);
@@ -96,12 +96,12 @@
             this._energyMetersTypeLabel.TabIndex = 15;
             this._energyMetersTypeLabel.Text = "电表型号";
             // 
-            // _logFileText
+            // _logDirectoryText
             // 
-            this._logFileText.Location = new System.Drawing.Point(129, 259);
-            this._logFileText.Name = "_logFileText";
-            this._logFileText.Size = new System.Drawing.Size(300, 21);
-            this._logFileText.TabIndex = 14;
+            this._logDirectoryText.Location = new System.Drawing.Point(129, 259);
+            this._logDirectoryText.Name = "_logDirectoryText";
+            this._logDirectoryText.Size = new System.Drawing.Size(300, 21);
+            this._logDirectoryText.TabIndex = 14;
             // 
             // _browseLogButton
             // 
@@ -113,14 +113,14 @@
             this._browseLogButton.UseVisualStyleBackColor = true;
             this._browseLogButton.Click += new System.EventHandler(this._browseLogButton_Click);
             // 
-            // _logFileLabel
+            // _logDirectoryLabel
             // 
-            this._logFileLabel.AutoSize = true;
-            this._logFileLabel.Location = new System.Drawing.Point(45, 259);
-            this._logFileLabel.Name = "_logFileLabel";
-            this._logFileLabel.Size = new System.Drawing.Size(53, 12);
-            this._logFileLabel.TabIndex = 13;
-            this._logFileLabel.Text = "日志路径";
+            this._logDirectoryLabel.AutoSize = true;
+            this._logDirectoryLabel.Location = new System.Drawing.Point(45, 259);
+            this._logDirectoryLabel.Name = "_logDirectoryLabel";
+            this._logDirectoryLabel.Size = new System.Drawing.Size(53, 12);
+            this._logDirectoryLabel.TabIndex = 13;
+            this._logDirectoryLabel.Text = "日志目录";
             // 
             // _portNameCombo
             // 
@@ -284,9 +284,9 @@
         private System.Windows.Forms.Label _dataPathLabel;
         private System.Windows.Forms.ComboBox _portNameCombo;
         private System.Windows.Forms.Label _portNameLabel;
-        private System.Windows.Forms.TextBox _logFileText;
+        private System.Windows.Forms.TextBox _logDirectoryText;
         private System.Windows.Forms.Button _browseLogButton;
-        private System.Windows.Forms.Label _logFileLabel;
+        private System.Windows.Forms.Label _logDirectoryLabel;
         private System.Windows.Forms.Label _energyMetersTypeLabel;
         private System.Windows.Forms.ComboBox _energyMetersTypeCombo;
     }

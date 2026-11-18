@@ -6,8 +6,8 @@ using Xunit;
 namespace MeterRecorder.Tests
 {
     /// <summary>
-    /// 存储设置：数据目录与日志文件记录在 ini 里，留空表示跟随程序目录。
-    /// 与串口配置共用 SystemSet 节，写其中一个不能把另一个的键冲掉。
+    /// 存储设置：数据目录与日志目录记录在 ini 里，留空表示跟随程序目录。
+    /// 旧版本把日志存成完整文件路径（LogFile），这里要能读出来并转成目录。
     /// </summary>
     public class StorageConfigTests
     {
@@ -25,7 +25,7 @@ namespace MeterRecorder.Tests
                 StorageConfig config = StorageConfig.Load(path);
 
                 Assert.Null(config.DataDirectory);
-                Assert.Null(config.LogFile);
+                Assert.Null(config.LogDirectory);
             }
         }
 
@@ -39,14 +39,49 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
                 string directory = temp.File("custom data");
-                string logFile = temp.File(@"logs\meter.log");
+                string logDirectory = temp.File("logs");
                 File.WriteAllText(path,
-                    "[SystemSet]\r\nDataDirectory=  " + directory + "  \r\nLogFile=  " + logFile + "  \r\n");
+                    "[SystemSet]\r\nDataDirectory=  " + directory + "  \r\nLogDirectory=  " + logDirectory + "  \r\n");
 
                 StorageConfig config = StorageConfig.Load(path);
 
                 Assert.Equal(directory, config.DataDirectory);
-                Assert.Equal(logFile, config.LogFile);
+                Assert.Equal(logDirectory, config.LogDirectory);
+            }
+        }
+
+        /// <summary>
+        /// 升级前只有 LogFile（完整文件路径），应取它的目录作为日志目录，
+        /// 现场不用手工改 ini。
+        /// </summary>
+        [Fact]
+        public void Load_LegacyLogFileKey_ConvertsToDirectory()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("system.ini");
+                string logDirectory = temp.File("legacy-logs");
+                File.WriteAllText(path,
+                    "[SystemSet]\r\nLogFile=" + Path.Combine(logDirectory, "log.txt") + "\r\n");
+
+                Assert.Equal(logDirectory, StorageConfig.Load(path).LogDirectory);
+            }
+        }
+
+        /// <summary>
+        /// 新键优先：同时存在 LogDirectory 与旧 LogFile 时用新键。
+        /// </summary>
+        [Fact]
+        public void Load_NewKeyWinsOverLegacy()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("system.ini");
+                File.WriteAllText(path,
+                    "[SystemSet]\r\nLogDirectory=" + temp.File("new-logs") + "\r\nLogFile=" +
+                    Path.Combine(temp.File("old-logs"), "log.txt") + "\r\n");
+
+                Assert.Equal(temp.File("new-logs"), StorageConfig.Load(path).LogDirectory);
             }
         }
 
@@ -60,14 +95,14 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
                 string directory = temp.File("meter-data");
-                string logFile = Path.Combine(temp.File("logs"), "meter.log");
+                string logDirectory = temp.File("logs");
                 Directory.CreateDirectory(directory);
 
-                new StorageConfig { DataDirectory = directory, LogFile = logFile }.Save(path);
+                new StorageConfig { DataDirectory = directory, LogDirectory = logDirectory }.Save(path);
 
                 StorageConfig reloaded = StorageConfig.Load(path);
                 Assert.Equal(directory, reloaded.DataDirectory);
-                Assert.Equal(logFile, reloaded.LogFile);
+                Assert.Equal(logDirectory, reloaded.LogDirectory);
             }
         }
 
@@ -81,15 +116,34 @@ namespace MeterRecorder.Tests
             {
                 string path = temp.File("system.ini");
 
-                new StorageConfig { DataDirectory = "  ", LogFile = "  " }.Save(path);
+                new StorageConfig { DataDirectory = "  ", LogDirectory = "  " }.Save(path);
 
                 string ini = File.ReadAllText(path);
                 Assert.Contains("DataDirectory=", ini);
-                Assert.Contains("LogFile=", ini);
+                Assert.Contains("LogDirectory=", ini);
 
                 StorageConfig reloaded = StorageConfig.Load(path);
                 Assert.Null(reloaded.DataDirectory);
-                Assert.Null(reloaded.LogFile);
+                Assert.Null(reloaded.LogDirectory);
+            }
+        }
+
+        /// <summary>
+        /// 保存时删除旧版 LogFile 键，避免它继续影响读取结果。
+        /// </summary>
+        [Fact]
+        public void Save_RemovesLegacyLogFileKey()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("system.ini");
+                File.WriteAllText(path,
+                    "[SystemSet]\r\nLogFile=" + Path.Combine(temp.File("old"), "log.txt") + "\r\n");
+
+                new StorageConfig { LogDirectory = temp.File("logs") }.Save(path);
+
+                Assert.DoesNotContain("LogFile=", File.ReadAllText(path));
+                Assert.Equal(temp.File("logs"), StorageConfig.Load(path).LogDirectory);
             }
         }
 
@@ -124,10 +178,10 @@ namespace MeterRecorder.Tests
                     SlaveAddress = 12
                 };
                 string directory = temp.File("data-root");
-                string logFile = Path.Combine(temp.File("logs"), "log.txt");
+                string logDirectory = temp.File("logs");
 
                 device.Save(path);
-                new StorageConfig { DataDirectory = directory, LogFile = logFile }.Save(path);
+                new StorageConfig { DataDirectory = directory, LogDirectory = logDirectory }.Save(path);
 
                 DeviceConfig reloaded = DeviceConfig.Load(path);
                 Assert.Equal("COM7", reloaded.PortName);
@@ -137,13 +191,14 @@ namespace MeterRecorder.Tests
 
                 StorageConfig storage = StorageConfig.Load(path);
                 Assert.Equal(directory, storage.DataDirectory);
-                Assert.Equal(logFile, storage.LogFile);
+                Assert.Equal(logDirectory, storage.LogDirectory);
             }
         }
     }
 
     /// <summary>
-    /// 路径装配：数据根目录与日志文件都可以来自配置，其余目录仍跟着程序目录。
+    /// 路径装配：数据根目录与日志目录都可以来自配置，其余目录仍跟着程序目录；
+    /// 日志文件按天生成，由 GetLogFile 决定。
     /// </summary>
     public class AppPathsTests
     {
@@ -159,7 +214,9 @@ namespace MeterRecorder.Tests
 
                 Assert.Equal(Path.Combine(temp.Root, "Data"), paths.DataDirectory);
                 Assert.Equal(Path.Combine(temp.Root, "System", "system.ini"), paths.SystemFile);
-                Assert.Equal(Path.Combine(temp.Root, "Logs", "log.txt"), paths.LogFile);
+                Assert.Equal(Path.Combine(temp.Root, "Logs"), paths.LogDirectory);
+                Assert.Equal(Path.Combine(temp.Root, "Logs", "2026-11-18.log"),
+                    paths.GetLogFile(new DateTime(2026, 11, 18, 9, 30, 0)));
             }
         }
 
@@ -182,34 +239,35 @@ namespace MeterRecorder.Tests
         }
 
         /// <summary>
-        /// 指定日志文件后，日志目录从文件路径推导出来，不再固定为 Logs。
+        /// 配置里的日志目录生效，日志文件名仍按日期生成。
         /// </summary>
         [Fact]
-        public void Constructor_CustomLogFile_DerivesDirectory()
+        public void Constructor_CustomLogDirectory_IsUsed()
         {
             using (TempDirectory temp = new TempDirectory())
             {
-                string logFile = Path.Combine(temp.File("var-log"), "meter.log");
+                string logDirectory = temp.File("var-log");
 
-                AppPaths paths = new AppPaths(temp.Root, null, logFile);
+                AppPaths paths = new AppPaths(temp.Root, null, logDirectory);
 
-                Assert.Equal(logFile, paths.LogFile);
-                Assert.Equal(temp.File("var-log"), paths.LogDirectory);
+                Assert.Equal(logDirectory, paths.LogDirectory);
+                Assert.Equal(Path.Combine(logDirectory, "2026-11-18.log"),
+                    paths.GetLogFile(new DateTime(2026, 11, 18)));
                 Assert.Equal(Path.Combine(temp.Root, "Data"), paths.DataDirectory);
             }
         }
 
         /// <summary>
-        /// 日志路径留空时回到程序目录下的 Logs\log.txt。
+        /// 日志目录留空时回到程序目录下的 Logs。
         /// </summary>
         [Fact]
-        public void Constructor_BlankLogFile_FallsBackToDefault()
+        public void Constructor_BlankLogDirectory_FallsBackToDefault()
         {
             using (TempDirectory temp = new TempDirectory())
             {
                 AppPaths paths = new AppPaths(temp.Root, null, "   ");
 
-                Assert.Equal(Path.Combine(temp.Root, "Logs", "log.txt"), paths.LogFile);
+                Assert.Equal(Path.Combine(temp.Root, "Logs"), paths.LogDirectory);
             }
         }
 
@@ -251,13 +309,12 @@ namespace MeterRecorder.Tests
             using (TempDirectory temp = new TempDirectory())
             {
                 string custom = temp.File("external-data");
-                string logFile = Path.Combine(temp.File("custom-logs"), "log.txt");
-                AppPaths paths = new AppPaths(temp.Root, custom, logFile);
+                string logDirectory = temp.File("custom-logs");
+                AppPaths paths = new AppPaths(temp.Root, custom, logDirectory);
 
                 paths.EnsureCreated();
 
                 Assert.True(Directory.Exists(paths.LogDirectory));
-                Assert.True(Directory.Exists(Path.GetDirectoryName(logFile)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Djsf1352)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Amc)));
                 Assert.True(Directory.Exists(paths.GetDataDirectory(MeterType.Adl400)));
