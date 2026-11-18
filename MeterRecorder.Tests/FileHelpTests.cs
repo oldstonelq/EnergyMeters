@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using MeterRecorder;
@@ -68,6 +69,51 @@ namespace MeterRecorder.Tests
 
                 Assert.Equal(new[] { "A", "B" }, File.ReadAllLines(path, Encoding.GetEncoding("gb2312")));
             }
+        }
+
+        /// <summary>
+        /// 含逗号、引号、换行的字段要整体加引号、内部引号双写，否则列会错位。
+        /// </summary>
+        [Fact]
+        public void JoinCsvFields_EscapesSpecialCharacters()
+        {
+            Assert.Equal("a,b", FileHelp.JoinCsvFields(new[] { "a", "b" }));
+            Assert.Equal("\"a,b\",c", FileHelp.JoinCsvFields(new[] { "a,b", "c" }));
+            Assert.Equal("\"他说\"\"好\"\"\"", FileHelp.JoinCsvFields(new[] { "他说\"好\"" }));
+            Assert.Equal("\"第一行\n第二行\"", FileHelp.JoinCsvFields(new[] { "第一行\n第二行" }));
+        }
+
+        /// <summary>
+        /// 行尾不能多出逗号：多一个逗号就多一个空列，程序与 Excel 都会看到。
+        /// </summary>
+        [Fact]
+        public void JoinCsvFields_HasNoTrailingComma()
+        {
+            string line = FileHelp.JoinCsvFields(new[] { "时间", "电压" });
+
+            Assert.Equal("时间,电压", line);
+            Assert.DoesNotContain("\t", line);
+            Assert.False(line.EndsWith(",", StringComparison.Ordinal));
+        }
+
+        /// <summary>
+        /// 表头加数据行，行数与内容都要对应，表头单独一行。
+        /// </summary>
+        [Fact]
+        public void BuildCsvLines_PutsHeaderFirst()
+        {
+            string[] lines = FileHelp.BuildCsvLines(
+                new[] { "时间", "电压(V)" },
+                new[]
+                {
+                    new[] { "2026-11-18 08:00:00", "220.4" },
+                    new[] { "2026-11-18 08:00:01", "220.5" }
+                });
+
+            Assert.Equal(3, lines.Length);
+            Assert.Equal("时间,电压(V)", lines[0]);
+            Assert.Equal("2026-11-18 08:00:00,220.4", lines[1]);
+            Assert.Equal("2026-11-18 08:00:01,220.5", lines[2]);
         }
     }
 }

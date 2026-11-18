@@ -16,6 +16,12 @@ namespace MeterRecorder
         private static readonly object s_writeLock = new object();
 
         /// <summary>
+        /// 单个日志文件的大小上限。超过后改名为 log.txt.1，当前文件重新开始，
+        /// 避免长期运行时文件无限增长、出问题不好翻。
+        /// </summary>
+        internal const long MaxLogBytes = 1024 * 1024;
+
+        /// <summary>
         /// 记录一条消息。
         /// </summary>
         /// <param name="message">消息内容</param>
@@ -37,12 +43,42 @@ namespace MeterRecorder
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), message, Environment.NewLine);
                 lock (s_writeLock)
                 {
+                    RotateIfTooLarge(filePath, MaxLogBytes);
                     File.AppendAllText(filePath, line, Encoding.UTF8);
                 }
             }
             catch (Exception)
             {
                 // 磁盘满、文件被占用时不再上抛：日志失败不应中断主流程。
+            }
+        }
+
+        /// <summary>
+        /// 日志超过阈值时改名为「原文件名.1」，上一次的归档会被覆盖。
+        /// 轮转失败不影响本次写入，继续追加到原文件即可。
+        /// </summary>
+        /// <param name="filePath">当前日志文件</param>
+        /// <param name="maxBytes">大小上限</param>
+        internal static void RotateIfTooLarge(string filePath, long maxBytes)
+        {
+            try
+            {
+                FileInfo info = new FileInfo(filePath);
+                if (!info.Exists || info.Length < maxBytes)
+                {
+                    return;
+                }
+
+                string archivePath = filePath + ".1";
+                if (File.Exists(archivePath))
+                {
+                    File.Delete(archivePath);
+                }
+                File.Move(filePath, archivePath);
+            }
+            catch (Exception)
+            {
+                // 文件被占用时轮转不了，继续写原文件，不能因此丢日志。
             }
         }
 

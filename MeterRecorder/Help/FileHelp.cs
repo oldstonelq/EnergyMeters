@@ -66,60 +66,97 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 把表格中可见的列导出为 CSV。
+        /// 把表格中可见的列导出为 CSV。字段按标准规则转义：含逗号、引号或换行的值加引号、
+        /// 内部引号双写。早先每个字段后先加制表符再补逗号，Excel 看着没问题，但用程序读取
+        /// 会得到带制表符的值，每行末尾还会多出一个空列。
         /// </summary>
         /// <param name="grid">要导出的表格</param>
         /// <param name="fileName">目标文件</param>
         /// <param name="error">失败原因；成功时为空字符串</param>
-        /// <param name="appendTexts">追加在末尾的额外行</param>
         /// <returns>写入成功返回 true</returns>
-        public static bool ExportCsv(DataGridView grid, string fileName, out string error, string[] appendTexts = null)
+        public static bool ExportCsv(DataGridView grid, string fileName, out string error)
         {
-            List<string> lines = new List<string>();
-            StringBuilder builder = new StringBuilder();
+            List<int> visibleColumns = new List<int>();
             for (int i = 0; i < grid.Columns.Count; i++)
             {
                 if (grid.Columns[i].Visible)
                 {
-                    builder.Append(grid.Columns[i].HeaderText + "\t,");
+                    visibleColumns.Add(i);
                 }
             }
-            lines.Add(builder.ToString());
 
-            for (int i = 0; i < grid.Rows.Count; i++)
+            string[] headers = new string[visibleColumns.Count];
+            for (int i = 0; i < visibleColumns.Count; i++)
             {
-                builder.Clear();
-                for (int j = 0; j < grid.Columns.Count; j++)
+                headers[i] = grid.Columns[visibleColumns[i]].HeaderText;
+            }
+
+            string[][] rows = new string[grid.Rows.Count][];
+            for (int row = 0; row < grid.Rows.Count; row++)
+            {
+                string[] cells = new string[visibleColumns.Count];
+                for (int i = 0; i < visibleColumns.Count; i++)
                 {
-                    if (!grid.Columns[j].Visible)
-                    {
-                        continue;
-                    }
-                    if (grid.Rows[i].Cells[j].Value != null)
-                    {
-                        builder.Append(grid.Rows[i].Cells[j].Value.ToString() + "\t");
-                    }
-                    builder.Append(",");
+                    object value = grid.Rows[row].Cells[visibleColumns[i]].Value;
+                    cells[i] = value == null ? string.Empty : value.ToString();
                 }
-                lines.Add(builder.ToString());
+                rows[row] = cells;
             }
 
-            if (appendTexts != null && appendTexts.Length > 0)
-            {
-                lines.AddRange(appendTexts);
-            }
-
-            return WriteCsv(fileName, lines.ToArray(), FileMode.Create, out error);
+            return WriteCsv(fileName, BuildCsvLines(headers, rows), FileMode.Create, out error);
         }
 
         /// <summary>
-        /// 按 GB2312 编码把多行文本写入 CSV 文件。
+        /// 把表头与数据行拼成 CSV 文本。抽出来便于单元测试，不必构造 DataGridView。
         /// </summary>
-        /// <param name="filePath">文件路径</param>
-        /// <param name="lines">要写入的每一行</param>
-        /// <param name="fileMode">文件打开模式</param>
-        /// <param name="error">失败原因；成功时为空字符串</param>
-        /// <returns>写入成功返回 true</returns>
+        /// <param name="headers">表头字段</param>
+        /// <param name="rows">数据行</param>
+        internal static string[] BuildCsvLines(IReadOnlyList<string> headers, IReadOnlyList<string[]> rows)
+        {
+            string[] lines = new string[rows.Count + 1];
+            lines[0] = JoinCsvFields(headers);
+            for (int i = 0; i < rows.Count; i++)
+            {
+                lines[i + 1] = JoinCsvFields(rows[i]);
+            }
+            return lines;
+        }
+
+        /// <summary>
+        /// 按 CSV 规则拼接一行：字段之间用逗号，字段本身按需加引号。
+        /// </summary>
+        /// <param name="fields">一行中的各字段</param>
+        internal static string JoinCsvFields(IReadOnlyList<string> fields)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < fields.Count; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(',');
+                }
+                builder.Append(EscapeCsvField(fields[i]));
+            }
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 转义单个字段：含逗号、引号、回车或换行时整体加引号，内部引号双写。
+        /// </summary>
+        /// <param name="value">字段值</param>
+        internal static string EscapeCsvField(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+            if (value.IndexOfAny(new[] { ',', '"', '\r', '\n' }) < 0)
+            {
+                return value;
+            }
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
+        }
+
         public static bool WriteCsv(string filePath, string[] lines, FileMode fileMode, out string error)
         {
             try
