@@ -25,7 +25,7 @@
 - **落盘记录**：点「停止」后先等采集线程退出，再把整段数据写入 JSON，文件名即起止时间。
 - **导出 CSV**：导出当前分组可见的列，GB2312 编码，Excel 直接打开不乱码。
 - **历史回放**：独立模态窗体，可勾选 1~3 个通道叠加；通道定义随文件走，换表型也能打开。
-- **失败可见**：端口打不开、读数中断、写盘失败都会弹提示并写 `Logs\log.txt`，不静默记 0。
+- **失败可见**：端口打不开、读数中断、写盘失败都会弹提示并写日志，不静默记 0。
 
 ## 运行环境
 
@@ -64,8 +64,8 @@
 - **记录表**（下方）：本次采集的逐帧记录，采集中自动滚到最新一行；表格最多保留最近
   5000 行，落盘仍是全部数据。
 
-设置窗体里的「数据存储路径」与「日志路径」都可直接输入，或点右侧「浏览...」选目录；
-保存后重启生效。数据文件仍按表型放在所选目录的子目录里，日志文件名固定为 `log.txt`。
+设置窗体里的「数据存储路径」与「日志目录」都可直接输入，或点右侧「浏览...」选目录；
+保存后重启生效。数据文件仍按表型放在所选目录的子目录里，日志文件名按日期自动生成。
 
 主窗体客户区 1280×740（含边框与标题栏约 1300×780），设置窗体 523×356。
 两者边框固定，不能用鼠标拖边调整大小；主窗体保留最大化按钮，1366×768 的工控机
@@ -84,8 +84,8 @@ StopBits=One
 Parity=None
 EnergyMetersType=ADL400
 SlaveAddress=177
-DataDirectory=D://MeterData
-LogFile=D://MeterData//logs//log.txt
+DataDirectory=D:\MeterData
+LogDirectory=D:\MeterData\logs
 ```
 
 | 键 | 取值 | 说明 |
@@ -98,7 +98,7 @@ LogFile=D://MeterData//logs//log.txt
 | `EnergyMetersType` | `DJSF1352` / `AMC` / `ADL400` | 决定通道定义与寄存器地址 |
 | `SlaveAddress` | 1~247 | 留空或填 0 时用表型默认值 |
 | `DataDirectory` | 目录路径 | 数据文件根目录；留空表示程序目录下的 `Data` |
-| `LogFile` | 文件路径 | 日志文件完整路径；留空表示程序目录下的 `Logs\log.txt` |
+| `LogDirectory` | 目录路径 | 日志目录，文件名按日期生成；留空表示程序目录下的 `Logs` |
 
 解析全部走 `TryParse` 并带范围校验，ini 里有脏值不会导致启动崩溃，只会回落到默认值。
 
@@ -163,7 +163,7 @@ Data\ADL400\20261116142001至20261116143000.json
 ```
 MeterRecorder/
 ├─ Core/         表型枚举与转换、通道定义、样本、IEnergyMeter、工厂
-├─ Config/       AppPaths（目录）、DeviceConfig（串口与表型）、StorageConfig（数据与日志路径）
+├─ Config/       AppPaths（目录）、DeviceConfig（串口与表型）、StorageConfig（数据与日志目录）
 ├─ Protocol/     ModbusRtuClient（组帧/超时/校验）、IModbusTransport 与串口实现、
 │                ModbusCrc、ModbusFrame、ModbusException
 ├─ Models/       三款表的寄存器地址与缩放
@@ -259,8 +259,9 @@ using (Adl400EnergyMeters meter = new Adl400EnergyMeters(new DeviceConfig(), tra
 
 ## 日志与常见提示
 
-日志默认追加写入 `Logs\log.txt`，可在设置窗体改到别的目录；超过 1 MB 自动归档为
-`log.txt.1`，当前文件重新开始。常见弹窗：
+日志按天写入 `Logs\2026-11-18.log`：同一天追加、跨天新开文件，历史记录不会被覆盖；
+可在设置窗体改日志目录。升级时旧的 `log.txt` 会按最后修改时间并入对应日期的文件。
+常见弹窗：
 
 | 提示 | 原因 | 处理 |
 |---|---|---|
@@ -280,6 +281,7 @@ using (Adl400EnergyMeters meter = new Adl400EnergyMeters(new DeviceConfig(), tra
 - **数据目录默认跟随 exe**：在设置窗体里可以改到别的盘，改完需重启；旧数据不会自动搬过去。
 - **表型切换需重启**：配置在启动时装配，改表型后要点「保存&应用」再重启。
 - **从站地址只能改 ini**：界面暂未提供该项输入。
+- **日志不自动清理**：按天累积、永不覆盖，一年约几 MB；需要定期归档可等第 40 项实现。
 
 ## 相关文档
 
