@@ -60,8 +60,15 @@ namespace MeterRecorder
         /// </summary>
         private void InitializeTextBoxes()
         {
-            _dataPathText.Text = SystemParameters.Paths.DataDirectory;
-            _logFileText.Text = SystemParameters.Paths.LogFile;
+            // 从 ini 回显而不是读 Paths：Paths 要重启才更新，
+            // 否则保存完重新打开设置，看到的是旧路径，容易以为没保存成功。
+            StorageConfig storage = StorageConfig.Load(SystemParameters.Paths.SystemFile);
+            _dataPathText.Text = string.IsNullOrWhiteSpace(storage.DataDirectory)
+                ? SystemParameters.Paths.DataDirectory
+                : storage.DataDirectory;
+            _logFileText.Text = string.IsNullOrWhiteSpace(storage.LogFile)
+                ? SystemParameters.Paths.LogFile
+                : storage.LogFile;
         }
 
         /// <summary>
@@ -117,7 +124,7 @@ namespace MeterRecorder
             string full;
             try
             {
-                full = Path.GetFullPath(text);
+                full = StoragePath.NormalizeDirectory(text);
                 Directory.CreateDirectory(full);
             }
             catch (Exception ex)
@@ -128,11 +135,8 @@ namespace MeterRecorder
                 return false;
             }
 
-            string defaultRoot = Path.GetFullPath(Path.Combine(Application.StartupPath, "Data"));
-            char separator = Path.DirectorySeparatorChar;
-            bool followsStartupPath = string.Equals(
-                full.TrimEnd(separator), defaultRoot.TrimEnd(separator), StringComparison.OrdinalIgnoreCase);
-            dataRoot = followsStartupPath ? null : full;
+            string defaultRoot = Path.Combine(Application.StartupPath, "Data");
+            dataRoot = StoragePath.AreSame(full, defaultRoot) ? null : full;
             return true;
         }
 
@@ -181,12 +185,9 @@ namespace MeterRecorder
             string full;
             try
             {
-                full = Path.GetFullPath(text);
-                // 只填了目录时补上固定文件名，避免 Logger 往目录上追加。
-                if (Directory.Exists(full))
-                {
-                    full = Path.Combine(full, "log.txt");
-                }
+                // 以分隔符结尾或指向已存在的目录时补上 log.txt，
+                // 否则 Logger 会往目录路径追加，异常被吞掉后一条日志都没有。
+                full = StoragePath.NormalizeLogFile(text);
                 string directory = Path.GetDirectoryName(full);
                 if (!string.IsNullOrEmpty(directory))
                 {
@@ -201,10 +202,8 @@ namespace MeterRecorder
                 return false;
             }
 
-            string defaultFile = Path.GetFullPath(
-                Path.Combine(Application.StartupPath, "Logs", "log.txt"));
-            bool followsStartupPath = string.Equals(full, defaultFile, StringComparison.OrdinalIgnoreCase);
-            logFile = followsStartupPath ? null : full;
+            string defaultFile = Path.Combine(Application.StartupPath, "Logs", StoragePath.DefaultLogFileName);
+            logFile = StoragePath.AreSame(full, defaultFile) ? null : full;
             return true;
         }
 

@@ -279,5 +279,56 @@ namespace MeterRecorder.Tests
                 Assert.Equal(3, document.Channels.Count);
             }
         }
+
+        /// <summary>
+        /// 覆盖已有文件时用「临时文件 + 替换」，目录里不应留下 .tmp 残留。
+        /// </summary>
+        [Fact]
+        public void Save_OverwritesExistingFileWithoutLeavingTempFile()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("data.json");
+                MeterType type = MeterType.Adl400;
+                IReadOnlyList<ChannelDescriptor> channels = MeterChannels.GetChannels(type);
+
+                SampleRepository.Save(path, type, channels, new[]
+                {
+                    new MeterSample(new DateTime(2026, 11, 18, 8, 0, 0), new double[17])
+                });
+                SampleRepository.Save(path, type, channels, new[]
+                {
+                    new MeterSample(new DateTime(2026, 11, 18, 8, 0, 1), new double[17]),
+                    new MeterSample(new DateTime(2026, 11, 18, 8, 0, 2), new double[17])
+                });
+
+                Assert.Equal(2, SampleRepository.Load(path).Samples.Count);
+                Assert.Empty(Directory.GetFiles(temp.Root, "*.tmp"));
+            }
+        }
+
+        /// <summary>
+        /// 目标文件被别的进程占用时写入会失败，但原文件必须保持完整、临时文件要清掉，
+        /// 不能出现「写了一半」的文件。
+        /// </summary>
+        [Fact]
+        public void Save_WhenTargetLocked_LeavesOriginalUntouched()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                string path = temp.File("locked.json");
+                File.WriteAllText(path, "{}");
+
+                using (new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    Assert.ThrowsAny<Exception>(() => SampleRepository.Save(path, MeterType.Adl400,
+                        MeterChannels.GetChannels(MeterType.Adl400),
+                        new[] { new MeterSample(new DateTime(2026, 11, 18, 8, 0, 0), new double[17]) }));
+                }
+
+                Assert.Equal("{}", File.ReadAllText(path));
+                Assert.Empty(Directory.GetFiles(temp.Root, "*.tmp"));
+            }
+        }
     }
 }

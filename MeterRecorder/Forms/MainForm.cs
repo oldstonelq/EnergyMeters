@@ -70,6 +70,14 @@ namespace MeterRecorder
 
             UpdateButtons();
             UpdateStatus();
+
+            // 配置的存储目录不可用时会回落到程序目录，这里明确告知，
+            // 否则用户以为数据还写在原来的盘里。
+            if (!string.IsNullOrEmpty(SystemParameters.StartupWarning))
+            {
+                MessageBox.Show(SystemParameters.StartupWarning, "存储目录提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>

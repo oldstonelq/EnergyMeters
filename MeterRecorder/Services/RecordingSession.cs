@@ -87,6 +87,7 @@ namespace MeterRecorder
 
         /// <summary>
         /// 保存到指定目录，返回文件完整路径。写盘失败时抛出异常，由调用方提示用户。
+        /// 目标文件已存在时自动加序号，不会覆盖同一时间段的旧记录。
         /// </summary>
         /// <param name="directory">数据目录，不存在时自动创建</param>
         public string Save(string directory)
@@ -97,9 +98,37 @@ namespace MeterRecorder
             }
             string fileName = BuildFileName();
             Directory.CreateDirectory(directory);
-            string filePath = Path.Combine(directory, fileName);
+            string filePath = BuildUniquePath(directory, fileName);
             SampleRepository.Save(filePath, _meterType, _channels, _samples);
             return filePath;
+        }
+
+        /// <summary>
+        /// 目标文件已存在时追加序号，如 xxx_2.json。文件名只精确到秒，
+        /// 同一时间段重复采集或连续快速保存都会撞名，直接写会把上一次的记录盖掉。
+        /// </summary>
+        /// <param name="directory">数据目录</param>
+        /// <param name="fileName">按首末时间生成的文件名</param>
+        private static string BuildUniquePath(string directory, string fileName)
+        {
+            string filePath = Path.Combine(directory, fileName);
+            if (!File.Exists(filePath))
+            {
+                return filePath;
+            }
+
+            string name = Path.GetFileNameWithoutExtension(fileName);
+            string extension = Path.GetExtension(fileName);
+            for (int index = 2; index < 1000; index++)
+            {
+                string candidate = Path.Combine(directory, name + "_" + index + extension);
+                if (!File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            throw new IOException("同名数据文件过多，无法生成新文件名：" + fileName);
         }
     }
 }

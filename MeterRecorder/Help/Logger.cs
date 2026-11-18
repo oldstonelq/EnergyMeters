@@ -62,12 +62,17 @@ namespace MeterRecorder
         }
 
         /// <summary>
-        /// 取日志文件路径。组合根尚未初始化时返回 null，此时直接丢弃。
+        /// 取日志文件路径。组合根尚未初始化时退回程序目录，
+        /// 否则「启动装配阶段出错」这类最需要日志的场景反而什么都记不下来。
         /// </summary>
         private static string ResolveFilePath()
         {
             AppPaths paths = SystemParameters.Paths;
-            return paths == null ? null : paths.LogFile;
+            if (paths != null)
+            {
+                return paths.LogFile;
+            }
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "log.txt");
         }
     }
 }

@@ -69,7 +69,44 @@ namespace MeterRecorder
                 Samples = new List<MeterSample>(samples)
             };
             string json = JsonConvert.SerializeObject(document, s_serializerSettings);
-            System.IO.File.WriteAllText(filePath, json, System.Text.Encoding.UTF8);
+            WriteAtomically(filePath, json);
+        }
+
+        /// <summary>
+        /// 先写同目录下的临时文件，成功后再替换目标文件。直接覆盖时若写到一半断电、
+        /// 磁盘写满或进程被杀，会留下半个 JSON，而原文件已被截断，数据无法恢复。
+        /// </summary>
+        /// <param name="filePath">目标文件路径</param>
+        /// <param name="content">要写入的完整内容</param>
+        private static void WriteAtomically(string filePath, string content)
+        {
+            string tempPath = filePath + ".tmp";
+            try
+            {
+                System.IO.File.WriteAllText(tempPath, content, System.Text.Encoding.UTF8);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Replace(tempPath, filePath, null);
+                }
+                else
+                {
+                    System.IO.File.Move(tempPath, filePath);
+                }
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempPath))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(tempPath);
+                    }
+                    catch (System.IO.IOException)
+                    {
+                        // 临时文件删不掉就留着，不能让清理动作掩盖真正的写入错误。
+                    }
+                }
+            }
         }
 
         /// <summary>

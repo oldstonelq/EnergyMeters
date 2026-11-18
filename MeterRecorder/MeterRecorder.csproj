@@ -84,6 +84,7 @@
     <Compile Include="Help\FileHelp.cs" />
     <Compile Include="Help\FormIcon.cs" />
     <Compile Include="Help\Logger.cs" />
+    <Compile Include="Help\StoragePath.cs" />
     <Compile Include="Models\Djsf1352EnergyMeters.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>

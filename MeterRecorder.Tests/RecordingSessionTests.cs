@@ -174,6 +174,29 @@ namespace MeterRecorder.Tests
                 /// <summary>
         /// 默认构造一份三相会话。
         /// </summary>
+        /// <summary>
+        /// 文件名只精确到秒，同一时间段重复保存时必须换名，
+        /// 否则第一次的记录会被后一次直接覆盖。
+        /// </summary>
+        [Fact]
+        public void Save_WhenFileExists_AppendsSuffix()
+        {
+            using (TempDirectory temp = new TempDirectory())
+            {
+                RecordingSession session = NewSession();
+                session.Add(NewSample(new DateTime(2026, 11, 17, 9, 0, 0)));
+                session.Add(NewSample(new DateTime(2026, 11, 17, 9, 30, 0)));
+
+                string first = session.Save(temp.Root);
+                string second = session.Save(temp.Root);
+
+                Assert.True(File.Exists(first));
+                Assert.True(File.Exists(second));
+                Assert.NotEqual(first, second);
+                Assert.Contains("_2", Path.GetFileName(second));
+            }
+        }
+
         private static RecordingSession NewSession()
         {
             return NewSession(MeterType.Adl400);
